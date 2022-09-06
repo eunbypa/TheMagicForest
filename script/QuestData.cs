@@ -14,6 +14,7 @@ public class QuestData
     public int reward;*/
     int npcId;
     int reward;
+    int requirement;
     string title;
     string npcName;
     string type;
@@ -26,6 +27,10 @@ public class QuestData
         {
             return npcId;
         }
+        set
+        {
+            npcId = value;
+        }
     }
 
     public int Reward
@@ -33,6 +38,22 @@ public class QuestData
         get
         {
             return reward;
+        }
+        set
+        {
+            reward = value;
+        }
+    }
+
+    public int Requirement
+    {
+        get
+        {
+            return requirement;
+        }
+        set
+        {
+            requirement = value;
         }
     }
 
@@ -42,6 +63,10 @@ public class QuestData
         {
             return title;
         }
+        set
+        {
+            title = value;
+        }
     }
 
     public string NpcName
@@ -49,6 +74,10 @@ public class QuestData
         get
         {
             return npcName;
+        }
+        set
+        {
+            npcName = value;
         }
     }
 
@@ -58,6 +87,10 @@ public class QuestData
         {
             return type;
         }
+        set
+        {
+            type = value;
+        }
     }
 
     public string Info
@@ -66,6 +99,10 @@ public class QuestData
         {
             return info;
         }
+        set
+        {
+            info = value;
+        }
     }
 
     public string RewardType
@@ -73,6 +110,10 @@ public class QuestData
         get
         {
             return rewardType;
+        }
+        set
+        {
+            rewardType = value;
         }
     }
 }

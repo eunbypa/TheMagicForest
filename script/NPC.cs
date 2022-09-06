@@ -17,7 +17,7 @@ public class NPC : MonoBehaviour
     void Start()
     {
         gm = GM.GetComponent<GameManager>();
-        d = GameObject.Find("DialogueManager").GetComponent<DialogueManager>().DiaData[npcid - 1];
+        d = GameObject.Find("DialogueManager").GetComponent<DialogueManager>().DiaData[npcId - 1];
     }
 
     public int NpcId

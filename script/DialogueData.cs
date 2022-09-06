@@ -18,6 +18,10 @@ public class DialogueData //: MonoBehaviour
         {
             return npcId;
         }
+        set
+        {
+            npcId = value;
+        }
     }
 
     public string NpcName
@@ -26,6 +30,10 @@ public class DialogueData //: MonoBehaviour
         {
             return npcName;
         }
+        set
+        {
+            npcName = value;
+        }
     }
 
     public List<string> Dialogue
@@ -33,6 +41,10 @@ public class DialogueData //: MonoBehaviour
         get
         {
             return dialogue;
+        }
+        set
+        {
+            dialogue = value;
         }
     }
 

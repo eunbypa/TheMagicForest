@@ -95,6 +95,14 @@ public class GameManager : MonoBehaviour
         this.maxExp = Convert.ToInt32(MAXexp.text);
     }
 
+    public int CurMapNum
+    {
+        get
+        {
+            return curMapNum;
+        }
+    }
+
     public bool Accept
     {
         get
@@ -339,7 +347,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator TalkAnime()
     {
-        for (i = 0; i < textdata.Length; i++)
+        for (i = 0; i < textData.Length; i++)
         {
             isTalking = true;
             tmp += textData[i];
@@ -380,7 +388,7 @@ public class GameManager : MonoBehaviour
         {
             curNpcId = id;
             npcImage.sprite = sp[id - 1];
-            npcName.text = dm.DiaData[id - 1].name;
+            npcName.text = dm.DiaData[id - 1].NpcName;
             /*if (qm.questData[curquestnum].npcid == id)
             {
                 IsQuest = true;
@@ -421,9 +429,9 @@ public class GameManager : MonoBehaviour
     public void ShowQuestInfo()
     {
         QuestUI.SetActive(true);
-        questTitle.text = qm.questData[curQuestNum].title;
-        questNpcName.text = qm.questData[curQuestNum].npcName;
-        questInfo.text = qm.questData[curQuestNum].info;
+        questTitle.text = qm.questData[curQuestNum].Title;
+        questNpcName.text = qm.questData[curQuestNum].NpcName;
+        questInfo.text = qm.questData[curQuestNum].Info;
     }
     public void ClearQuestInfo()
     {
@@ -432,10 +440,10 @@ public class GameManager : MonoBehaviour
 
     public void QuestUpdate(string type)
     {
-        if(qm.questData[curQuestNum].type == type)
+        if(qm.questData[curQuestNum].Type == type)
         {
             checkNum++;
-            if(checkNum == qm.questData[curQuestNum].requirement)
+            if(checkNum == qm.questData[curQuestNum].Requirement)
             {
                 QuestSuccess();
             }
@@ -455,9 +463,9 @@ public class GameManager : MonoBehaviour
 
     public void QuestReward()
     {
-        if(qm.questData[curQuestNum].rewardType == "경험치")
+        if(qm.questData[curQuestNum].RewardType == "경험치")
         {
-            ExpUp(qm.questData[curQuestNum].reward);
+            ExpUp(qm.questData[curQuestNum].Reward);
         }
         curQuestNum++;
         QuestState.SetActive(false);

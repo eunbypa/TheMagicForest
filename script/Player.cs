@@ -113,14 +113,14 @@ public class Player : MonoBehaviour
                 }
             }
         }
-        if (X == 0 && Y == 0)
+        if (x == 0 && y == 0)
         {
             ani.SetTrigger("stop");
         }
         else
         {
             ani.SetTrigger("walk");
-            if (X == 1) 
+            if (x == 1) 
             {
                 if (flip == false)
                 {
@@ -128,7 +128,7 @@ public class Player : MonoBehaviour
                     flip = true;
                 }
             }
-            if (X == -1) 
+            if (x == -1) 
             {
                 if (flip == true)
                 {
@@ -225,7 +225,7 @@ public class Player : MonoBehaviour
             if (!(gm.SkDisable))
             {
                 curMp = gm.GetCurMp();
-                if (curMp != 0)
+                if (curMp != 0) // 정확히는 현재 스킬 사용에 필요한 mp 양만큼 존재하는지 체크해야함
                 {
                     SkillEvent();
                 }
@@ -234,7 +234,7 @@ public class Player : MonoBehaviour
     }
     void MoveEvent()
     {
-        rb.velocity = new Vector2(X, Y).normalized * speed;
+        rb.velocity = new Vector2(x, y).normalized * speed;
     }
     void SkillEvent()
     {

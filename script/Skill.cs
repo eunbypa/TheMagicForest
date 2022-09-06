@@ -64,6 +64,10 @@ public class Skill : MonoBehaviour
         {
             return coolTime;
         }
+        set
+        {
+            coolTime = value;
+        }
     }
 
     public bool Attack
@@ -71,6 +75,10 @@ public class Skill : MonoBehaviour
         get
         {
             return attack;
+        }
+        set
+        {
+            attack = value;
         }
     }
 
@@ -80,6 +88,10 @@ public class Skill : MonoBehaviour
         {
             return attackSuccess;
         }
+        set
+        {
+            attackSuccess = value;
+        }
     }
 
     public bool Finish
@@ -87,6 +99,10 @@ public class Skill : MonoBehaviour
         get
         {
             return finish;
+        }
+        set
+        {
+            finish = value;
         }
     }
 

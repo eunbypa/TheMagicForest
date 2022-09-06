@@ -31,14 +31,14 @@ public class QuestManager : MonoBehaviour
             }
             SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
             QuestData qdata = new QuestData();
-            qdata.title = SplitLine[1];
-            qdata.npcid = Convert.ToInt32(SplitLine[2]);
-            qdata.npcname = SplitLine[3];
-            qdata.type = SplitLine[4];
-            qdata.info = SplitLine[5];
-            qdata.requirement = Convert.ToInt32(SplitLine[6]);
-            qdata.rewardtype = SplitLine[7];
-            qdata.reward = Convert.ToInt32(SplitLine[8]);
+            qdata.Title = SplitLine[1];
+            qdata.NpcId = Convert.ToInt32(SplitLine[2]);
+            qdata.NpcName = SplitLine[3];
+            qdata.Type = SplitLine[4];
+            qdata.Info = SplitLine[5];
+            qdata.Requirement = Convert.ToInt32(SplitLine[6]);
+            qdata.RewardType = SplitLine[7];
+            qdata.Reward = Convert.ToInt32(SplitLine[8]);
             questData.Add(qdata);
         }
     }

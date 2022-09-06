@@ -9,21 +9,25 @@ public class DialogueManager : MonoBehaviour
     //public List<DialogueData> QuestAskDiaData = new List<DialogueData>();
     //public List<DialogueData> QuestSuccessDiaData = new List<DialogueData>();
 
-    List<DialogueData> diaData = new List<DialogueData>();
-    List<DialogueData> questAskDiaData = new List<DialogueData>();
-    List<DialogueData> questSuccessDiaData = new List<DialogueData>();
+    List<DialogueData> diaData = new List<DialogueData>(); // 기본 대사
+    List<DialogueData> questAskDiaData = new List<DialogueData>(); // 플레이어에게 퀘스트 요청 시 대사
+    List<DialogueData> questAcceptDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 수락 시 대사
+    List<DialogueData> questRefuseDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 거절 시 대사
+    List<DialogueData> questDoingDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 진행 중 일때 대사
+    List<DialogueData> questSuccessDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 성공 시 대사
 
     char[] LineSeperate = new char[] { '\n' };
     char[] CSVSeperate = new char[] { ',' };
 
-    int checkfirst = 0;
-    int npcnum = 0;
-    int questnum = 0;
+    int checkFirst = 0;
+    int npcNum = 0;
+    int questNum = 0;
 
     void Awake()
     {
         ReadDiaData();
     }
+
     void ReadDiaData()
     {
         TextAsset textset = Resources.Load<TextAsset>("NpcScript");
@@ -31,42 +35,90 @@ public class DialogueManager : MonoBehaviour
         string[] SplitLine;
         foreach (string line in Lines)
         {
-            if (checkfirst == 0)
+            if (checkFirst == 0) // 첫줄은 생략하는 용도
             {
-                checkfirst++;
+                checkFirst++;
                 continue;
             }
             SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
-            if (checkfirst == 1) //첫번째 npc의 첫번째 대사를 읽고 있는지 체크
+            if (checkFirst == 1) //첫번째 npc의 첫번째 대사를 읽고 있는지 체크
             {
-                checkfirst++;
-                npcnum++;
+                checkFirst++;
+                npcNum++;
                 DialogueData d = new DialogueData();
-                d.npcid = Convert.ToInt32(SplitLine[0]);
-                d.name = SplitLine[1];
+                d.NpcId = Convert.ToInt32(SplitLine[0]);
+                d.NpcName = SplitLine[1];
                 SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
                 SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
                 d.Dialogue.Add(SplitLine[2]);
-                DiaData.Add(d);
+                diaData.Add(d);
             }
             else
             {
-                if (Convert.ToString(DiaData[npcnum - 1].npcid) == SplitLine[0])
+                if (Convert.ToString(DiaData[npcNum - 1].NpcId) == SplitLine[0])
                 {
                     SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
                     SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
-                    DiaData[npcnum - 1].Dialogue.Add(SplitLine[2]);
+                    diaData[npcNum - 1].Dialogue.Add(SplitLine[2]);
                 }
                 else
                 {
-                    npcnum++;
+                    npcNum++;
                     DialogueData d = new DialogueData();
-                    d.npcid = Convert.ToInt32(SplitLine[0]);
-                    d.name = SplitLine[1];
+                    d.NpcId = Convert.ToInt32(SplitLine[0]);
+                    d.NpcName = SplitLine[1];
                     SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
                     SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
                     d.Dialogue.Add(SplitLine[2]);
-                    DiaData.Add(d);
+                    diaData.Add(d);
+                }
+            }
+
+        }
+    }
+    /*void ReadDiaData()
+    {
+        TextAsset textset = Resources.Load<TextAsset>("NpcScript");
+        string[] Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
+        string[] SplitLine;
+        foreach (string line in Lines)
+        {
+            if (checkFirst == 0) // 첫줄은 생략하는 용도
+            {
+                checkFirst++;
+                continue;
+            }
+            SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
+            if (checkFirst == 1) //첫번째 npc의 첫번째 대사를 읽고 있는지 체크
+            {
+                checkFirst++;
+                npcNum++;
+                DialogueData d = new DialogueData();
+                d.NpcId = Convert.ToInt32(SplitLine[0]);
+                d.NpcName = SplitLine[1];
+                SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
+                SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
+                d.Dialogue.Add(SplitLine[2]);
+                diaData.Add(d);
+            }
+            else
+            {
+                if (Convert.ToString(DiaData[npcNum - 1].NpcId) == SplitLine[0])
+                {
+                    SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
+                    SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
+                    diaData[npcNum - 1].Dialogue.Add(SplitLine[2]);
+                }
+                else
+                {
+                    npcNum++;
+                    DialogueData d = new DialogueData();
+                    d.NpcId = Convert.ToInt32(SplitLine[0]);
+                    d.NpcName = SplitLine[1];
+                    SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
+                    SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
+                    d.Dialogue.Add(SplitLine[2]);
+                    diaData.Add(d);
                 }
             }
 
@@ -74,83 +126,83 @@ public class DialogueManager : MonoBehaviour
 
         textset = Resources.Load<TextAsset>("QuestScript_ask");
         Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
-        checkfirst = 0;
+        checkFirst = 0;
 
         foreach (string line in Lines)
         {
-            if (checkfirst == 0)
+            if (checkFirst == 0)
             {
-                checkfirst++;
+                checkFirst++;
                 continue;
             }
             SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
-            if (checkfirst == 1)
+            if (checkFirst == 1)
             {
-                checkfirst++;
-                questnum++;
+                checkFirst++;
+                questNum++;
                 DialogueData d = new DialogueData();
-                d.name = SplitLine[1];
+                d.NpcName = SplitLine[1];
                 d.Dialogue.Add(SplitLine[2]);
-                QuestAskDiaData.Add(d);
+                questAskDiaData.Add(d);
             }
             else
             {
-                if (Convert.ToString(questnum) == SplitLine[0])
+                if (Convert.ToString(questNum) == SplitLine[0])
                 {
-                    QuestAskDiaData[questnum - 1].Dialogue.Add(SplitLine[2]);
+                    QuestAskDiaData[questNum - 1].Dialogue.Add(SplitLine[2]);
                 }
                 else
                 {
-                    questnum++;
+                    questNum++;
                     DialogueData d = new DialogueData();
-                    d.name = SplitLine[1];
+                    d.NpcName = SplitLine[1];
                     d.Dialogue.Add(SplitLine[2]);
-                    QuestAskDiaData.Add(d);
+                    questAskDiaData.Add(d);
                 }
             }
 
         }
 
-        questnum = 0;
-        checkfirst = 0;
+        questNum = 0;
+        checkFirst = 0;
         textset = Resources.Load<TextAsset>("QuestScript_Success");
         Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string line in Lines)
         {
-            if (checkfirst == 0)
+            if (checkFirst == 0)
             {
-                checkfirst++;
+                checkFirst++;
                 continue;
             }
             SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
-            if (checkfirst == 1)
+            if (checkFirst == 1)
             {
-                checkfirst++;
-                questnum++;
+                checkFirst++;
+                questNum++;
                 DialogueData d = new DialogueData();
-                d.name = SplitLine[1];
+                d.NpcName = SplitLine[1];
                 d.Dialogue.Add(SplitLine[2]);
-                QuestSuccessDiaData.Add(d);
+                questSuccessDiaData.Add(d);
             }
             else
             {
-                if (Convert.ToString(questnum) == SplitLine[0])
+                if (Convert.ToString(questNum) == SplitLine[0])
                 {
-                    QuestSuccessDiaData[questnum - 1].Dialogue.Add(SplitLine[2]);
+                    questSuccessDiaData[questNum - 1].Dialogue.Add(SplitLine[2]);
                 }
                 else
                 {
-                    questnum++;
+                    questNum++;
                     DialogueData d = new DialogueData();
-                    d.name = SplitLine[1];
+                    d.NpcName = SplitLine[1];
                     d.Dialogue.Add(SplitLine[2]);
-                    QuestSuccessDiaData.Add(d);
+                    questSuccessDiaData.Add(d);
                 }
             }
 
         }
-    }
+    }*/
 
     public List<DialogueData> DiaData
     {

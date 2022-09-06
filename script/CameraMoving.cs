@@ -11,30 +11,30 @@ public class CameraMoving : MonoBehaviour
     public float[] maxY;
     public float[] minY;
 
-    int curmapnum;
+    int curMapNum;
     Vector3 playerPos;
     GameManager gm;
 
     void Start()
     {
         this.gm = GM.GetComponent<GameManager>();
-        this.curmapnum = gm.curmapnum;
+        this.curMapNum = gm.CurMapNum;
         playerPos = this.player.transform.position;
-        if (playerPos.x < minX[this.curmapnum])
+        if (playerPos.x < minX[this.curMapNum])
         {
-            transform.position = new Vector3(minX[this.curmapnum], playerPos.y, transform.position.z);
+            transform.position = new Vector3(minX[this.curMapNum], playerPos.y, transform.position.z);
         }
-        if (playerPos.x > maxX[this.curmapnum])
+        if (playerPos.x > maxX[this.curMapNum])
         {
-            transform.position = new Vector3(maxX[this.curmapnum], playerPos.y, transform.position.z);
+            transform.position = new Vector3(maxX[this.curMapNum], playerPos.y, transform.position.z);
         }
-        if (playerPos.y < minY[this.curmapnum])
+        if (playerPos.y < minY[this.curMapNum])
         {
-            transform.position = new Vector3(playerPos.x, minY[this.curmapnum], transform.position.z);
+            transform.position = new Vector3(playerPos.x, minY[this.curMapNum], transform.position.z);
         }
-        if (playerPos.y > maxY[this.curmapnum])
+        if (playerPos.y > maxY[this.curMapNum])
         {
-            transform.position = new Vector3(playerPos.x, maxY[this.curmapnum], transform.position.z);
+            transform.position = new Vector3(playerPos.x, maxY[this.curMapNum], transform.position.z);
         }
     }
 
@@ -45,35 +45,35 @@ public class CameraMoving : MonoBehaviour
 
     void Moving()
     {
-        if (this.curmapnum != gm.curmapnum)
+        if (this.curMapNum != gm.CurMapNum)
         {
-            this.curmapnum = gm.curmapnum;
+            this.curMapNum = gm.CurMapNum;
             playerPos = this.player.transform.position;
-            if (playerPos.x < minX[this.curmapnum])
+            if (playerPos.x < minX[this.curMapNum])
             {
-                transform.position = new Vector3(minX[this.curmapnum], playerPos.y, transform.position.z);
+                transform.position = new Vector3(minX[this.curMapNum], playerPos.y, transform.position.z);
             }
-            if (playerPos.x > maxX[this.curmapnum])
+            if (playerPos.x > maxX[this.curMapNum])
             {
-                transform.position = new Vector3(maxX[this.curmapnum], playerPos.y, transform.position.z);
+                transform.position = new Vector3(maxX[this.curMapNum], playerPos.y, transform.position.z);
             }
-            if (playerPos.y < minY[this.curmapnum])
+            if (playerPos.y < minY[this.curMapNum])
             {
-                transform.position = new Vector3(playerPos.x, minY[this.curmapnum], transform.position.z);
+                transform.position = new Vector3(playerPos.x, minY[this.curMapNum], transform.position.z);
             }
-            if (playerPos.y > maxY[this.curmapnum])
+            if (playerPos.y > maxY[this.curMapNum])
             {
-                transform.position = new Vector3(playerPos.x, maxY[this.curmapnum], transform.position.z);
+                transform.position = new Vector3(playerPos.x, maxY[this.curMapNum], transform.position.z);
             }
         }
         else
         {
             playerPos = this.player.transform.position;
-            if (playerPos.x > minX[this.curmapnum] && playerPos.x < maxX[this.curmapnum])
+            if (playerPos.x > minX[this.curMapNum] && playerPos.x < maxX[this.curMapNum])
             {
                 transform.position = new Vector3(playerPos.x, transform.position.y, transform.position.z);
             }
-            if (playerPos.y > minY[this.curmapnum] && playerPos.y < maxY[this.curmapnum])
+            if (playerPos.y > minY[this.curMapNum] && playerPos.y < maxY[this.curMapNum])
             {
                 transform.position = new Vector3(transform.position.x, playerPos.y, transform.position.z);
             }
