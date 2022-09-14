@@ -10,7 +10,7 @@ public class DialogueData //: MonoBehaviour
 
     int npcId;
     string npcName;
-    List<string> dialogue = new List<string>();
+    List<string> dialogue = new List<string>(); // 대화 데이터 리스트, index : 대화 순서
 
     public int NpcId
     {

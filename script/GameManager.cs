@@ -8,41 +8,47 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public delegate void GetTalkData(); // npc한테서 대사를 전달받는 대리자
+    public delegate void UnLockWaiting(); // 기다리고 있는 상황을 기다리지 않아도 되도록 풀어주는 대리자
     public GetTalkData npcTalk;
-
+    public UnLockWaiting unLockWait;
     //serializefield 해야됨
-    public GameObject DM;
-    public GameObject QM;
-    public GameObject QuestState;
-    public GameObject Yes;
-    public GameObject No;
-    public GameObject skillLocked;
-    public GameObject Up;
-    public GameObject Down;
-    public GameObject QuestList;
-    public GameObject TalkUI;
-    public GameObject QuestUI;
-    public GameObject Inven;
-    public Image hpGraph;
-    public TMPro.TMP_Text MAXhp;
-    public TMPro.TMP_Text hp;
-    public Image mpGraph;
-    public TMPro.TMP_Text MAXmp;
-    public TMPro.TMP_Text mp;
-    public Image expGraph;
-    public TMPro.TMP_Text MAXexp;
-    public TMPro.TMP_Text exp;
-    public Image skill;
-    public TMPro.TMP_Text coolTime;
-    public Image npcImage;
-    public TMPro.TMP_Text npcName;
-    public TMPro.TMP_Text talk;
-    public TMPro.TMP_Text questTitle;
-    public TMPro.TMP_Text questNpc;
-    public TMPro.TMP_Text questNpcName;
-    public TMPro.TMP_Text questInfo;
-
-    public Sprite[] sp;
+    [SerializeField] private GameObject DM;
+    [SerializeField] private GameObject QM;
+    [SerializeField] private GameObject QuestState;
+    [SerializeField] private GameObject Yes;
+    [SerializeField] private GameObject No;
+    [SerializeField] private GameObject skillLocked;
+    [SerializeField] private GameObject Up;
+    [SerializeField] private GameObject Down;
+    [SerializeField] private GameObject QuestList;
+    [SerializeField] private GameObject TalkUI;
+    [SerializeField] private GameObject QuestUI;
+    [SerializeField] private GameObject Inven;
+    [SerializeField] private GameObject[] reqList;
+    [SerializeField] private Image hpGraph;
+    [SerializeField] private TMPro.TMP_Text MAXhp;
+    [SerializeField] private TMPro.TMP_Text hp;
+    [SerializeField] private Image mpGraph;
+    [SerializeField] private TMPro.TMP_Text MAXmp;
+    [SerializeField] private TMPro.TMP_Text mp;
+    [SerializeField] private Image expGraph;
+    [SerializeField] private TMPro.TMP_Text MAXexp;
+    [SerializeField] private TMPro.TMP_Text exp;
+    [SerializeField] private Image skill;
+    [SerializeField] private TMPro.TMP_Text coolTime;
+    [SerializeField] private Image npcImage;
+    [SerializeField] private TMPro.TMP_Text npcName;
+    [SerializeField] private TMPro.TMP_Text talk;
+    [SerializeField] private TMPro.TMP_Text questT;
+    [SerializeField] private TMPro.TMP_Text questTitle;
+    [SerializeField] private TMPro.TMP_Text questNpc;
+    [SerializeField] private TMPro.TMP_Text questNpcName;
+    [SerializeField] private TMPro.TMP_Text questInfo;
+    [SerializeField] private TMPro.TMP_Text[] questReqName;
+    [SerializeField] private TMPro.TMP_Text[] questReqCurNum;
+    [SerializeField] private TMPro.TMP_Text[] slash;
+    [SerializeField] private TMPro.TMP_Text[] questReqTotal;
+    [SerializeField] private Sprite[] sp;
 
     //public bool Istalking = false;
     //public bool FinishTalk = false;
@@ -65,18 +71,20 @@ public class GameManager : MonoBehaviour
     int maxMp = 0;
     int curExp = 0;
     int maxExp = 0;
-    int curQuestNum = 0;
-    int checkNum = 0;
+    int curQuestNum = 1;
+    int curQuestNpcId; //현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 NPC의 ID
+    int finishReqNum = 0; // 퀘스트 조건들에서 완료한 조건 수
     float percent = 0;
     string tmp = null;
     char[] textData = null;
     bool isTalking = false;
-    bool isQuest = false;
-    bool answer = false;
+   // bool isQuest = false;
+   // bool answer = false;
     bool success = false;
     bool finishTalk = false;
     bool skDisable = false;
     bool accept = false;
+    //bool doneQuest = false; // 모든 퀘스트 완료한 경우
     //bool startTalk = true;
 
     Animator ani;
@@ -93,6 +101,7 @@ public class GameManager : MonoBehaviour
         this.curMp = Convert.ToInt32(MAXmp.text);
         this.maxMp = Convert.ToInt32(MAXmp.text);
         this.maxExp = Convert.ToInt32(MAXexp.text);
+        this.curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
     }
 
     public int CurMapNum
@@ -103,11 +112,35 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public int CurQuestNum
+    {
+        get
+        {
+            return curQuestNum;
+        }
+    }
+
+    public int CurQuestNpcId
+    {
+        get
+        {
+            return curQuestNpcId;
+        }
+    }
+
     public bool Accept
     {
         get
         {
             return accept;
+        }
+    }
+
+    public bool Success
+    {
+        get
+        {
+            return success;
         }
     }
 
@@ -133,6 +166,14 @@ public class GameManager : MonoBehaviour
             finishTalk = value;
         }
     }
+
+    /*public void GetMessage(string s) // 메시지를 받아 각 동작을 수행하는 방식? 고민중
+    {
+        if(s == "퀘스트수락")
+        {
+
+        }
+    }*/
 
     public void TeleportMap(int n)
     {
@@ -356,11 +397,11 @@ public class GameManager : MonoBehaviour
         }
         tmp = null;
         isTalking = false;
-        if(answer)
+        /*if(answer)
         {
             OpenYesOrNoButton();
             answer = false;
-        }
+        }*/
         yield break;
     }
     
@@ -382,13 +423,13 @@ public class GameManager : MonoBehaviour
         Up.SetActive(false);
         QuestList.SetActive(false);
     }
-    public void ChangeTalkNpc(int id)
+    public void ChangeTalkNpc(int id, string name)
     {
         if (curNpcId != id)
         {
             curNpcId = id;
             npcImage.sprite = sp[id - 1];
-            npcName.text = dm.DiaData[id - 1].NpcName;
+            npcName.text = name;
             /*if (qm.questData[curquestnum].npcid == id)
             {
                 IsQuest = true;
@@ -410,11 +451,7 @@ public class GameManager : MonoBehaviour
     {
         Yes.SetActive(false);
         No.SetActive(false);
-        if (!accept)
-        {
-            //TalkOff();
-            TalkDone();
-        }
+        unLockWait();
     }
 
     public void QuestAccept()
@@ -422,52 +459,105 @@ public class GameManager : MonoBehaviour
         accept = true;
         CloseYesOrNoButton();
         ShowQuestInfo();
-        textData = dm.QuestAskDiaData[curQuestNum].Dialogue[dm.QuestAskDiaData[curQuestNum].Dialogue.Count - 1].ToCharArray();
-        talkAni = TalkAnime(); 
-        StartCoroutine(talkAni);
+        TalkEvent();
+        //textData = dm.QuestAskDiaData[curQuestNum].Dialogue[dm.QuestAskDiaData[curQuestNum].Dialogue.Count - 1].ToCharArray();
+        //talkAni = TalkAnime(); 
+        //StartCoroutine(talkAni);
+    }
+    public void QuestRefuse()
+    {
+        accept = false;
+        CloseYesOrNoButton();
+        TalkEvent();
     }
     public void ShowQuestInfo()
     {
         QuestUI.SetActive(true);
-        questTitle.text = qm.questData[curQuestNum].Title;
-        questNpcName.text = qm.questData[curQuestNum].NpcName;
-        questInfo.text = qm.questData[curQuestNum].Info;
+        questTitle.text = qm.QuestDataList[curQuestNum-1].Title;
+        questNpcName.text = qm.QuestDataList[curQuestNum-1].NpcName;
+        questInfo.text = qm.QuestDataList[curQuestNum-1].Info;
+        Debug.Log(qm.QuestDataList[curQuestNum - 1].Type.Count);
+        for(int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
+        {
+            questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i];
+            //questReqName[i].SetActive(true);
+            questReqCurNum[i].text = Convert.ToString(0);
+            //questReqCurNum[i].SetActive(true);
+            //slash[i].SetActive(true);
+            questReqTotal[i].text = Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            //questReqTotal[i].SetActive(true);
+            reqList[i].SetActive(true);
+        }
     }
     public void ClearQuestInfo()
     {
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Req_Id.Count; i++)
+        {
+            reqList[i].SetActive(false);
+        }
         QuestUI.SetActive(false);
     }
 
-    public void QuestUpdate(string type)
+    public void QuestUpdate(string type, int id = 0)
     {
-        if(qm.questData[curQuestNum].Type == type)
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Req_Id.Count; i++)
         {
-            checkNum++;
-            if(checkNum == qm.questData[curQuestNum].Requirement)
+            if (Convert.ToInt32(questReqCurNum[i]) == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
+            if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id)) // id가 디폴트 값인 0으로 들어온 경우 식별해야 할 아이디 정보가 없다는 것을 의미
             {
-                QuestSuccess();
+                if(Convert.ToInt32(questReqCurNum[i]) < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
+                {
+                    questReqCurNum[i].text = Convert.ToString(Convert.ToInt32(questReqCurNum[i]) + 1);
+                }
+                if(Convert.ToInt32(questReqCurNum[i]) == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
+        }
+        if (finishReqNum == qm.QuestDataList[curQuestNum-1].Req_Id.Count)
+        {
+            QuestSuccess();
         }
     }
 
     public void QuestSuccess()
     {
-        checkNum = 0;
+        finishReqNum = 0;
         success = true;
         ani.SetTrigger("success");
+        questT.color = Color.yellow;
         questTitle.color = Color.yellow;
         questNpc.color = Color.yellow;
         questNpcName.color = Color.yellow;
         questInfo.color = Color.yellow;
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Req_Id.Count; i++)
+        {
+            questReqName[i].color = Color.yellow;
+            questReqCurNum[i].color = Color.yellow;
+            slash[i].color = Color.yellow;
+            questReqTotal[i].color = Color.yellow;
+        }
     }
 
     public void QuestReward()
     {
-        if(qm.questData[curQuestNum].RewardType == "경험치")
+        accept = false;
+        success = false;
+        for(int i = 0;  i < qm.QuestDataList[curQuestNum-1].RewardType.Count; i++)
         {
-            ExpUp(qm.questData[curQuestNum].Reward);
+            if (qm.QuestDataList[curQuestNum - 1].RewardType[i] == "exp")
+            {
+                ExpUp(qm.QuestDataList[curQuestNum - 1].Reward[i]);
+            } 
+            if(qm.QuestDataList[curQuestNum - 1].RewardType[i] == "gold")
+            {
+
+            }
         }
         curQuestNum++;
+        if (curQuestNum <= qm.QuestDataList.Count) curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
+        else
+        {
+            curQuestNpcId = 0;
+        }
         QuestState.SetActive(false);
     }
 

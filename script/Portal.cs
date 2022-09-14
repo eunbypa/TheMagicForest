@@ -4,19 +4,19 @@ using UnityEngine;
 
 public class Portal : MonoBehaviour
 {
-    public GameObject GM;
-    public GameObject player;
-    public GameObject destination;
-    public GameObject CurMap;
-    public GameObject NextMap;
+    [SerializeField] private GameObject GM;
+    [SerializeField] private GameObject player;
+    [SerializeField] private GameObject destination;
+    [SerializeField] private GameObject CurMap;
+    [SerializeField] private GameObject NextMap;
 
     //public int departuremapnum;
     //public int destinationmapnum;
 
-    int departureMapNum;
-    int destinationMapNum;
-    bool teleport = false;
-    GameManager gm;
+    [SerializeField] private int departureMapNum;
+    [SerializeField] private int destinationMapNum;
+    private bool teleport = false;
+    private GameManager gm;
 
     void Start()
     {
