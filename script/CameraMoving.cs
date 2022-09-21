@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 
 public class CameraMoving : MonoBehaviour
 {
-    //[SerializeField] private Tilemap[] tilemap;
+    [SerializeField] private Tilemap[] maps;
     [SerializeField] private Vector3[] minMapPos;
     [SerializeField] private Vector3[] maxMapPos;
     [SerializeField] private GameObject player;
@@ -14,7 +14,7 @@ public class CameraMoving : MonoBehaviour
     //public float[] minX;
     //public float[] maxY;
     //public float[] minY;
-    //private Camera camera;
+    private Camera camera;
     private int curMapNum;
     private Vector3 playerPos;
     private GameManager gm;
@@ -28,10 +28,10 @@ public class CameraMoving : MonoBehaviour
     {
         this.gm = GM.GetComponent<GameManager>();
         this.curMapNum = gm.CurMapNum;
-        //this.camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+        this.camera = GameObject.Find("Main Camera").GetComponent<Camera>();
         //this.camera = Camera.main;
-        //this.height = 2f * camera.orthographicSize;
-        //this.width = height * camera.aspect;
+        this.height = 2f * camera.orthographicSize;
+        this.width = height * camera.aspect;
         SetLimit();
         //minX = maps[curMapNum].cellToWorld(maps[curMapNum].cellBounds.xMin);
         //maxX = maps[curMapNum].cellToWorld(maps[curMapNum].cellBounds.xMin);
@@ -45,16 +45,16 @@ public class CameraMoving : MonoBehaviour
 
     void SetLimit() // 카메라 이동범위 제한 세팅
     {
-        /*Vector3 minTile = maps[curMapNum].CellToWorld(maps[curMapNum].cellBounds.min);
+        Vector3 minTile = maps[curMapNum].CellToWorld(maps[curMapNum].cellBounds.min);
         Vector3 maxTile = maps[curMapNum].CellToWorld(maps[curMapNum].cellBounds.max);
         minX = minTile.x + width/2;
         maxX = maxTile.x - width/2;
         minY = minTile.y + height/2;
-        maxY = maxTile.y - height/2;*/
-        minX = minMapPos[curMapNum].x;
+        maxY = maxTile.y - height/2;
+        /*minX = minMapPos[curMapNum].x;
         maxX = maxMapPos[curMapNum].x;
         minY = minMapPos[curMapNum].y;
-        maxY = maxMapPos[curMapNum].y;
+        maxY = maxMapPos[curMapNum].y;*/
     }
 
     void CheckPlayerPos() // 플레이어의 현재 위치가 카메라 이동범위를 벗어났는지 체크
@@ -70,19 +70,19 @@ public class CameraMoving : MonoBehaviour
         }
         if (playerPos.x < minX)
         {
-            transform.position = new Vector3(minX, playerPos.y, transform.position.z);
+            transform.position = new Vector3(minX, transform.position.y, transform.position.z);
         }
         if (playerPos.x > maxX)
         {
-            transform.position = new Vector3(maxX, playerPos.y, transform.position.z);
+            transform.position = new Vector3(maxX, transform.position.y, transform.position.z);
         }
         if (playerPos.y < minY)
         {
-            transform.position = new Vector3(playerPos.x, minY, transform.position.z);
+            transform.position = new Vector3(transform.position.x, minY, transform.position.z);
         }
         if (playerPos.y > maxY)
         {
-            transform.position = new Vector3(playerPos.x, maxY, transform.position.z);
+            transform.position = new Vector3(transform.position.x, maxY, transform.position.z);
         }
     }
 

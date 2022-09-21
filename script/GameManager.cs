@@ -9,30 +9,34 @@ public class GameManager : MonoBehaviour
 {
     public delegate void GetTalkData(); // npc한테서 대사를 전달받는 대리자
     public delegate void UnLockWaiting(); // 기다리고 있는 상황을 기다리지 않아도 되도록 풀어주는 대리자
+    public delegate void SetMagic(GameObject sk); // 마법석 변경 시 플레이어 마법지팡이 이미지 바꾸기 & 스킬 세팅
     public GetTalkData npcTalk;
     public UnLockWaiting unLockWait;
+    public SetMagic setMagic;
     //serializefield 해야됨
-    [SerializeField] private GameObject DM;
-    [SerializeField] private GameObject QM;
-    [SerializeField] private GameObject QuestState;
-    [SerializeField] private GameObject Yes;
-    [SerializeField] private GameObject No;
+    [SerializeField] private GameObject dM;
+    [SerializeField] private GameObject qM;
+    [SerializeField] private GameObject[] skills;
+    [SerializeField] private GameObject yes;
+    [SerializeField] private GameObject no;
     [SerializeField] private GameObject skillLocked;
-    [SerializeField] private GameObject Up;
-    [SerializeField] private GameObject Down;
-    [SerializeField] private GameObject QuestList;
-    [SerializeField] private GameObject TalkUI;
-    [SerializeField] private GameObject QuestUI;
-    [SerializeField] private GameObject Inven;
+    [SerializeField] private GameObject up;
+    [SerializeField] private GameObject down;
+    [SerializeField] private GameObject progressingQuest;
+    [SerializeField] private GameObject talkUI;
+    [SerializeField] private GameObject questUI;
+    [SerializeField] private GameObject skillImage;
+    [SerializeField] private GameObject inven;
     [SerializeField] private GameObject[] reqList;
+    [SerializeField] private GameObject selectMagicStoneUI;
     [SerializeField] private Image hpGraph;
-    [SerializeField] private TMPro.TMP_Text MAXhp;
+    [SerializeField] private TMPro.TMP_Text maxHp;
     [SerializeField] private TMPro.TMP_Text hp;
     [SerializeField] private Image mpGraph;
-    [SerializeField] private TMPro.TMP_Text MAXmp;
+    [SerializeField] private TMPro.TMP_Text maxMp;
     [SerializeField] private TMPro.TMP_Text mp;
     [SerializeField] private Image expGraph;
-    [SerializeField] private TMPro.TMP_Text MAXexp;
+    [SerializeField] private TMPro.TMP_Text maxExp;
     [SerializeField] private TMPro.TMP_Text exp;
     [SerializeField] private Image skill;
     [SerializeField] private TMPro.TMP_Text coolTime;
@@ -48,12 +52,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text[] questReqCurNum;
     [SerializeField] private TMPro.TMP_Text[] slash;
     [SerializeField] private TMPro.TMP_Text[] questReqTotal;
-    [SerializeField] private Sprite[] sp;
+    [SerializeField] private Sprite[] npcImages;
+    [SerializeField] private Sprite[] skImages;
 
     //public bool Istalking = false;
     //public bool FinishTalk = false;
     //public bool skDisable = false;
-   // public bool accept = false;
+    // public bool accept = false;
     //public int curMapNum = 0;
 
     private IEnumerator talkAni;
@@ -62,15 +67,16 @@ public class GameManager : MonoBehaviour
     DialogueManager dm;
     QuestManager qm;
 
+    List<int> curQuestReqNum = new List<int>();
     int curMapNum = 0;
     int curNpcId = 0;
     int i = 0;
     int curHp = 0;
-    int maxHp = 0;
+    int curMaxHp = 0;
     int curMp = 0;
-    int maxMp = 0;
+    int curMaxMp = 0;
     int curExp = 0;
-    int maxExp = 0;
+    int curMaxExp = 0;
     int curQuestNum = 1;
     int curQuestNpcId; //현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 NPC의 ID
     int finishReqNum = 0; // 퀘스트 조건들에서 완료한 조건 수
@@ -84,6 +90,10 @@ public class GameManager : MonoBehaviour
     bool finishTalk = false;
     bool skDisable = false;
     bool accept = false;
+    //bool[] selectedMagicStone = new bool[3];
+    bool waterSelected = false;
+    bool dirtSelected = false;
+    bool windSelected = false;
     //bool doneQuest = false; // 모든 퀘스트 완료한 경우
     //bool startTalk = true;
 
@@ -91,16 +101,16 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        this.ani = QuestState.GetComponent<Animator>();
+        //this.ani = questState.GetComponent<Animator>();
         this.talkAni = TalkAnime();
         this.wfs = new WaitForSeconds(0.05f);
-        this.dm = DM.GetComponent<DialogueManager>();
-        this.qm = QM.GetComponent<QuestManager>();
-        this.curHp = Convert.ToInt32(MAXhp.text);
-        this.maxHp = Convert.ToInt32(MAXhp.text);
-        this.curMp = Convert.ToInt32(MAXmp.text);
-        this.maxMp = Convert.ToInt32(MAXmp.text);
-        this.maxExp = Convert.ToInt32(MAXexp.text);
+        this.dm = dM.GetComponent<DialogueManager>();
+        this.qm = qM.GetComponent<QuestManager>();
+        this.curHp = Convert.ToInt32(hp.text);
+        this.curMaxHp = Convert.ToInt32(maxHp.text);
+        this.curMp = Convert.ToInt32(mp.text);
+        this.curMaxMp = Convert.ToInt32(maxMp.text);
+        this.curMaxExp = Convert.ToInt32(maxExp.text);
         this.curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
     }
 
@@ -167,6 +177,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public bool WaterSelected
+    {
+        set
+        {
+            waterSelected = value;
+        }
+    }
+    public bool DirtSelected
+    {
+        set
+        {
+            dirtSelected = value;
+        }
+    }
+    public bool WindSelected
+    {
+        set
+        {
+            windSelected = value;
+        }
+    }
+
+
     /*public void GetMessage(string s) // 메시지를 받아 각 동작을 수행하는 방식? 고민중
     {
         if(s == "퀘스트수락")
@@ -205,14 +238,14 @@ public class GameManager : MonoBehaviour
     {
         curMp -= n;
         //percent = Convert.ToDouble(n) / Convert.ToDouble(maxmp);
-        percent = (float)((float)(n) * (1.0 / (float)(maxMp)));
+        percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
         mpGraph.fillAmount -= percent;
         mp.text = Convert.ToString(curMp);
     }
     public void HPDown(int n)
     {
         curHp -= n;
-        percent = (float)((float)(n) * (1.0 / (float)(maxHp)));
+        percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
         //percent = Convert.ToDouble(n) / Convert.ToDouble(maxhp);
         hpGraph.fillAmount -= percent;
         hp.text = Convert.ToString(curHp);
@@ -220,7 +253,7 @@ public class GameManager : MonoBehaviour
     public void ExpUp(int n)
     {
         curExp += n;
-        percent = (float)((float)(n) * (1.0 / (float)(maxExp)));
+        percent = (float)((float)(n) * (1.0 / (float)(curMaxExp)));
         //percent = Convert.ToDouble(n) / Convert.ToDouble(maxexp);
         expGraph.fillAmount += percent;
         exp.text = Convert.ToString(curExp);
@@ -228,11 +261,11 @@ public class GameManager : MonoBehaviour
 
     public void InventoryOn()
     {
-        Inven.SetActive(true);
+        inven.SetActive(true);
     }
     public void InventoryOff()
     {
-        Inven.SetActive(false);
+        inven.SetActive(false);
     }
 
     /*public void TalkOn(int num)
@@ -351,7 +384,7 @@ public class GameManager : MonoBehaviour
     */
     public void TalkEvent() // 플레이어와 npc 간 대화 이벤트 발생
     {
-        TalkUI.SetActive(true);
+        talkUI.SetActive(true);
         if(isTalking) // 대사 출력 중에 호출되었으면 해당 대사 순차적 출력을 스킵하고 한번에 출력
         {
             SkipTalk();
@@ -382,7 +415,7 @@ public class GameManager : MonoBehaviour
 
     public void TalkDone() // 대화 이벤트 종료
     {
-        TalkUI.SetActive(false);
+        talkUI.SetActive(false);
         finishTalk = false;
     }
 
@@ -413,22 +446,22 @@ public class GameManager : MonoBehaviour
 
     public void OpenCurQuestList()
     {
-        Down.SetActive(false);
-        Up.SetActive(true);
-        QuestList.SetActive(true);
+        down.SetActive(false);
+        up.SetActive(true);
+        progressingQuest.SetActive(true);
     }
     public void CloseCurQuestList()
     {
-        Down.SetActive(true);
-        Up.SetActive(false);
-        QuestList.SetActive(false);
+        down.SetActive(true);
+        up.SetActive(false);
+        progressingQuest.SetActive(false);
     }
     public void ChangeTalkNpc(int id, string name)
     {
         if (curNpcId != id)
         {
             curNpcId = id;
-            npcImage.sprite = sp[id - 1];
+            npcImage.sprite = npcImages[id - 1];
             npcName.text = name;
             /*if (qm.questData[curquestnum].npcid == id)
             {
@@ -443,15 +476,15 @@ public class GameManager : MonoBehaviour
 
     public void OpenYesOrNoButton()
     {
-        Yes.SetActive(true);
-        No.SetActive(true);
+        yes.SetActive(true);
+        no.SetActive(true);
     }
 
     public void CloseYesOrNoButton()
     {
-        Yes.SetActive(false);
-        No.SetActive(false);
         unLockWait();
+        yes.SetActive(false);
+        no.SetActive(false);
     }
 
     public void QuestAccept()
@@ -472,21 +505,26 @@ public class GameManager : MonoBehaviour
     }
     public void ShowQuestInfo()
     {
-        QuestUI.SetActive(true);
+        questUI.SetActive(true);
         questTitle.text = qm.QuestDataList[curQuestNum-1].Title;
         questNpcName.text = qm.QuestDataList[curQuestNum-1].NpcName;
         questInfo.text = qm.QuestDataList[curQuestNum-1].Info;
-        Debug.Log(qm.QuestDataList[curQuestNum - 1].Type.Count);
-        for(int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
+        questT.color = Color.white;
+        questTitle.color = Color.white;
+        questNpc.color = Color.white;
+        questNpcName.color = Color.white;
+        questInfo.color = Color.white;
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
             questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i];
-            //questReqName[i].SetActive(true);
             questReqCurNum[i].text = Convert.ToString(0);
-            //questReqCurNum[i].SetActive(true);
-            //slash[i].SetActive(true);
             questReqTotal[i].text = Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
-            //questReqTotal[i].SetActive(true);
             reqList[i].SetActive(true);
+            questReqName[i].color = Color.white;
+            questReqCurNum[i].color = Color.white;
+            slash[i].color = Color.white;
+            questReqTotal[i].color = Color.white;
+            curQuestReqNum.Add(0);
         }
     }
     public void ClearQuestInfo()
@@ -495,24 +533,29 @@ public class GameManager : MonoBehaviour
         {
             reqList[i].SetActive(false);
         }
-        QuestUI.SetActive(false);
+        questUI.SetActive(false);
     }
 
     public void QuestUpdate(string type, int id = 0)
     {
-        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Req_Id.Count; i++)
+        if (!accept) return; // 수락한 퀘스트가 없는 경우 탈출
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            if (Convert.ToInt32(questReqCurNum[i]) == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
+            Debug.Log(curQuestReqNum[i]);
+            Debug.Log(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
+            Debug.Log(qm.QuestDataList[curQuestNum - 1].Type[i]);
             if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id)) // id가 디폴트 값인 0으로 들어온 경우 식별해야 할 아이디 정보가 없다는 것을 의미
             {
-                if(Convert.ToInt32(questReqCurNum[i]) < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
+                if(curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
-                    questReqCurNum[i].text = Convert.ToString(Convert.ToInt32(questReqCurNum[i]) + 1);
+                    curQuestReqNum[i]++;
+                    questReqCurNum[i].text = Convert.ToString(curQuestReqNum[i]);
                 }
-                if(Convert.ToInt32(questReqCurNum[i]) == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
+                if(curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
         }
-        if (finishReqNum == qm.QuestDataList[curQuestNum-1].Req_Id.Count)
+        if (finishReqNum == qm.QuestDataList[curQuestNum-1].Type.Count)
         {
             QuestSuccess();
         }
@@ -522,14 +565,15 @@ public class GameManager : MonoBehaviour
     {
         finishReqNum = 0;
         success = true;
-        ani.SetTrigger("success");
+        //ani.SetTrigger("success");
         questT.color = Color.yellow;
         questTitle.color = Color.yellow;
         questNpc.color = Color.yellow;
         questNpcName.color = Color.yellow;
         questInfo.color = Color.yellow;
-        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Req_Id.Count; i++)
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
+            curQuestReqNum.RemoveAt(i);
             questReqName[i].color = Color.yellow;
             questReqCurNum[i].color = Color.yellow;
             slash[i].color = Color.yellow;
@@ -539,6 +583,8 @@ public class GameManager : MonoBehaviour
 
     public void QuestReward()
     {
+        questUI.SetActive(false);
+        if(curQuestNum == 1) skillImage.SetActive(true);
         accept = false;
         success = false;
         for(int i = 0;  i < qm.QuestDataList[curQuestNum-1].RewardType.Count; i++)
@@ -558,7 +604,40 @@ public class GameManager : MonoBehaviour
         {
             curQuestNpcId = 0;
         }
-        QuestState.SetActive(false);
+        //QuestState.SetActive(false);
     }
 
+    public void SelectMagicStoneUIOn()
+    {
+        if (curQuestNum == 1 && !accept) return; // 1번 퀘스트를 아직 수락하지 않은 경우 비활성화
+        selectMagicStoneUI.SetActive(true);
+    }
+    public void SelectMagicStoneUIOff()
+    {
+        selectMagicStoneUI.SetActive(false);
+    }
+
+    public void SwitchingMagicStone()
+    {
+        if(waterSelected)
+        {
+            skill.sprite = skImages[0];
+            setMagic(skills[0]);
+        }
+        else if(dirtSelected)
+        {
+            skill.sprite = skImages[1];
+            setMagic(skills[1]);
+
+        }
+        else if(windSelected)
+        {
+            skill.sprite = skImages[2];
+            setMagic(skills[2]);
+
+        }
+        //skillImage.SetActive(true);
+        QuestUpdate("마법석선택");
+        SelectMagicStoneUIOff();
+    }
 }

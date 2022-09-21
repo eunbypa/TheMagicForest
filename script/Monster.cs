@@ -36,6 +36,7 @@ public class Monster : MonoBehaviour
 
     void Update()
     {
+        //rb.velocity = new Vector2(1, 0) * 3;
         AttackEvent();
         if (end)
         {
@@ -102,6 +103,7 @@ public class Monster : MonoBehaviour
         {
             Bar.SetActive(false);
             ani.SetTrigger("die");
+            end = true;
         }
     }
 

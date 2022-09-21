@@ -85,7 +85,11 @@ public class NPC : MonoBehaviour
             gm.FinishTalk = true;
             diaIdx = 0;
             if(ds == DialogueState.questReply) gm.QuestUpdate("NPC대화", npcId);
-            if (ds == DialogueState.questSuccess) questBallon.SetActive(false);
+            if (ds == DialogueState.questSuccess)
+            {
+                questBallon.SetActive(false);
+                gm.QuestReward();
+            }
         }
     }
 
@@ -93,17 +97,17 @@ public class NPC : MonoBehaviour
     {
         if (gm.CurQuestNpcId == this.npcId) //현재 퀘스트 번호가 이 npc가 담당한 퀘스트인 경우
         {
-            if (ds == DialogueState.normal) ds = DialogueState.questAsk;
+            if (!gm.Accept) ds = DialogueState.questAsk;
             else if (ds == DialogueState.questAsk)
             {
                 if (!gm.Accept) ds = DialogueState.questRefuse; // 플레이어가 퀘스트를 수락하지 않은 상태인 경우
                 else ds = DialogueState.questAccept; // 플레이어가 퀘스트를 수락한 경우
             }
             else if (ds == DialogueState.questRefuse) ds = DialogueState.questAsk;
-            else if (ds == DialogueState.questAccept) ds = DialogueState.questDoing;
-            else if (ds == DialogueState.questDoing)
+            else if (gm.Accept && !gm.Success) ds = DialogueState.questDoing;
+            else if (gm.Success)
             {
-                if (gm.Success) ds = DialogueState.questSuccess;
+                ds = DialogueState.questSuccess;
             }
         }
         else if(gm.CurQuestNpcId != 0 && gm.Accept) // 아직 수행하는 퀘스트가 있는 경우
@@ -117,6 +121,7 @@ public class NPC : MonoBehaviour
             }
         }
         else ds = DialogueState.normal;
+        Debug.Log(ds);
     }
 
     void GetDiaData()

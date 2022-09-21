@@ -1,17 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
+using UnityEngine.Experimental.U2D.Animation;
 
 public class Player : MonoBehaviour
 {
-    public GameObject Skill;
-    public GameObject GM;
-    public float speed = 5f;
-    public int talking = 0;
-    public int curCollidingNum = 0;
-    public bool moving = true;
+    [SerializeField] private GameObject MagicStone;
+    [SerializeField] private GameObject MagicStick;
+    [SerializeField] private GameObject skill;
+    [SerializeField] private GameObject gM;
+    [SerializeField] private float speed = 5f;
+    //[SerializeField] private int talking = 0;
+    [SerializeField] private int curCollidingNum = 0;
+    [SerializeField] private bool moving = true;
 
     int directionX = 0;
     int directionY = 0;
@@ -29,6 +32,7 @@ public class Player : MonoBehaviour
     float notHurtTime = 1f;
     bool flip = false;
     bool npcContact = false;
+    bool tableContact = false;
     bool skillUse = false;
     bool skON = false;
     bool getHurt = false;
@@ -36,6 +40,7 @@ public class Player : MonoBehaviour
     private IEnumerator hurtPeriod;
     private WaitForSeconds wfs;
 
+    SpriteResolver spResolver;
     Rigidbody2D rb;
     Animator ani;
     SortingGroup sg;
@@ -46,11 +51,13 @@ public class Player : MonoBehaviour
     {
         this.hurtPeriod = HurtEvent();
         this.wfs = new WaitForSeconds(notHurtTime);
-        this.sk = Skill.GetComponent<Skill>();
+        //this.sk = Skill.GetComponent<Skill>(); // 퀘스트 1번 시작 전이면 비활성화 해야함
+        this.spResolver = GetComponent<SpriteResolver>();
         this.rb = GetComponent<Rigidbody2D>();
         this.ani = GetComponent<Animator>();
         this.sg = GetComponent<SortingGroup>();
-        this.gm = GM.GetComponent<GameManager>();
+        this.gm = gM.GetComponent<GameManager>();
+        gm.setMagic += SetMagicStone;
     }
 
     void Update()
@@ -58,20 +65,7 @@ public class Player : MonoBehaviour
         EnteringKey();
         if (gm.SkDisable)
         {
-            if (remainCool > 0)
-            {
-                oneSecond += Time.deltaTime;
-                if (oneSecond > 1f)
-                {
-                    remainCool -= 1f;
-                    gm.CheckCoolTime(remainCool);
-                    oneSecond = 0;
-                }
-            }
-            else
-            {
-                gm.ResetSkillDisable();
-            }
+            WaitForCoolTimeDone();
         }
         if (skillUse)
         {
@@ -107,13 +101,17 @@ public class Player : MonoBehaviour
                 if (wait > skTime)
                 {
                     wait = 0;
-                    Skill.SetActive(false);
+                    skill.SetActive(false);
                     sk.Finish = false;
                     skillUse = false;
                 }
             }
         }
-        if (x == 0 && y == 0)
+        if(gm.CurQuestNum == 2)
+        {
+            SetMagicStick();
+        }
+        /*if (x == 0 && y == 0)
         {
             ani.SetTrigger("stop");
         }
@@ -136,19 +134,12 @@ public class Player : MonoBehaviour
                     flip = false;
                 }
             }
-        }
+        }*/
     }
 
     void FixedUpdate()
     {
-        if (moving)
-        {
-            MoveEvent();
-        }
-        else
-        {
-            rb.velocity = new Vector2(0, 0).normalized * 0; 
-        }
+        MoveEvent();
     }
 
     void EnteringKey()
@@ -219,9 +210,11 @@ public class Player : MonoBehaviour
             {
                 DialogueEvent();
             }
+            if (tableContact) gm.SelectMagicStoneUIOn();
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
+            if (gm.CurQuestNum == 1) return; // 아직 스킬을 사용할 수 없는 상태
             if (!(gm.SkDisable))
             {
                 curMp = gm.GetCurMp();
@@ -234,6 +227,36 @@ public class Player : MonoBehaviour
     }
     void MoveEvent()
     {
+        if (!moving)
+        {
+            rb.velocity = new Vector2(0, 0).normalized * 0;
+            ani.SetTrigger("stop");
+            return;
+        }
+        if (x == 0 && y == 0)
+        {
+            ani.SetTrigger("stop");
+        }
+        else
+        {
+            ani.SetTrigger("walk");
+            if (x == 1)
+            {
+                if (flip == false)
+                {
+                    transform.localScale = new Vector3(-1, 1, 1);
+                    flip = true;
+                }
+            }
+            if (x == -1)
+            {
+                if (flip == true)
+                {
+                    transform.localScale = new Vector3(1, 1, 1);
+                    flip = false;
+                }
+            }
+        }
         rb.velocity = new Vector2(x, y).normalized * speed;
     }
     void SkillEvent()
@@ -241,10 +264,10 @@ public class Player : MonoBehaviour
         skillUse = true;
         if (gm.Accept) // 진행중인 퀘스트가 있을 때 어떤 행동을 할때마다 퀘스트 조건 검사 함수에 전달해 이 행동이 해당되는지 검사
         {
-            gm.QuestUpdate("스킬");
+            gm.QuestUpdate("마법사용");
         }
         gm.SetSkillDisable();
-        Skill.SetActive(true);
+        skill.SetActive(true);
         remainCool = sk.CoolTime;
         wait = 0;
         sk.setting(transform.position.x, transform.position.y, directionX, directionY);
@@ -271,8 +294,41 @@ public class Player : MonoBehaviour
             gm.FinishTalk = false;
         }*/
     }
+    void SetMagicStone(GameObject sk)
+    {
+        skill = sk;
+        this.sk = skill.GetComponent<Skill>();
+    }
+    void SetMagicStick()
+    {
+        spResolver = MagicStone.GetComponent<SpriteResolver>();
+        spResolver.SetCategoryAndLabel("MagicStone", "wind");
+        spResolver = MagicStick.GetComponent<SpriteResolver>();
+        spResolver.SetCategoryAndLabel("MagicStick", "hold");
+    }
+    void WaitForCoolTimeDone()
+    {
+        if (remainCool > 0)
+        {
+            oneSecond += Time.deltaTime;
+            if (oneSecond > 1f)
+            {
+                remainCool -= 1f;
+                gm.CheckCoolTime(remainCool);
+                oneSecond = 0;
+            }
+        }
+        else
+        {
+            gm.ResetSkillDisable();
+        }
+    }
     void OnTriggerEnter2D(Collider2D Other)
     {
+        if(Other.gameObject.tag == "MagicStoneTable")
+        {
+            tableContact = true;
+        }
         if (Other.gameObject.tag == "MOP" || Other.gameObject.tag == "attack")
         {
             if (getHurt == false)
@@ -531,6 +587,10 @@ public class Player : MonoBehaviour
             {
                 sg.sortingOrder = 0;
             }
+        }
+        if (Other.gameObject.tag == "MagicStoneTable")
+        {
+            tableContact = false;
         }
     }
 
