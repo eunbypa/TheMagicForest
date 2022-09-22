@@ -29,8 +29,9 @@ public class Portal : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                TeleportEvent();
+                gm.WaitForTeleportReady();
             }
+            if (gm.TeleportReady) TeleportEvent();
         }
     }
 

@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject inven;
     [SerializeField] private GameObject[] reqList;
     [SerializeField] private GameObject selectMagicStoneUI;
+    [SerializeField] private GameObject blackOut;
     [SerializeField] private Image hpGraph;
     [SerializeField] private TMPro.TMP_Text maxHp;
     [SerializeField] private TMPro.TMP_Text hp;
@@ -62,11 +63,12 @@ public class GameManager : MonoBehaviour
     //public int curMapNum = 0;
 
     private IEnumerator talkAni;
+    private IEnumerator waitForTeleport;
     private WaitForSeconds wfs;
-
+    private WaitForSeconds wfs2;
     DialogueManager dm;
     QuestManager qm;
-
+    Animator ani;
     List<int> curQuestReqNum = new List<int>();
     int curMapNum = 0;
     int curNpcId = 0;
@@ -84,8 +86,7 @@ public class GameManager : MonoBehaviour
     string tmp = null;
     char[] textData = null;
     bool isTalking = false;
-   // bool isQuest = false;
-   // bool answer = false;
+    bool teleportReady = false;
     bool success = false;
     bool finishTalk = false;
     bool skDisable = false;
@@ -97,13 +98,14 @@ public class GameManager : MonoBehaviour
     //bool doneQuest = false; // 모든 퀘스트 완료한 경우
     //bool startTalk = true;
 
-    Animator ani;
-
     void Start()
     {
         //this.ani = questState.GetComponent<Animator>();
+        this.ani = blackOut.GetComponent<Animator>();
         this.talkAni = TalkAnime();
+        this.waitForTeleport = WaitForTeleport();
         this.wfs = new WaitForSeconds(0.05f);
+        this.wfs2 = new WaitForSeconds(0.5f);
         this.dm = dM.GetComponent<DialogueManager>();
         this.qm = qM.GetComponent<QuestManager>();
         this.curHp = Convert.ToInt32(hp.text);
@@ -198,6 +200,14 @@ public class GameManager : MonoBehaviour
             windSelected = value;
         }
     }
+    public bool TeleportReady
+    {
+        get
+        {
+            return teleportReady;
+        }
+    }
+
 
 
     /*public void GetMessage(string s) // 메시지를 받아 각 동작을 수행하는 방식? 고민중
@@ -207,10 +217,26 @@ public class GameManager : MonoBehaviour
 
         }
     }*/
+    public void WaitForTeleportReady()
+    {
+        blackOut.SetActive(true);
+        ani.SetTrigger("blackOut");
+        waitForTeleport = WaitForTeleport();
+        StartCoroutine(waitForTeleport);
+    }
 
     public void TeleportMap(int n)
     {
         curMapNum = n;
+        teleportReady = false;
+    }
+    IEnumerator WaitForTeleport()
+    {
+        yield return wfs2;
+        teleportReady = true;
+        yield return wfs2;
+        blackOut.SetActive(false);
+        yield break;
     }
     public void SetSkillDisable()
     {
@@ -516,14 +542,14 @@ public class GameManager : MonoBehaviour
         questInfo.color = Color.white;
         for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i];
-            questReqCurNum[i].text = Convert.ToString(0);
-            questReqTotal[i].text = Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + "0 / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            //questReqCurNum[i].text = Convert.ToString(0);
+            //questReqTotal[i].text = Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
             reqList[i].SetActive(true);
             questReqName[i].color = Color.white;
-            questReqCurNum[i].color = Color.white;
-            slash[i].color = Color.white;
-            questReqTotal[i].color = Color.white;
+            //questReqCurNum[i].color = Color.white;
+            //slash[i].color = Color.white;
+            //questReqTotal[i].color = Color.white;
             curQuestReqNum.Add(0);
         }
     }
@@ -541,16 +567,16 @@ public class GameManager : MonoBehaviour
         if (!accept) return; // 수락한 퀘스트가 없는 경우 탈출
         for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            Debug.Log(curQuestReqNum[i]);
-            Debug.Log(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            //Debug.Log(curQuestReqNum[i]);
+            //Debug.Log(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
             if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
-            Debug.Log(qm.QuestDataList[curQuestNum - 1].Type[i]);
+            //Debug.Log(qm.QuestDataList[curQuestNum - 1].Type[i]);
             if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id)) // id가 디폴트 값인 0으로 들어온 경우 식별해야 할 아이디 정보가 없다는 것을 의미
             {
                 if(curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
                     curQuestReqNum[i]++;
-                    questReqCurNum[i].text = Convert.ToString(curQuestReqNum[i]);
+                    questReqCurNum[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
                 }
                 if(curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
