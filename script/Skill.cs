@@ -33,7 +33,7 @@ public class Skill : MonoBehaviour
         Moving();
     }
 
-    void Moving ()
+    void Moving()
     {
         if (attack)
         {

@@ -15,7 +15,7 @@ public class DialogueManager : MonoBehaviour
     List<DialogueData> questRefuseDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 거절 시 대사, index : 퀘스트 번호
     List<DialogueData> questDoingDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 진행 중 일때 대사, index : 퀘스트 번호
     List<DialogueData> questSuccessDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 성공 시 대사, index : 퀘스트 번호
-    List<DialogueData> questReplyDiaData = new List<DialogueData>(); // 현재 퀘스트 요구사항 타입이 npc와 대화일 때 거기에 해당하는 npc일 때 대사
+    List<Tuple<int, List<DialogueData>>> questReplyDiaData = new List<Tuple<int, List<DialogueData>>>(); // 현재 퀘스트 요구사항 타입이 npc와 대화일 때 거기에 해당하는 npc일 때 대사, Tuple.Item1 : 퀘스트 번호, Tuple.Item2 : npc 대사
 
     char[] LineSeperate = new char[] { '\n' };
     char[] CSVSeperate = new char[] { ',' };
@@ -32,6 +32,7 @@ public class DialogueManager : MonoBehaviour
         ReadDiaData("QuestScript_Refuse", ref questRefuseDiaData);
         ReadDiaData("QuestScript_Doing", ref questDoingDiaData);
         ReadDiaData("QuestScript_Success", ref questSuccessDiaData);
+        ReadDiaData("QuestScript_Reply", ref questReplyDiaData);
     }
 
     void ReadDiaData(string s, ref List<DialogueData> dList) // 맨 첫번째 column이 데이터를 나누는 기준이 된다.
@@ -71,6 +72,40 @@ public class DialogueManager : MonoBehaviour
         }
         curNum = 0;
         checkFirst = 0;
+    }
+    void ReadDiaData(string s, ref List<Tuple<int, List<DialogueData>>> dList)
+    {
+        TextAsset textset = Resources.Load<TextAsset>(s);
+        string[] Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
+        string[] SplitLine;
+        int curNpc = 0;
+        foreach (string line in Lines)
+        {
+            if (checkFirst == 0) // 첫줄은 생략하는 용도
+            {
+                checkFirst++;
+                continue;
+            }
+            SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
+            int nextNum = Convert.ToInt32(SplitLine[0]);
+            if (curNum != nextNum)
+            {
+                curNum = nextNum;
+                dList.Add(new Tuple<int, List<DialogueData>>(curNum, new List<DialogueData>()));
+            }
+            int nextNpc = Convert.ToInt32(SplitLine[1]);
+            if (curNpc != nextNpc)
+            {
+                curNpc = nextNpc;
+                DialogueData d = new DialogueData();
+                d.NpcId = nextNpc;
+                d.NpcName = SplitLine[2];
+                dList[dList.Count - 1].Item2.Add(d);
+            }
+            SplitLine[3] = SplitLine[3].Replace("닉네임", "로빈"); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
+            SplitLine[3] = SplitLine[3].Replace("쉼표", ",");
+            dList[dList.Count - 1].Item2[dList[dList.Count - 1].Item2.Count - 1].Dialogue.Add(SplitLine[3]);
+        }
     }
     /*void ReadDiaData()
     {
@@ -244,7 +279,7 @@ public class DialogueManager : MonoBehaviour
             return questSuccessDiaData;
         }
     }
-    public List<DialogueData> QuestReplyDiaData
+    public List<Tuple<int, List<DialogueData>>> QuestReplyDiaData
     {
         get
         {

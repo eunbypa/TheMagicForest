@@ -18,8 +18,11 @@ public class Player : MonoBehaviour
 
     int directionX = 0;
     int directionY = 0;
-    int curMp = 0;
-    int requireMp = 10;
+    int level = 1;
+    int curHp = 100;
+    int curMp = 100;
+    int curExp = 0;
+    int skillMp = 10;
     float x = 0;
     float y = 0;
     float wait = 0;
@@ -69,7 +72,8 @@ public class Player : MonoBehaviour
         }
         if (skillUse)
         {
-            if (sk.AttackSuccess)
+            CheckSkillExistedTime();
+            /*if (sk.AttackSuccess)
             {
                 skON = false;
                 wait = 0;
@@ -105,7 +109,7 @@ public class Player : MonoBehaviour
                     sk.Finish = false;
                     skillUse = false;
                 }
-            }
+            }*/
         }
         if(gm.CurQuestNum == 2)
         {
@@ -273,7 +277,7 @@ public class Player : MonoBehaviour
         sk.setting(transform.position.x, transform.position.y, directionX, directionY);
         ani.SetTrigger("skill");
         skON = true;
-        gm.MPDown(requireMp);
+        gm.MPDown(skillMp);
         gm.CheckCoolTime(remainCool); 
     }
     void DialogueEvent()
@@ -305,6 +309,46 @@ public class Player : MonoBehaviour
         spResolver.SetCategoryAndLabel("MagicStone", "wind");
         spResolver = MagicStick.GetComponent<SpriteResolver>();
         spResolver.SetCategoryAndLabel("MagicStick", "hold");
+    }
+    void CheckSkillExistedTime()
+    {
+        if (sk.AttackSuccess)
+        {
+            skON = false;
+            wait = 0;
+            sk.AttackSuccess = false;
+        }
+        if (skON)
+        {
+            wait += Time.deltaTime;
+            if (wait > skReady)
+            {
+                wait = 0;
+                sk.Attack = true;
+                skON = false;
+            }
+        }
+        if (sk.Attack)
+        {
+            wait += Time.deltaTime;
+            if (wait > skTime)
+            {
+                wait = 0;
+                sk.Finish = true;
+                sk.Attack = false;
+            }
+        }
+        if (sk.Finish)
+        {
+            wait += Time.deltaTime;
+            if (wait > skTime)
+            {
+                wait = 0;
+                skill.SetActive(false);
+                sk.Finish = false;
+                skillUse = false;
+            }
+        }
     }
     void WaitForCoolTimeDone()
     {

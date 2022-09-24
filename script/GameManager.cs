@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviour
     public UnLockWaiting unLockWait;
     public SetMagic setMagic;
     //serializefield ÇØ¾ßµÊ
-    [SerializeField] private GameObject dM;
+    //[SerializeField] private GameObject dM;
     [SerializeField] private GameObject qM;
     [SerializeField] private GameObject[] skills;
     [SerializeField] private GameObject yes;
@@ -106,7 +106,7 @@ public class GameManager : MonoBehaviour
         this.waitForTeleport = WaitForTeleport();
         this.wfs = new WaitForSeconds(0.05f);
         this.wfs2 = new WaitForSeconds(0.5f);
-        this.dm = dM.GetComponent<DialogueManager>();
+        //this.dm = dM.GetComponent<DialogueManager>();
         this.qm = qM.GetComponent<QuestManager>();
         this.curHp = Convert.ToInt32(hp.text);
         this.curMaxHp = Convert.ToInt32(maxHp.text);
@@ -508,7 +508,6 @@ public class GameManager : MonoBehaviour
 
     public void CloseYesOrNoButton()
     {
-        unLockWait();
         yes.SetActive(false);
         no.SetActive(false);
     }
@@ -516,6 +515,7 @@ public class GameManager : MonoBehaviour
     public void QuestAccept()
     {
         accept = true;
+        unLockWait();
         CloseYesOrNoButton();
         ShowQuestInfo();
         TalkEvent();
@@ -525,7 +525,8 @@ public class GameManager : MonoBehaviour
     }
     public void QuestRefuse()
     {
-        accept = false;
+        accept = false; 
+        unLockWait();
         CloseYesOrNoButton();
         TalkEvent();
     }
@@ -576,7 +577,7 @@ public class GameManager : MonoBehaviour
                 if(curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
                     curQuestReqNum[i]++;
-                    questReqCurNum[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+                    questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
                 }
                 if(curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
@@ -601,18 +602,27 @@ public class GameManager : MonoBehaviour
         {
             curQuestReqNum.RemoveAt(i);
             questReqName[i].color = Color.yellow;
-            questReqCurNum[i].color = Color.yellow;
-            slash[i].color = Color.yellow;
-            questReqTotal[i].color = Color.yellow;
+            //questReqCurNum[i].color = Color.yellow;
+            //slash[i].color = Color.yellow;
+            //questReqTotal[i].color = Color.yellow;
         }
+    }
+    
+    public void QuestDone()
+    {
+        questUI.SetActive(false);
+        if (curQuestNum == 1) skillImage.SetActive(true);
+        accept = false;
+        success = false;
+        QuestReward();
     }
 
     public void QuestReward()
     {
-        questUI.SetActive(false);
+        /*questUI.SetActive(false);
         if(curQuestNum == 1) skillImage.SetActive(true);
         accept = false;
-        success = false;
+        success = false;*/
         for(int i = 0;  i < qm.QuestDataList[curQuestNum-1].RewardType.Count; i++)
         {
             if (qm.QuestDataList[curQuestNum - 1].RewardType[i] == "exp")
