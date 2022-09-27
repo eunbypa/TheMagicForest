@@ -29,7 +29,7 @@ public abstract class Npc : MonoBehaviour
     {
         wait = false;
     }
-    public abstract void DialogueReady();
+    public abstract bool DialogueReady();
     public abstract void SetDiaState();
     public abstract void GetDiaData();
 }

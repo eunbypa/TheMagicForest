@@ -48,6 +48,7 @@ public class Player : MonoBehaviour
     Animator ani;
     SortingGroup sg;
     GameManager gm;
+    InventoryManager im;
     Skill sk;
 
     void Start()
@@ -221,7 +222,7 @@ public class Player : MonoBehaviour
             if (gm.CurQuestNum == 1) return; // 아직 스킬을 사용할 수 없는 상태
             if (!(gm.SkDisable))
             {
-                curMp = gm.GetCurMp();
+                curMp = gm.CurMp;
                 if (curMp != 0) // 정확히는 현재 스킬 사용에 필요한 mp 양만큼 존재하는지 체크해야함
                 {
                     SkillEvent();
@@ -303,7 +304,7 @@ public class Player : MonoBehaviour
         skill = sk;
         this.sk = skill.GetComponent<Skill>();
     }
-    void SetMagicStick()
+    void SetMagicStick() // 다른 마법석 상태도 추가해야 함 아직 바람만 추가한 상태
     {
         spResolver = MagicStone.GetComponent<SpriteResolver>();
         spResolver.SetCategoryAndLabel("MagicStone", "wind");
@@ -366,6 +367,10 @@ public class Player : MonoBehaviour
         {
             gm.ResetSkillDisable();
         }
+    }
+    public void GetItem(Item item, int num)
+    {
+
     }
     void OnTriggerEnter2D(Collider2D Other)
     {

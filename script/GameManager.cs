@@ -7,12 +7,16 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public delegate void GetTalkData(); // npc한테서 대사를 전달받는 대리자
+    public delegate bool GetTalkData(); // npc한테서 대사를 전달받는 대리자
     public delegate void UnLockWaiting(); // 기다리고 있는 상황을 기다리지 않아도 되도록 풀어주는 대리자
     public delegate void SetMagic(GameObject sk); // 마법석 변경 시 플레이어 마법지팡이 이미지 바꾸기 & 스킬 세팅
+    public delegate void SellRequestToMerchant(int idx, int num); // 상인이 아이템을 판매하도록 SellItem 함수 호출하는 대리자
+    public delegate int GetItemId(int idx); // 선택한 아이템의 위치를 기반으로 해당 아이템의 아이디가 무엇인지 상인에게서 정보를 받는 대리자
     public GetTalkData npcTalk;
     public UnLockWaiting unLockWait;
     public SetMagic setMagic;
+    public SellRequestToMerchant sellRequest;
+    public GetItemId getItemId;
     //serializefield 해야됨
     //[SerializeField] private GameObject dM;
     [SerializeField] private GameObject qM;
@@ -27,9 +31,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject questUI;
     [SerializeField] private GameObject skillImage;
     [SerializeField] private GameObject inven;
+    [SerializeField] private GameObject[] invenItemSpaces;
+    [SerializeField] private GameObject[] invenItemQuantitySpaces;
     [SerializeField] private GameObject[] reqList;
     [SerializeField] private GameObject selectMagicStoneUI;
+    [SerializeField] private GameObject shopBack;
+    [SerializeField] private GameObject shopUI;
+    [SerializeField] private GameObject enterNumberUI;
     [SerializeField] private GameObject blackOut;
+    [SerializeField] private TMP_InputField itemQuantityInput;
+    [SerializeField] private TMPro.TMP_Text gold;
     [SerializeField] private Image hpGraph;
     [SerializeField] private TMPro.TMP_Text maxHp;
     [SerializeField] private TMPro.TMP_Text hp;
@@ -50,11 +61,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text questNpcName;
     [SerializeField] private TMPro.TMP_Text questInfo;
     [SerializeField] private TMPro.TMP_Text[] questReqName;
-    [SerializeField] private TMPro.TMP_Text[] questReqCurNum;
-    [SerializeField] private TMPro.TMP_Text[] slash;
-    [SerializeField] private TMPro.TMP_Text[] questReqTotal;
+    [SerializeField] private Image[] shopSelectedItem;
+    [SerializeField] private Image[] invenItemList;
+    [SerializeField] private TMPro.TMP_Text[] invenItemQuantityList;
+    //[SerializeField] private TMPro.TMP_Text[] questReqCurNum;
+    //[SerializeField] private TMPro.TMP_Text[] slash;
+    //[SerializeField] private TMPro.TMP_Text[] questReqTotal;
+
     [SerializeField] private Sprite[] npcImages;
     [SerializeField] private Sprite[] skImages;
+    [SerializeField] private Sprite[] itemImages;
 
     //public bool Istalking = false;
     //public bool FinishTalk = false;
@@ -66,13 +82,16 @@ public class GameManager : MonoBehaviour
     private IEnumerator waitForTeleport;
     private WaitForSeconds wfs;
     private WaitForSeconds wfs2;
-    DialogueManager dm;
+
+    InventoryManager im;
+    //DialogueManager dm;
     QuestManager qm;
     Animator ani;
     List<int> curQuestReqNum = new List<int>();
     int curMapNum = 0;
     int curNpcId = 0;
-    int i = 0;
+    //int i = 0;
+    int curGold = 0;
     int curHp = 0;
     int curMaxHp = 0;
     int curMp = 0;
@@ -82,6 +101,7 @@ public class GameManager : MonoBehaviour
     int curQuestNum = 1;
     int curQuestNpcId; //현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 NPC의 ID
     int finishReqNum = 0; // 퀘스트 조건들에서 완료한 조건 수
+    int selectedItemLoc = -1; // 선택된 아이템의 칸 위치(인벤토리 or 상점), -1 : 선택된 아이템이 없음을 의미
     float percent = 0;
     string tmp = null;
     char[] textData = null;
@@ -95,6 +115,8 @@ public class GameManager : MonoBehaviour
     bool waterSelected = false;
     bool dirtSelected = false;
     bool windSelected = false;
+    bool noEmptySpace = false;
+    bool shopExit = false;
     //bool doneQuest = false; // 모든 퀘스트 완료한 경우
     //bool startTalk = true;
 
@@ -107,7 +129,9 @@ public class GameManager : MonoBehaviour
         this.wfs = new WaitForSeconds(0.05f);
         this.wfs2 = new WaitForSeconds(0.5f);
         //this.dm = dM.GetComponent<DialogueManager>();
+        this.im = inven.GetComponent<InventoryManager>();
         this.qm = qM.GetComponent<QuestManager>();
+        this.curGold = Convert.ToInt32(gold.text);
         this.curHp = Convert.ToInt32(hp.text);
         this.curMaxHp = Convert.ToInt32(maxHp.text);
         this.curMp = Convert.ToInt32(mp.text);
@@ -115,7 +139,20 @@ public class GameManager : MonoBehaviour
         this.curMaxExp = Convert.ToInt32(maxExp.text);
         this.curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
     }
-
+    public int CurGold
+    {
+        get
+        {
+            return curGold;
+        }
+    }
+    public int CurMp
+    {
+        get
+        {
+            return curMp;
+        }
+    }
     public int CurMapNum
     {
         get
@@ -137,6 +174,14 @@ public class GameManager : MonoBehaviour
         get
         {
             return curQuestNpcId;
+        }
+    }
+
+    public int SelectedItemLoc
+    {
+        get
+        {
+            return selectedItemLoc;
         }
     }
 
@@ -207,7 +252,27 @@ public class GameManager : MonoBehaviour
             return teleportReady;
         }
     }
-
+    public bool ShopExit
+    {
+        get
+        {
+            return shopExit;
+        }
+    }
+    public bool NoEmptySpace
+    {
+        get
+        {
+            return noEmptySpace;
+        }
+    }
+    public InventoryManager InvenManager
+    {
+        get
+        {
+            return im;
+        }
+    }
 
 
     /*public void GetMessage(string s) // 메시지를 받아 각 동작을 수행하는 방식? 고민중
@@ -256,26 +321,50 @@ public class GameManager : MonoBehaviour
             coolTime.text = null;
         }
     }
-    public int GetCurMp()
+    public void GoldIncrease(int n)
     {
-        return curMp;
+        curGold += n;
+        gold.text = Convert.ToString(curGold);
     }
+
+    public void GoldDecrease(int n)
+    {
+        curGold -= n;
+        gold.text = Convert.ToString(curGold);
+    }
+
+    public void HpUp(int n) // 최댓값 초과 여부 검사조건 나중에 추가해야함
+    {
+        curHp += n;
+        percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
+        hpGraph.fillAmount += percent;
+        hp.text = Convert.ToString(curHp);
+    }
+
+    public void HPDown(int n) // 0 이하 여부 검사조건 나중에 추가해야함
+    {
+        curHp -= n;
+        percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
+        hpGraph.fillAmount -= percent;
+        hp.text = Convert.ToString(curHp);
+    }
+
+    public void MPUp(int n) // 최댓값 초과 여부 검사조건 나중에 추가해야함
+    {
+        curMp += n;
+        percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
+        mpGraph.fillAmount += percent;
+        mp.text = Convert.ToString(curMp);
+    }
+
     public void MPDown(int n)
     {
         curMp -= n;
-        //percent = Convert.ToDouble(n) / Convert.ToDouble(maxmp);
         percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
         mpGraph.fillAmount -= percent;
         mp.text = Convert.ToString(curMp);
     }
-    public void HPDown(int n)
-    {
-        curHp -= n;
-        percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
-        //percent = Convert.ToDouble(n) / Convert.ToDouble(maxhp);
-        hpGraph.fillAmount -= percent;
-        hp.text = Convert.ToString(curHp);
-    }
+    
     public void ExpUp(int n)
     {
         curExp += n;
@@ -287,11 +376,114 @@ public class GameManager : MonoBehaviour
 
     public void InventoryOn()
     {
+        for(int i = 0; i < im.MaxSize; i++)
+        {
+            if(i < im.InvenItemList.Count)
+            {
+                invenItemList[i].sprite = itemImages[im.InvenItemList[i].ItemId - 1];
+                invenItemQuantityList[i].text = Convert.ToString(im.InvenItemQuantityList[i]);
+                invenItemSpaces[i].SetActive(true);
+                invenItemQuantitySpaces[i].SetActive(true);
+            }
+            else
+            {
+                invenItemSpaces[i].SetActive(false);
+                invenItemQuantitySpaces[i].SetActive(false);
+            }
+        }
         inven.SetActive(true);
     }
     public void InventoryOff()
     {
         inven.SetActive(false);
+    }
+    public void ShopOn()
+    {
+        shopExit = false;
+        shopBack.SetActive(true);
+        shopUI.SetActive(true);
+    }
+    public void ShopOff()
+    {
+        selectedItemLoc = -1;
+        shopExit = true;
+        unLockWait();
+        ClearTalk();
+        TalkEvent();
+        foreach(Image i in shopSelectedItem)
+        {
+            Color color = i.color;
+            color.a = 0f;
+            i.color = color;
+        }
+        shopBack.SetActive(false);
+        shopUI.SetActive(false);
+    }
+    public void BuyItemRequest()
+    {
+        if (itemQuantityInput.text == null) return;
+        int num = Convert.ToInt32(itemQuantityInput.text);
+        if (num <= 0) return;
+        itemQuantityInput.text = null;
+        enterNumberUI.SetActive(false);
+        sellRequest(selectedItemLoc, num);
+        unLockWait();
+        ClearTalk();
+        TalkEvent();
+        //sellRequest(selectedItemLoc, 수량);
+    }
+    public void GetItem(Item item, int num)
+    {
+        int idx = im.FindItem(item.ItemId);
+        if (idx == -1) im.ItemInsert(item, num);
+        else
+        {
+            im.ItemQuantityIncrease(idx, num);
+        }
+    }
+    public void EnterItemQuantity() // 구매할 아이템 수량 입력받는 함수
+    {
+        if (selectedItemLoc == -1)
+        {
+            unLockWait();
+            ClearTalk();
+            TalkEvent();
+            return;
+        }
+        if (im.IsFull && im.FindItem(getItemId(selectedItemLoc)) == -1) noEmptySpace = true;
+        else noEmptySpace = false;
+        if(noEmptySpace)
+        {
+            unLockWait();
+            ClearTalk();
+            TalkEvent();
+            return;
+        }
+        enterNumberUI.SetActive(true);
+    }
+    public void SelectedItem(int idx)
+    {
+        Color color;
+        if (selectedItemLoc == idx)
+        {
+            color = shopSelectedItem[selectedItemLoc].color;
+            color.a = 0f;
+            shopSelectedItem[selectedItemLoc].color = color;
+            selectedItemLoc = -1;
+        }
+        else
+        {
+            if(selectedItemLoc != -1)
+            {
+                color = shopSelectedItem[selectedItemLoc].color;
+                color.a = 0f;
+                shopSelectedItem[selectedItemLoc].color = color;
+            }
+            selectedItemLoc = idx;
+            color = shopSelectedItem[selectedItemLoc].color;
+            color.a = 0.5f;
+            shopSelectedItem[selectedItemLoc].color = color;
+        }
     }
 
     /*public void TalkOn(int num)
@@ -408,7 +600,7 @@ public class GameManager : MonoBehaviour
         
     }
     */
-    public void TalkEvent() // 플레이어와 npc 간 대화 이벤트 발생
+    public void TalkEvent() // 플레이어와 npc 간 대화 이벤트 발생 시 npc에게서 다음 대사 받아서 대화창 UI에 출력함
     {
         talkUI.SetActive(true);
         if(isTalking) // 대사 출력 중에 호출되었으면 해당 대사 순차적 출력을 스킵하고 한번에 출력
@@ -417,7 +609,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            npcTalk();
+            if (!npcTalk()) return; // 반환값이 false면 다음 대화를 할 차례가 아직 아니라는 걸 의미
             if (finishTalk) // 대화 종료
             {
                 TalkDone();
@@ -439,6 +631,13 @@ public class GameManager : MonoBehaviour
         isTalking = false;
     }
 
+    public void ClearTalk() // 현재 출력중인 대화 중단하고 대화 데이터 빈 상태로 놓는 함수
+    {
+        isTalking = false;
+        StopCoroutine(talkAni);
+        tmp = null;
+    }
+
     public void TalkDone() // 대화 이벤트 종료
     {
         talkUI.SetActive(false);
@@ -447,7 +646,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator TalkAnime()
     {
-        for (i = 0; i < textData.Length; i++)
+        for (int i = 0; i < textData.Length; i++)
         {
             isTalking = true;
             tmp += textData[i];
@@ -518,6 +717,10 @@ public class GameManager : MonoBehaviour
         unLockWait();
         CloseYesOrNoButton();
         ShowQuestInfo();
+        ClearTalk();
+        //isTalking = false;
+        //StopCoroutine(talkAni);
+        //tmp = null;
         TalkEvent();
         //textData = dm.QuestAskDiaData[curQuestNum].Dialogue[dm.QuestAskDiaData[curQuestNum].Dialogue.Count - 1].ToCharArray();
         //talkAni = TalkAnime(); 
@@ -525,9 +728,14 @@ public class GameManager : MonoBehaviour
     }
     public void QuestRefuse()
     {
+        //Debug.Log("퀘스트거부");
         accept = false; 
         unLockWait();
         CloseYesOrNoButton();
+        ClearTalk();
+        //isTalking = false;
+        //StopCoroutine(talkAni);
+        //tmp = null;
         TalkEvent();
     }
     public void ShowQuestInfo()
@@ -615,6 +823,12 @@ public class GameManager : MonoBehaviour
         accept = false;
         success = false;
         QuestReward();
+        curQuestNum++;
+        if (curQuestNum <= qm.QuestDataList.Count) curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
+        else
+        {
+            curQuestNpcId = 0;
+        }
     }
 
     public void QuestReward()
@@ -633,12 +847,6 @@ public class GameManager : MonoBehaviour
             {
 
             }
-        }
-        curQuestNum++;
-        if (curQuestNum <= qm.QuestDataList.Count) curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
-        else
-        {
-            curQuestNpcId = 0;
         }
         //QuestState.SetActive(false);
     }

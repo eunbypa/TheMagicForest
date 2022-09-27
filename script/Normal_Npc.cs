@@ -10,9 +10,9 @@ public class Normal_Npc : Npc
     {
         normal, questAsk, questRefuse, questAccept, questDoing, questSuccess, questReply
     };
-    [SerializeField] private GameObject GM;
-    [SerializeField] private GameObject DM;
-    [SerializeField] private GameObject QM;
+    [SerializeField] private GameObject gM;
+    [SerializeField] private GameObject dM;
+    [SerializeField] private GameObject qM;
     [SerializeField] private GameObject questBallon;
     //[SerializeField] private int npcId;
  
@@ -28,9 +28,9 @@ public class Normal_Npc : Npc
     //bool wait = false; // 퀘스트 요청 시 플레이어의 수락여부를 알기 전까지 wait를 true로 설정하여 대화가 더 이상 진행되지 않도록 함
     void Start()
     {
-        gm = GM.GetComponent<GameManager>();
-        dm = DM.GetComponent<DialogueManager>();
-        qm = QM.GetComponent<QuestManager>();
+        gm = gM.GetComponent<GameManager>();
+        dm = dM.GetComponent<DialogueManager>();
+        qm = qM.GetComponent<QuestManager>();
         ds = DialogueState.normal;
         ani = questBallon.GetComponent<Animator>();
         //d = GameObject.Find("DialogueManager").GetComponent<DialogueManager>().DiaData[npcId - 1];
@@ -59,11 +59,11 @@ public class Normal_Npc : Npc
         wait = false;
     }*/
    
-    public override void DialogueReady()
+    public override bool DialogueReady()
     {
         //Debug.Log(diaIdx);
-        //Debug.Log(wait);
-        if (Wait) return;
+        //Debug.Log(Wait);
+        if (Wait) return false;
         if (diaIdx == 0)
         {
             SetDiaState(); // 대화 시작전 어떤 대화를 가져와야 하는지 그 상태 체크
@@ -76,8 +76,8 @@ public class Normal_Npc : Npc
             diaIdx++;
             if (ds == DialogueState.questAsk && diaIdx == d.Dialogue.Count) // 퀘스트 요청하는 상태에서 퀘스트 요청 대사들 중 마지막 순서 대사를 말하고 있는 경우
             {
-                gm.OpenYesOrNoButton();
                 Wait = true;
+                gm.OpenYesOrNoButton();
                 diaIdx = 0;
             }
         }
@@ -88,11 +88,13 @@ public class Normal_Npc : Npc
             if(ds == DialogueState.questReply) gm.QuestUpdate("NPC대화", NpcId);
             if (ds == DialogueState.questSuccess)
             {
-                ds = DialogueState.normal;
+                //ds = DialogueState.normal;
+                SetDiaState();
                 questBallon.SetActive(false);
                 gm.QuestDone();
             }
         }
+        return true;
     }
 
     public override void SetDiaState()
@@ -107,9 +109,13 @@ public class Normal_Npc : Npc
             }
             else if (ds == DialogueState.questRefuse) ds = DialogueState.questAsk;
             else if (gm.Accept && !gm.Success) ds = DialogueState.questDoing;
-            else if (gm.Success)
+            else if (ds != DialogueState.questSuccess && gm.Success)
             {
                 ds = DialogueState.questSuccess;
+            }
+            else if(ds == DialogueState.questSuccess)
+            {
+                ds = DialogueState.normal;
             }
         }
         else if(gm.CurQuestNpcId != 0 && gm.Accept) // 아직 수행하는 퀘스트가 있는 경우
