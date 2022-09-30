@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/* Class : DialogueManager
+ * Description : csv 파일에서 대사 데이터들을 읽어들이고 알맞은 곳에 저장하는 동작을 수행하는 대화 데이터 관리자 클래스입니다. 유니티의 생명 주기 함수들을 사용하기 위해 MonoBehaviour 클래스를 상속받습니다. 
+ */
 public class DialogueManager : MonoBehaviour
 {
-    //public List<DialogueData> DiaData = new List<DialogueData>();
-    //public List<DialogueData> QuestAskDiaData = new List<DialogueData>();
-    //public List<DialogueData> QuestSuccessDiaData = new List<DialogueData>();
+    int checkFirst = 0; // csv파일의 맨 첫 번째 줄은 저장할 데이터에 해당하지 않으므로 이 경우 저장 과정을 생략하고자 첫 번째 줄을 읽은 상태인지 나타냄
+    int curNum = 0; // 현재 읽고 있는 데이터가 몇번째 집합체의 데이터인지 그 정보를 저장함(ex : 1번 npc의 대사는 1번을 기준으로 묶여있으므로 그 묶여있는 대사가 어디까지 있는지 파악하는 용도)
+    char[] LineSeperate = new char[] { '\n' }; // 줄바꿈
+    char[] CSVSeperate = new char[] { ',' }; // csv는 쉼표를 기준으로 데이터를 나누기 때문에 데이터를 분리하기 위한 쉼표 
 
     List<DialogueData> diaData = new List<DialogueData>(); // npc의 기본 대사, index : npcId
     List<DialogueData> questAskDiaData = new List<DialogueData>(); // 플레이어에게 퀘스트 요청 시 대사, index : 퀘스트 번호
@@ -15,18 +19,69 @@ public class DialogueManager : MonoBehaviour
     List<DialogueData> questRefuseDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 거절 시 대사, index : 퀘스트 번호
     List<DialogueData> questDoingDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 진행 중 일때 대사, index : 퀘스트 번호
     List<DialogueData> questSuccessDiaData = new List<DialogueData>(); // 플레이어가 퀘스트 성공 시 대사, index : 퀘스트 번호
-    List<Tuple<int, List<DialogueData>>> questReplyDiaData = new List<Tuple<int, List<DialogueData>>>(); // 현재 퀘스트 요구사항 타입이 npc와 대화일 때 거기에 해당하는 npc일 때 대사, Tuple.Item1 : 퀘스트 번호, Tuple.Item2 : npc 대사
+    List<Tuple<int, List<DialogueData>>> questReplyDiaData = new List<Tuple<int, List<DialogueData>>>(); // 현재 퀘스트 요구사항 타입이 npc와 대화일 때 플레이어가 대화해야 하는 npc일 때 대사, Tuple.Item1 : 퀘스트 번호, Tuple.Item2 : npc 대사
 
-    char[] LineSeperate = new char[] { '\n' };
-    char[] CSVSeperate = new char[] { ',' };
-
-    int checkFirst = 0;
-    int curNum = 0; // 현재 읽고 있는 데이터가 몇번째 집합체의 데이터인지 그 정보를 저장함
-    //TextAsset textSet;
+    /* Property */
+    public List<DialogueData> DiaData
+    {
+        get
+        {
+            return diaData;
+        }
+    }
+    /* Property */
+    public List<DialogueData> QuestAskDiaData
+    {
+        get
+        {
+            return questAskDiaData;
+        }
+    }
+    /* Property */
+    public List<DialogueData> QuestAcceptDiaData
+    {
+        get
+        {
+            return questAcceptDiaData;
+        }
+    }
+    /* Property */
+    public List<DialogueData> QuestRefuseDiaData
+    {
+        get
+        {
+            return questRefuseDiaData;
+        }
+    }
+    /* Property */
+    public List<DialogueData> QuestDoingDiaData
+    {
+        get
+        {
+            return questDoingDiaData;
+        }
+    }
+    /* Property */
+    public List<DialogueData> QuestSuccessDiaData
+    {
+        get
+        {
+            return questSuccessDiaData;
+        }
+    }
+    /* Property */
+    public List<Tuple<int, List<DialogueData>>> QuestReplyDiaData
+    {
+        get
+        {
+            return questReplyDiaData;
+        }
+    }
 
     void Awake()
     {
-        ReadDiaData("NpcScript", ref diaData);
+        //csv 파일 읽어들이고 해당 리스트에 저장하는 작업
+        ReadDiaData("NpcScript", ref diaData); 
         ReadDiaData("QuestScript_Ask", ref questAskDiaData);
         ReadDiaData("QuestScript_Accept", ref questAcceptDiaData);
         ReadDiaData("QuestScript_Refuse", ref questRefuseDiaData);
@@ -35,14 +90,22 @@ public class DialogueManager : MonoBehaviour
         ReadDiaData("QuestScript_Reply", ref questReplyDiaData);
     }
 
-    void ReadDiaData(string s, ref List<DialogueData> dList) // 맨 첫번째 column이 데이터를 나누는 기준이 된다.
+    /* Method : ReadDiaData
+     * Description : csv 파일에서 데이터를 읽어들이고 줄바꿈 단위로 한 줄씩 분리하고, 한 줄에서 쉼표 단위로 데이터를 분리한 다음 각각의 데이터를 알맞은 위치에 저장하는 동작을 수행하는 메서드입니다.
+     * csv 파일은 쉼표를 기준으로 데이터를 분리하기 때문에 npc 대사에 쉼표를 어떻게하면 넣을 수 있을까 고민하다 쉼표가 들어가야 할 위치에 한글로 쉼표라고 쓰고 데이터를 읽어들이는 과정에서 string Replace함수를
+     * 이용해 쉼표를 쉼표 기호로 바꿔주는 방식으로 구현했습니다. 마찬가지로 플레이어의 닉네임 또한 타이틀 씬에서 입력받은 정보에 따라 달라지므로 같은 방식으로 구현했는데 아직 타이틀 씬을 구현하지 않아서 닉네임은
+     * 일단 임시 이름으로 명시한 상태입니다.
+     * Parameter : string s - csv 파일 이름, ref List<DialogueData> dList - DialogueData 리스트 
+     * Return Value : void
+     */
+    void ReadDiaData(string s, ref List<DialogueData> dList) 
     {
         TextAsset textset = Resources.Load<TextAsset>(s);
         string[] Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
         string[] SplitLine;
         foreach (string line in Lines)
         {
-            if (checkFirst == 0) // 첫줄은 생략하는 용도
+            if (checkFirst == 0)
             {
                 checkFirst++;
                 continue;
@@ -73,6 +136,12 @@ public class DialogueManager : MonoBehaviour
         curNum = 0;
         checkFirst = 0;
     }
+
+    /* Method : ReadDiaData
+     * Description : 위의 함수와 같은 동작을 하는 메서드지만 매개변수를 달리 할 필요가 있어 오버로딩하였습니다.
+     * Parameter : string s - csv 파일 이름, ref List<Tuple<int, List<DialogueData>>> dList - Tuple 리스트, Tuple은 int와 DialogueData 리스트 쌍으로 구성됨
+     * Return Value : void
+     */
     void ReadDiaData(string s, ref List<Tuple<int, List<DialogueData>>> dList)
     {
         TextAsset textset = Resources.Load<TextAsset>(s);
@@ -81,7 +150,7 @@ public class DialogueManager : MonoBehaviour
         int curNpc = 0;
         foreach (string line in Lines)
         {
-            if (checkFirst == 0) // 첫줄은 생략하는 용도
+            if (checkFirst == 0) 
             {
                 checkFirst++;
                 continue;
@@ -105,185 +174,6 @@ public class DialogueManager : MonoBehaviour
             SplitLine[3] = SplitLine[3].Replace("닉네임", "로빈"); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
             SplitLine[3] = SplitLine[3].Replace("쉼표", ",");
             dList[dList.Count - 1].Item2[dList[dList.Count - 1].Item2.Count - 1].Dialogue.Add(SplitLine[3]);
-        }
-    }
-    /*void ReadDiaData()
-    {
-        TextAsset textset = Resources.Load<TextAsset>("NpcScript");
-        string[] Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
-        string[] SplitLine;
-        foreach (string line in Lines)
-        {
-            if (checkFirst == 0) // 첫줄은 생략하는 용도
-            {
-                checkFirst++;
-                continue;
-            }
-            SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
-            if (checkFirst == 1) //첫번째 npc의 첫번째 대사를 읽고 있는지 체크
-            {
-                checkFirst++;
-                npcNum++;
-                DialogueData d = new DialogueData();
-                d.NpcId = Convert.ToInt32(SplitLine[0]);
-                d.NpcName = SplitLine[1];
-                SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
-                SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
-                d.Dialogue.Add(SplitLine[2]);
-                diaData.Add(d);
-            }
-            else
-            {
-                if (Convert.ToString(DiaData[npcNum - 1].NpcId) == SplitLine[0])
-                {
-                    SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
-                    SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
-                    diaData[npcNum - 1].Dialogue.Add(SplitLine[2]);
-                }
-                else
-                {
-                    npcNum++;
-                    DialogueData d = new DialogueData();
-                    d.NpcId = Convert.ToInt32(SplitLine[0]);
-                    d.NpcName = SplitLine[1];
-                    SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈");
-                    SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
-                    d.Dialogue.Add(SplitLine[2]);
-                    diaData.Add(d);
-                }
-            }
-
-        }
-
-        textset = Resources.Load<TextAsset>("QuestScript_ask");
-        Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
-        checkFirst = 0;
-
-        foreach (string line in Lines)
-        {
-            if (checkFirst == 0)
-            {
-                checkFirst++;
-                continue;
-            }
-            SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
-            if (checkFirst == 1)
-            {
-                checkFirst++;
-                questNum++;
-                DialogueData d = new DialogueData();
-                d.NpcName = SplitLine[1];
-                d.Dialogue.Add(SplitLine[2]);
-                questAskDiaData.Add(d);
-            }
-            else
-            {
-                if (Convert.ToString(questNum) == SplitLine[0])
-                {
-                    QuestAskDiaData[questNum - 1].Dialogue.Add(SplitLine[2]);
-                }
-                else
-                {
-                    questNum++;
-                    DialogueData d = new DialogueData();
-                    d.NpcName = SplitLine[1];
-                    d.Dialogue.Add(SplitLine[2]);
-                    questAskDiaData.Add(d);
-                }
-            }
-
-        }
-
-        questNum = 0;
-        checkFirst = 0;
-        textset = Resources.Load<TextAsset>("QuestScript_Success");
-        Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string line in Lines)
-        {
-            if (checkFirst == 0)
-            {
-                checkFirst++;
-                continue;
-            }
-            SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
-            if (checkFirst == 1)
-            {
-                checkFirst++;
-                questNum++;
-                DialogueData d = new DialogueData();
-                d.NpcName = SplitLine[1];
-                d.Dialogue.Add(SplitLine[2]);
-                questSuccessDiaData.Add(d);
-            }
-            else
-            {
-                if (Convert.ToString(questNum) == SplitLine[0])
-                {
-                    questSuccessDiaData[questNum - 1].Dialogue.Add(SplitLine[2]);
-                }
-                else
-                {
-                    questNum++;
-                    DialogueData d = new DialogueData();
-                    d.NpcName = SplitLine[1];
-                    d.Dialogue.Add(SplitLine[2]);
-                    questSuccessDiaData.Add(d);
-                }
-            }
-
-        }
-    }*/
-
-    public List<DialogueData> DiaData
-    {
-        get
-        {
-            return diaData;
-        }
-    }
-
-    public List<DialogueData> QuestAskDiaData
-    {
-        get
-        {
-            return questAskDiaData;
-        }
-    }
-
-    public List<DialogueData> QuestAcceptDiaData
-    {
-        get
-        {
-            return questAcceptDiaData;
-        }
-    }
-    public List<DialogueData> QuestRefuseDiaData
-    {
-        get
-        {
-            return questRefuseDiaData;
-        }
-    }
-    public List<DialogueData> QuestDoingDiaData
-    {
-        get
-        {
-            return questDoingDiaData;
-        }
-    }
-    public List<DialogueData> QuestSuccessDiaData
-    {
-        get
-        {
-            return questSuccessDiaData;
-        }
-    }
-    public List<Tuple<int, List<DialogueData>>> QuestReplyDiaData
-    {
-        get
-        {
-            return questReplyDiaData;
         }
     }
 }

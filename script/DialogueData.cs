@@ -2,16 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DialogueData //: MonoBehaviour
+/* Class : DialogueData
+ * Description : npc의 대화 데이터를 담당하는 클래스입니다.
+ */
+public class DialogueData 
 {
-    //public int npcid;
-    //public string name;
-    //public List<string> Dialogue =  new List<string>();
+    int npcId; // npc를 식별하는 아이디
+    string npcName; // npc의 이름
+    List<string> dialogue = new List<string>(); // 대화 시 대사 데이터 순서대로 저장된 리스트, index : 대화 순서
 
-    int npcId;
-    string npcName;
-    List<string> dialogue = new List<string>(); // 대화 데이터 리스트, index : 대화 순서
-
+    /* Property */
     public int NpcId
     {
         get
@@ -23,7 +23,7 @@ public class DialogueData //: MonoBehaviour
             npcId = value;
         }
     }
-
+    /* Property */
     public string NpcName
     {
         get
@@ -35,7 +35,7 @@ public class DialogueData //: MonoBehaviour
             npcName = value;
         }
     }
-
+    /* Property */
     public List<string> Dialogue
     {
         get
