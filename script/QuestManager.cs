@@ -76,7 +76,6 @@ public class QuestManager : MonoBehaviour
                 questDataList[curNum - 1].Type.Add(SplitLine[1]);
                 if(SplitLine[2] != "¾øÀ½")questDataList[curNum - 1].Req_Id.Add(Convert.ToInt32(SplitLine[2]));
                 questDataList[curNum - 1].Req_Name.Add(SplitLine[3]);
-                Debug.Log(SplitLine[3]);
                 questDataList[curNum - 1].Req_Num.Add(Convert.ToInt32(SplitLine[4]));
             }
             if(s == "Quest_Reward")

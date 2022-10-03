@@ -556,7 +556,7 @@ public class GameManager : MonoBehaviour
      * Description : 상점에서 구매할 아이템을 얼마나 구매할지 그 수량을 입력받는 동작을 수행하는 메서드입니다. 이 때 선택된 아이템이 없으면 수량 입력창을 띄우기 전에 메서드를 빠져나오도록 구현했습니다
      * Return Value : void
      */
-    public void EnterItemQuantity() // 구매할 아이템 수량 입력받는 함수
+    public void EnterItemQuantity() 
     {
         if (selectedItemLoc == -1)
         {
@@ -617,17 +617,17 @@ public class GameManager : MonoBehaviour
      * 호출합니다.
      * Return Value : void
      */
-    public void TalkEvent() // 플레이어와 npc 간 대화 이벤트 발생 시 npc에게서 다음 대사 받아서 대화창 UI에 출력함
+    public void TalkEvent() 
     {
         talkUI.SetActive(true);
-        if(isTalking) // 대사 출력 중에 호출되었으면 해당 대사 순차적 출력을 스킵하고 한번에 출력
+        if(isTalking)
         {
             SkipTalk();
         }
         else
         {
-            if (!npcTalk()) return; // 반환값이 false면 다음 대화를 할 차례가 아직 아니라는 걸 의미
-            if (finishTalk) // 대화 종료
+            if (!npcTalk()) return;
+            if (finishTalk)
             {
                 TalkDone();
             }
@@ -801,19 +801,18 @@ public class GameManager : MonoBehaviour
 
     /* Method : QuestUpdate
      * Description : 진행중인 퀘스트가 있을 때 플레이어가 해당 퀘스트 완료조건에 해당하는 동작을 수행하였는지 확인하고 만약 해당하면 현재 수행한 조건 상태를 업데이트하는 동작을 수행하는 메서드입니다.
+     * 현재 진행 중인 퀘스트가 없으면 메서드를 빠져나옵니다. 조건을 검사할 때 id가 디폴트 값인 0으로 들어온 경우 별도로 식별해야 할 아이디 정보가 없다는 것을 의미합니다. 즉, type만 일치하면 퀘스트 요구 조건에
+     * 해당한다는 의미입니다.
      * Parameter : string type - 퀘스트 조건 유형, int id - 퀘스트 조건에 해당하는 정보를 식별하는 아이디(ex : 아이디가 1 인 몬스터 처치)
      * Return Value : void
      */
     public void QuestUpdate(string type, int id = 0)
     {
-        if (!accept) return; // 수락한 퀘스트가 없는 경우 탈출
+        if (!accept) return; 
         for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            Debug.Log(curQuestReqNum[i]);
-            Debug.Log(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
             if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
-            Debug.Log(qm.QuestDataList[curQuestNum - 1].Type[i]);
-            if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id)) // id가 디폴트 값인 0으로 들어온 경우 식별해야 할 아이디 정보가 없다는 것을 의미
+            if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id))
             {
                 if(curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
