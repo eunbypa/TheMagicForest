@@ -81,7 +81,7 @@ public class DialogueManager : MonoBehaviour
     void Awake()
     {
         //csv 파일 읽어들이고 해당 리스트에 저장하는 작업
-        ReadDiaData("NpcScript", ref diaData); 
+        ReadDiaData("NpcScript", ref diaData);
         ReadDiaData("QuestScript_Ask", ref questAskDiaData);
         ReadDiaData("QuestScript_Accept", ref questAcceptDiaData);
         ReadDiaData("QuestScript_Refuse", ref questRefuseDiaData);
@@ -98,7 +98,7 @@ public class DialogueManager : MonoBehaviour
      * Parameter : string s - csv 파일 이름, ref List<DialogueData> dList - DialogueData 리스트 
      * Return Value : void
      */
-    void ReadDiaData(string s, ref List<DialogueData> dList) 
+    void ReadDiaData(string s, ref List<DialogueData> dList)
     {
         TextAsset textset = Resources.Load<TextAsset>(s);
         string[] Lines = textset.text.Split(LineSeperate, StringSplitOptions.RemoveEmptyEntries);
@@ -118,14 +118,16 @@ public class DialogueManager : MonoBehaviour
                 DialogueData d = new DialogueData();
                 dList.Add(d);
             }
-            if (s == "NpcScript") {
+            if (s == "NpcScript")
+            {
                 dList[curNum - 1].NpcId = Convert.ToInt32(SplitLine[0]);
                 dList[curNum - 1].NpcName = SplitLine[1];
                 SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈"); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
                 SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
                 dList[curNum - 1].Dialogue.Add(SplitLine[2]);
             }
-            else {
+            else
+            {
                 dList[curNum - 1].NpcId = Convert.ToInt32(SplitLine[1]);
                 dList[curNum - 1].NpcName = SplitLine[2];
                 SplitLine[3] = SplitLine[3].Replace("닉네임", "로빈"); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
@@ -150,7 +152,7 @@ public class DialogueManager : MonoBehaviour
         int curNpc = 0;
         foreach (string line in Lines)
         {
-            if (checkFirst == 0) 
+            if (checkFirst == 0)
             {
                 checkFirst++;
                 continue;

@@ -15,14 +15,14 @@ public class Normal_Npc : Npc
         normal, questAsk, questRefuse, questAccept, questDoing, questSuccess, questReply
     };
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    [SerializeField] private GameObject gM; // 게임 관리자 GameManager
+    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private GameObject dM; // 대화 데이터 관리자 DialogueManager
     [SerializeField] private GameObject qM; // 퀘스트 데이터 관리자 QuestManager
     [SerializeField] private GameObject questBallon; // 퀘스트 활성화 시 npc 위에 뜨는 말풍선
 
     int diaIdx = 0; // 다음 순서에 말할 대사 데이터 위치
     DialogueState ds; // 대화 상태
-    GameManager gm; // 게임 관리자 GameManager 클래스 객체
+    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
     DialogueManager dm; // 대화 데이터 관리자 DialogueManager 클래스 객체
     QuestManager qm; // 퀘스트 데이터 관리자 QuestManager 클래스 객체
     Animator ani; // 유니티 애니메이션 컴포넌트
@@ -30,7 +30,7 @@ public class Normal_Npc : Npc
 
     void Start()
     {
-        gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+        //gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
         dm = dM.GetComponent<DialogueManager>(); // dM GameObject 객체에 할당된 DialogueManager 클래스 컴포넌트를 가져옵니다.
         qm = qM.GetComponent<QuestManager>(); // qM GameObject 객체에 할당된 QuestManager 클래스 컴포넌트를 가져옵니다.
         ds = DialogueState.normal; // npc의 대화 상태를 기본값으로 초기화합니다.
@@ -39,11 +39,11 @@ public class Normal_Npc : Npc
 
     void Update()
     {
-        if(gm.CurQuestNpcId == NpcId) // 현재 플레이어가 진행 가능한 퀘스트를 가진 npc인 경우
+        if (GameManager.instance.CurQuestNpcId == NpcId) // 현재 플레이어가 진행 가능한 퀘스트를 가진 npc인 경우
         {
-            if(!gm.Accept) questBallon.SetActive(true); // 아직 플레이어가 퀘스트를 수락한 상태가 아니면 퀘스트 말풍선 활성화
-            else if(gm.Accept && !gm.Success) ani.SetTrigger("wait"); // 플레이어가 퀘스트를 수락했지만 성공하지 않았으면 진행중을 나타내는 애니메이션 실행
-            else if(gm.Success) ani.SetTrigger("success"); // 플레이어가 퀘스트 성공 시 성공 상태를 나타내는 애니메이션 실행
+            if (!GameManager.instance.Accept) questBallon.SetActive(true); // 아직 플레이어가 퀘스트를 수락한 상태가 아니면 퀘스트 말풍선 활성화
+            else if (GameManager.instance.Accept && !GameManager.instance.Success) ani.SetTrigger("wait"); // 플레이어가 퀘스트를 수락했지만 성공하지 않았으면 진행중을 나타내는 애니메이션 실행
+            else if (GameManager.instance.Success) ani.SetTrigger("success"); // 플레이어가 퀘스트 성공 시 성공 상태를 나타내는 애니메이션 실행
         }
     }
 
@@ -63,31 +63,31 @@ public class Normal_Npc : Npc
         if (Wait) return false;
         if (diaIdx == 0)
         {
-            SetDiaState(); 
+            SetDiaState();
             GetDiaData();
-            gm.ChangeTalkNpc(NpcId, d.NpcName);
+            GameManager.instance.ChangeTalkNpc(NpcId, d.NpcName);
         }
-        if (diaIdx < d.Dialogue.Count) 
+        if (diaIdx < d.Dialogue.Count)
         {
-            gm.TextData = d.Dialogue[diaIdx].ToCharArray();
+            GameManager.instance.TextData = d.Dialogue[diaIdx].ToCharArray();
             diaIdx++;
-            if (ds == DialogueState.questAsk && diaIdx == d.Dialogue.Count) 
+            if (ds == DialogueState.questAsk && diaIdx == d.Dialogue.Count)
             {
                 Wait = true;
-                gm.OpenYesOrNoButton();
+                GameManager.instance.OpenYesOrNoButton();
                 diaIdx = 0;
             }
         }
-        else 
+        else
         {
-            gm.FinishTalk = true;
+            GameManager.instance.FinishTalk = true;
             diaIdx = 0;
-            if(ds == DialogueState.questReply) gm.QuestUpdate("NPC대화", NpcId);
+            if (ds == DialogueState.questReply) GameManager.instance.QuestUpdate("NPC대화", NpcId);
             if (ds == DialogueState.questSuccess)
             {
                 SetDiaState();
                 questBallon.SetActive(false);
-                gm.QuestDone();
+                GameManager.instance.QuestDone();
             }
         }
         return true;
@@ -99,30 +99,30 @@ public class Normal_Npc : Npc
      */
     public override void SetDiaState()
     {
-        if (gm.CurQuestNpcId == NpcId) 
+        if (GameManager.instance.CurQuestNpcId == NpcId)
         {
             if (ds == DialogueState.normal || ds == DialogueState.questRefuse) ds = DialogueState.questAsk;
             else if (ds == DialogueState.questAsk)
             {
-                if (!gm.Accept) ds = DialogueState.questRefuse; 
+                if (!GameManager.instance.Accept) ds = DialogueState.questRefuse;
                 else ds = DialogueState.questAccept;
             }
             else if (ds == DialogueState.questRefuse) ds = DialogueState.questAsk;
-            else if (gm.Accept && !gm.Success) ds = DialogueState.questDoing;
-            else if (ds != DialogueState.questSuccess && gm.Success)
+            else if (GameManager.instance.Accept && !GameManager.instance.Success) ds = DialogueState.questDoing;
+            else if (ds != DialogueState.questSuccess && GameManager.instance.Success)
             {
                 ds = DialogueState.questSuccess;
             }
-            else if(ds == DialogueState.questSuccess)
+            else if (ds == DialogueState.questSuccess)
             {
                 ds = DialogueState.normal;
             }
         }
-        else if(gm.CurQuestNpcId != 0 && gm.Accept)
+        else if (GameManager.instance.CurQuestNpcId != 0 && GameManager.instance.Accept)
         {
-            for(int i = 0; i < qm.QuestDataList[gm.CurQuestNum - 1].Type.Count; i++)
+            for (int i = 0; i < qm.QuestDataList[GameManager.instance.CurQuestNum - 1].Type.Count; i++)
             {
-                if (qm.QuestDataList[gm.CurQuestNum - 1].Type[i] == "NPC대화" && qm.QuestDataList[gm.CurQuestNum - 1].Req_Id[i] == NpcId) 
+                if (qm.QuestDataList[GameManager.instance.CurQuestNum - 1].Type[i] == "NPC대화" && qm.QuestDataList[GameManager.instance.CurQuestNum - 1].Req_Id[i] == NpcId)
                 {
                     ds = DialogueState.questReply;
                 }
@@ -137,32 +137,32 @@ public class Normal_Npc : Npc
      */
     public override void GetDiaData()
     {
-        switch(ds)
+        switch (ds)
         {
             case DialogueState.normal:
                 d = dm.DiaData[NpcId - 1];
                 break;
             case DialogueState.questAsk:
-                d = dm.QuestAskDiaData[gm.CurQuestNum - 1];
+                d = dm.QuestAskDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questAccept:
-                d = dm.QuestAcceptDiaData[gm.CurQuestNum - 1];
+                d = dm.QuestAcceptDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questRefuse:
-                d = dm.QuestRefuseDiaData[gm.CurQuestNum - 1];
+                d = dm.QuestRefuseDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questDoing:
-                d = dm.QuestDoingDiaData[gm.CurQuestNum - 1];
+                d = dm.QuestDoingDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questSuccess:
-                d = dm.QuestSuccessDiaData[gm.CurQuestNum - 1];
+                d = dm.QuestSuccessDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questReply:
-                for (int i = 0; i < dm.QuestReplyDiaData.Count; i++) 
+                for (int i = 0; i < dm.QuestReplyDiaData.Count; i++)
                 {
-                    if(gm.CurQuestNum == dm.QuestReplyDiaData[i].Item1) 
+                    if (GameManager.instance.CurQuestNum == dm.QuestReplyDiaData[i].Item1)
                     {
-                        for(int j = 0; j < dm.QuestReplyDiaData[i].Item2.Count; j++)
+                        for (int j = 0; j < dm.QuestReplyDiaData[i].Item2.Count; j++)
                         {
                             if (NpcId == dm.QuestReplyDiaData[i].Item2[j].NpcId)
                             {
@@ -177,12 +177,12 @@ public class Normal_Npc : Npc
 
     void OnTriggerEnter2D(Collider2D Other)
     {
-        if(Other.gameObject.tag == "Player") // 플레이어가 npc와 접촉한 경우
+        if (Other.gameObject.tag == "Player") // 플레이어가 npc와 접촉한 경우
         {
-            if (gm.npcTalk != null) gm.npcTalk = null; // delegate 초기화
-            if (gm.unLockWait != null) gm.unLockWait = null; // delegate 초기화
-            gm.npcTalk += DialogueReady; // delegate에 메서드 할당
-            gm.unLockWait += UnLockWait; // delegate에 메서드 할당
+            if (GameManager.instance.npcTalk != null) GameManager.instance.npcTalk = null; // delegate 초기화
+            if (GameManager.instance.unLockWait != null) GameManager.instance.unLockWait = null; // delegate 초기화
+            GameManager.instance.npcTalk += DialogueReady; // delegate에 메서드 할당
+            GameManager.instance.unLockWait += UnLockWait; // delegate에 메서드 할당
         }
     }
 }

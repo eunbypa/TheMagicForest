@@ -55,7 +55,7 @@ public class QuestManager : MonoBehaviour
             SplitLine = line.Split(CSVSeperate, StringSplitOptions.RemoveEmptyEntries);
             if (Convert.ToString(curNum) != SplitLine[0])
             {
-                if (questDataList.Count <= curNum) 
+                if (questDataList.Count <= curNum)
                 {
                     QuestData qdata = new QuestData();
                     questDataList.Add(qdata);
@@ -64,21 +64,21 @@ public class QuestManager : MonoBehaviour
                 i++;
                 if (i == 3) return;
             }
-            if(s == "QuestList")
+            if (s == "QuestList")
             {
                 questDataList[curNum - 1].Title = SplitLine[1];
                 questDataList[curNum - 1].NpcId = Convert.ToInt32(SplitLine[2]);
                 questDataList[curNum - 1].NpcName = SplitLine[3];
                 questDataList[curNum - 1].Info = SplitLine[4];
             }
-            if(s == "Quest_Requirement")
+            if (s == "Quest_Requirement")
             {
                 questDataList[curNum - 1].Type.Add(SplitLine[1]);
-                if(SplitLine[2] != "없음")questDataList[curNum - 1].Req_Id.Add(Convert.ToInt32(SplitLine[2]));
+                if (SplitLine[2] != "없음") questDataList[curNum - 1].Req_Id.Add(Convert.ToInt32(SplitLine[2]));
                 questDataList[curNum - 1].Req_Name.Add(SplitLine[3]);
                 questDataList[curNum - 1].Req_Num.Add(Convert.ToInt32(SplitLine[4]));
             }
-            if(s == "Quest_Reward")
+            if (s == "Quest_Reward")
             {
                 questDataList[curNum - 1].RewardType.Add(SplitLine[1]);
                 questDataList[curNum - 1].Reward.Add(Convert.ToInt32(SplitLine[2]));

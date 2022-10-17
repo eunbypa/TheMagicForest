@@ -8,7 +8,7 @@ using UnityEngine;
 public class Portal : MonoBehaviour
 {
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    [SerializeField] private GameObject gM; // 게임 관리자 GameManager
+    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private GameObject player; // 플레이어
     [SerializeField] private GameObject destination; // 도착지 포탈
     [SerializeField] private GameObject curMap; // 현재 맵
@@ -17,11 +17,11 @@ public class Portal : MonoBehaviour
     [SerializeField] private int destinationMapNum; // 도착지 맵 번호
 
     bool teleport = false; // 플레이어가 포탈과 접촉해 있어서 텔레포트가 가능한 상태인지 여부
-    GameManager gm; // 게임 관리자 GameManager 클래스 객체
+    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
 
     void Start()
     {
-        this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
     }
 
     void Update()
@@ -30,9 +30,9 @@ public class Portal : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.UpArrow)) // 플레이어가 위쪽 방향키를 누른 경우 
             {
-                gm.WaitForTeleportReady(); // 텔레포트 완료까지 걸리는 시간만큼 대기하기 위해 gm의 WaitForTeleportReady 메서드 호출
+                GameManager.instance.WaitForTeleportReady(); // 텔레포트 완료까지 걸리는 시간만큼 대기하기 위해 gm의 WaitForTeleportReady 메서드 호출
             }
-            if (gm.TeleportReady) TeleportEvent(); // 텔레포트 준비가 끝났으면 Teleport 시작
+            if (GameManager.instance.TeleportReady) TeleportEvent(); // 텔레포트 준비가 끝났으면 Teleport 시작
         }
     }
 
@@ -43,10 +43,10 @@ public class Portal : MonoBehaviour
      */
     public void TeleportEvent()
     {
-        gm.TeleportMap(destinationMapNum);
+        GameManager.instance.TeleportMap(destinationMapNum);
         player.transform.position = new Vector2(destination.transform.position.x, destination.transform.position.y);
-        CurMap.SetActive(false);
-        NextMap.SetActive(true);
+        curMap.SetActive(false);
+        nextMap.SetActive(true);
         destination.SetActive(true);
     }
 

@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject MagicStone; // 마법석
     [SerializeField] private GameObject MagicStick; // 마법지팡이
     [SerializeField] private GameObject skill; // 스킬
-    [SerializeField] private GameObject gM; // 게임 관리자 GameManager
+    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private float speed = 5f; // 이동 속도
     [SerializeField] private int curCollidingNum = 0; // 현재 플레이어와 충돌중인 물체 수
     [SerializeField] private bool move = true; // 이동 가능 여부
@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
     Rigidbody2D rb; // 유니티에서 객체의 물리이동에 필요한 RigidBody 컴포넌트
     Animator ani; // 유니티 애니메이션 컴포넌트
     SortingGroup sg; // 유니티에서 복합체를 하나의 레이어를 기준으로 해서 그룹으로 정렬하고자 할 때 사용하는 SortingGroup 컴포넌트
-    GameManager gm; // 게임 관리자 GameManager 클래스 객체
+    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
     Skill sk; // 스킬 클래스 객체
 
     void Start()
@@ -63,15 +63,15 @@ public class Player : MonoBehaviour
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 Rigidbody2D 컴포넌트를 가져옵니다.
         this.ani = GetComponent<Animator>(); // 현재 클래스가 할당된 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         this.sg = GetComponent<SortingGroup>(); // 현재 클래스가 할당된 GameObject 객체에서 SortingGroup 컴포넌트를 가져옵니다.
-        this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
-        gm.unLockAct += UnLockAct; // gm의 delegate 변수인 unLockAct에 현재 클래스의 UnLockAct 함수를 할당합니다.
-        gm.setMagic += SetMagicStone; // gm의 delegate 변수인 setMagic에 현재 클래스의 SetMagicStone 함수를 할당합니다.
+        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+        GameManager.instance.unLockAct += UnLockAct; // gm의 delegate 변수인 unLockAct에 현재 클래스의 UnLockAct 함수를 할당합니다.
+        GameManager.instance.setMagic += SetMagicStone; // gm의 delegate 변수인 setMagic에 현재 클래스의 SetMagicStone 함수를 할당합니다.
     }
 
     void Update()
     {
         EnteringKey();
-        if (gm.SkDisable) // 스킬 사용 후 스킬 쿨타임이 끝날 때까지 스킬 사용이 불가능한 상태
+        if (GameManager.instance.SkDisable) // 스킬 사용 후 스킬 쿨타임이 끝날 때까지 스킬 사용이 불가능한 상태
         {
             WaitForCoolTimeDone();
         }
@@ -79,7 +79,7 @@ public class Player : MonoBehaviour
         {
             CheckSkillExistedTime();
         }
-        if(gm.CurQuestNum == 2) // 1번 퀘스트 완료 후부터 마법지팡이가 활성화 되도록 구현
+        if (GameManager.instance.CurQuestNum == 2) // 1번 퀘스트 완료 후부터 마법지팡이가 활성화 되도록 구현
         {
             SetMagicStick();
         }
@@ -170,15 +170,15 @@ public class Player : MonoBehaviour
             if (tableContact)
             {
                 actLock = true;
-                gm.SelectMagicStoneUIOn();
+                GameManager.instance.SelectMagicStoneUIOn();
             }
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
-            if (gm.CurQuestNum == 1) return;
-            if (!gm.SkDisable)
+            if (GameManager.instance.CurQuestNum == 1) return;
+            if (!GameManager.instance.SkDisable)
             {
-                curMp = gm.CurMp;
+                curMp = GameManager.instance.CurMp;
                 if (curMp >= skillMp)
                 {
                     SkillEvent();
@@ -241,19 +241,19 @@ public class Player : MonoBehaviour
     void SkillEvent()
     {
         skillUse = true;
-        if (gm.Accept) // 진행중인 퀘스트가 있을 때 어떤 행동을 할때마다 퀘스트 조건 검사 함수에 전달해 이 행동이 해당되는지 검사
+        if (GameManager.instance.Accept) // 진행중인 퀘스트가 있을 때 어떤 행동을 할때마다 퀘스트 조건 검사 함수에 전달해 이 행동이 해당되는지 검사
         {
-            gm.QuestUpdate("마법사용");
+            GameManager.instance.QuestUpdate("마법사용");
         }
-        gm.SetSkillDisable();
+        GameManager.instance.SetSkillDisable();
         skill.SetActive(true);
         remainCool = sk.CoolTime;
         wait = 0;
         sk.Setting(transform.position.x, transform.position.y, directionX, directionY);
         ani.SetTrigger("skill");
         skOn = true;
-        gm.MPDown(skillMp);
-        gm.CheckCoolTime(remainCool); 
+        GameManager.instance.MPDown(skillMp);
+        GameManager.instance.CheckCoolTime(remainCool);
     }
 
     /* Method : DialogueEvent
@@ -262,7 +262,7 @@ public class Player : MonoBehaviour
      */
     void DialogueEvent()
     {
-        gm.TalkEvent();
+        GameManager.instance.TalkEvent();
     }
 
     /* Method : SetMagicStone
@@ -345,20 +345,20 @@ public class Player : MonoBehaviour
             if (oneSecond > 1f)
             {
                 remainCool -= 1f;
-                gm.CheckCoolTime(remainCool);
+                GameManager.instance.CheckCoolTime(remainCool);
                 oneSecond = 0;
             }
         }
         else
         {
-            gm.ResetSkillDisable();
+            GameManager.instance.ResetSkillDisable();
         }
     }
 
     //해당 태그를 가진 물체와 충돌 상태면 플레이어의 레이어 값을 더 낮게 설정하는 방식 -> 향후 수정 필요(레이어 값이 명시되어도 괜찮을까?)
     void OnTriggerEnter2D(Collider2D Other)
     {
-        if(Other.gameObject.tag == "MagicStoneTable")
+        if (Other.gameObject.tag == "MagicStoneTable")
         {
             tableContact = true;
         }
@@ -405,7 +405,7 @@ public class Player : MonoBehaviour
         if (Other.gameObject.tag == "TREE")
         {
             ++curCollidingNum;
-            if(curCollidingNum == 1) 
+            if (curCollidingNum == 1)
             {
                 sg.sortingOrder = -4;
             }
@@ -416,7 +416,7 @@ public class Player : MonoBehaviour
                     sg.sortingOrder = -4;
                 }
             }
-          
+
         }
         if (Other.gameObject.tag == "TREE2")
         {
@@ -603,7 +603,7 @@ public class Player : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D Other)
     {
-        if ((Other.gameObject.tag == "TREE0") || (Other.gameObject.tag == "TREE") || (Other.gameObject.tag == "HOUSE") || (Other.gameObject.tag == "TREE2") || (Other.gameObject.tag == "HouseRoof") || 
+        if ((Other.gameObject.tag == "TREE0") || (Other.gameObject.tag == "TREE") || (Other.gameObject.tag == "HOUSE") || (Other.gameObject.tag == "TREE2") || (Other.gameObject.tag == "HouseRoof") ||
             (Other.gameObject.tag == "TREE-1"))
         {
             --curCollidingNum;
@@ -633,7 +633,7 @@ public class Player : MonoBehaviour
     IEnumerator HurtEvent()
     {
         getHurt = true;
-        gm.HPDown(5); // 향후 수정해야 함 -> 데미지가 고정된 상태
+        GameManager.instance.HPDown(5); // 향후 수정해야 함 -> 데미지가 고정된 상태
         ani.SetTrigger("hurt");
         yield return wfs;
         getHurt = false;

@@ -16,7 +16,7 @@ public class InventoryManager : MonoBehaviour
     //향후 데이터 저장&로드 기능 구현 시 저장된 데이터에서 인벤토리 정보를 가져오는 작업 구현 예정
     void Start()
     {
-        
+
     }
 
     /* Property */
@@ -110,9 +110,9 @@ public class InventoryManager : MonoBehaviour
      */
     public int FindItem(int itemId)
     {
-        for(int i = 0; i < invenItemList.Count; i++)
+        for (int i = 0; i < invenItemList.Count; i++)
         {
-            if(invenItemList[i].ItemId == itemId)
+            if (invenItemList[i].ItemId == itemId)
             {
                 return i;
             }

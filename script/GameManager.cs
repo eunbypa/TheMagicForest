@@ -10,6 +10,7 @@ using TMPro;
  */
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance; // 싱글톤 패턴
     public delegate bool GetTalkData(); // npc한테서 대사를 전달받는 대리자
     public delegate void UnLockAct(); // 플레이어 행동 제한을 풀어주는 대리자
     public delegate void UnLockWaiting(); // 기다리고 있는 상황을 기다리지 않아도 되도록 풀어주는 대리자
@@ -61,7 +62,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image npcImage; // npc 이미지
     [SerializeField] private TMPro.TMP_Text npcName; // npc 이름
     [SerializeField] private TMPro.TMP_Text talk; // npc의 대사
-    [SerializeField] private TMPro.TMP_Text questT; 
+    [SerializeField] private TMPro.TMP_Text questT;
     [SerializeField] private TMPro.TMP_Text questTitle; // 퀘스트 제목
     [SerializeField] private TMPro.TMP_Text questNpc; // 퀘스트를 준 npc
     [SerializeField] private TMPro.TMP_Text questNpcName; // 퀘스트를 준 npc 이름
@@ -113,6 +114,11 @@ public class GameManager : MonoBehaviour
     InventoryManager im; // 인벤토리 관리자 InventoryManager 클래스 객체
     QuestManager qm; // 퀘스트 데이터 관리자 QuestManager 클래스 객체
     Animator ani; // 유니티 애니메이션 컴포넌트
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {
@@ -343,7 +349,7 @@ public class GameManager : MonoBehaviour
     public void CheckCoolTime(float num)
     {
         coolTime.text = Convert.ToString(num);
-        if(num == 0)
+        if (num == 0)
         {
             coolTime.text = null;
         }
@@ -434,7 +440,7 @@ public class GameManager : MonoBehaviour
         percent = (float)((float)(n) * (1.0 / (float)(curMaxExp)));
         expGraph.fillAmount += percent;
         exp.text = Convert.ToString(curExp);
-        if(expGraph.fillAmount == 1f)
+        if (expGraph.fillAmount == 1f)
         {
             LevelUp();
         }
@@ -459,9 +465,9 @@ public class GameManager : MonoBehaviour
      */
     public void InventoryOn()
     {
-        for(int i = 0; i < im.MaxSize; i++)
+        for (int i = 0; i < im.MaxSize; i++)
         {
-            if(i < im.InvenItemList.Count)
+            if (i < im.InvenItemList.Count)
             {
                 invenItemList[i].sprite = itemImages[im.InvenItemList[i].ItemId - 1];
                 invenItemQuantityList[i].text = Convert.ToString(im.InvenItemQuantityList[i]);
@@ -508,7 +514,7 @@ public class GameManager : MonoBehaviour
         unLockWait();
         ClearTalk();
         TalkEvent();
-        foreach(Image i in shopSelectedItem)
+        foreach (Image i in shopSelectedItem)
         {
             Color color = i.color;
             color.a = 0f;
@@ -556,7 +562,7 @@ public class GameManager : MonoBehaviour
      * Description : 상점에서 구매할 아이템을 얼마나 구매할지 그 수량을 입력받는 동작을 수행하는 메서드입니다. 이 때 선택된 아이템이 없으면 수량 입력창을 띄우기 전에 메서드를 빠져나오도록 구현했습니다
      * Return Value : void
      */
-    public void EnterItemQuantity() 
+    public void EnterItemQuantity()
     {
         if (selectedItemLoc == -1)
         {
@@ -567,7 +573,7 @@ public class GameManager : MonoBehaviour
         }
         if (im.IsFull && im.FindItem(getItemId(selectedItemLoc)) == -1) noEmptySpace = true;
         else noEmptySpace = false;
-        if(noEmptySpace)
+        if (noEmptySpace)
         {
             unLockWait();
             ClearTalk();
@@ -597,7 +603,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if(selectedItemLoc != -1)
+            if (selectedItemLoc != -1)
             {
                 color = shopSelectedItem[selectedItemLoc].color;
                 color.a = 0f;
@@ -617,10 +623,10 @@ public class GameManager : MonoBehaviour
      * 호출합니다.
      * Return Value : void
      */
-    public void TalkEvent() 
+    public void TalkEvent()
     {
         talkUI.SetActive(true);
-        if(isTalking)
+        if (isTalking)
         {
             SkipTalk();
         }
@@ -643,7 +649,7 @@ public class GameManager : MonoBehaviour
      * Description : 현재 대화창에 출력중인 대사를 한번에 출력하는 스킵 동작을 수행하는 메서드입니다.
      * Return Value : void
      */
-    public void SkipTalk() 
+    public void SkipTalk()
     {
         StopCoroutine(talkAni);
         tmp = null;
@@ -655,7 +661,7 @@ public class GameManager : MonoBehaviour
      * Description : 현재 출력중인 대사를 중단시키고 임시 문자열 tmp를 빈 상태로 놓는 메서드입니다.
      * Return Value : void
      */
-    public void ClearTalk() 
+    public void ClearTalk()
     {
         isTalking = false;
         StopCoroutine(talkAni);
@@ -666,7 +672,7 @@ public class GameManager : MonoBehaviour
      * Description : 대화를 종료하는 동작을 수행하는 메서드입니다.
      * Return Value : void
      */
-    public void TalkDone() 
+    public void TalkDone()
     {
         unLockAct();
         talkUI.SetActive(false);
@@ -768,7 +774,7 @@ public class GameManager : MonoBehaviour
      */
     public void QuestRefuse()
     {
-        accept = false; 
+        accept = false;
         unLockWait();
         CloseYesOrNoButton();
         ClearTalk();
@@ -782,9 +788,9 @@ public class GameManager : MonoBehaviour
     public void ShowQuestInfo()
     {
         questUI.SetActive(true);
-        questTitle.text = qm.QuestDataList[curQuestNum-1].Title;
-        questNpcName.text = qm.QuestDataList[curQuestNum-1].NpcName;
-        questInfo.text = qm.QuestDataList[curQuestNum-1].Info;
+        questTitle.text = qm.QuestDataList[curQuestNum - 1].Title;
+        questNpcName.text = qm.QuestDataList[curQuestNum - 1].NpcName;
+        questInfo.text = qm.QuestDataList[curQuestNum - 1].Info;
         questT.color = Color.white;
         questTitle.color = Color.white;
         questNpc.color = Color.white;
@@ -808,21 +814,21 @@ public class GameManager : MonoBehaviour
      */
     public void QuestUpdate(string type, int id = 0)
     {
-        if (!accept) return; 
+        if (!accept) return;
         for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
             if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
             if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id))
             {
-                if(curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
+                if (curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
                     curQuestReqNum[i]++;
                     questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
                 }
-                if(curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
+                if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
         }
-        if (finishReqNum == qm.QuestDataList[curQuestNum-1].Type.Count)
+        if (finishReqNum == qm.QuestDataList[curQuestNum - 1].Type.Count)
         {
             QuestSuccess();
         }
@@ -878,13 +884,13 @@ public class GameManager : MonoBehaviour
      */
     public void QuestReward()
     {
-        for(int i = 0;  i < qm.QuestDataList[curQuestNum-1].RewardType.Count; i++)
+        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].RewardType.Count; i++)
         {
             if (qm.QuestDataList[curQuestNum - 1].RewardType[i] == "exp")
             {
                 ExpUp(qm.QuestDataList[curQuestNum - 1].Reward[i]);
-            } 
-            if(qm.QuestDataList[curQuestNum - 1].RewardType[i] == "gold")
+            }
+            if (qm.QuestDataList[curQuestNum - 1].RewardType[i] == "gold")
             {
 
             }
@@ -900,7 +906,7 @@ public class GameManager : MonoBehaviour
         if (curQuestNum == 1 && !accept)
         {
             unLockAct();
-            return; 
+            return;
         }
         selectMagicStoneUI.SetActive(true);
     }
@@ -921,18 +927,18 @@ public class GameManager : MonoBehaviour
      */
     public void SwitchingMagicStone()
     {
-        if(waterSelected)
+        if (waterSelected)
         {
             skill.sprite = skImages[0];
             setMagic(skills[0]);
         }
-        else if(dirtSelected)
+        else if (dirtSelected)
         {
             skill.sprite = skImages[1];
             setMagic(skills[1]);
 
         }
-        else if(windSelected)
+        else if (windSelected)
         {
             skill.sprite = skImages[2];
             setMagic(skills[2]);

@@ -6,7 +6,7 @@ using UnityEngine;
  * Description : 게임 내 플레이어가 사용하는 마법 스킬을 담당하는 클래스입니다. 유니티의 생명 주기 함수들과 충돌 처리 함수를 사용하기 위해 MonoBehaviour 클래스를 상속받습니다.
  */
 public class Skill : MonoBehaviour
-{    
+{
     int goX = 0; // x축 이동 방향
     int goY = 0; // y축 이동 방향
     float coolTime = 2f; // 스킬 쿨타임

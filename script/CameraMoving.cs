@@ -11,7 +11,7 @@ public class CameraMoving : MonoBehaviour
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
     [SerializeField] private Tilemap[] maps; // 유니티 타일맵 배열
     [SerializeField] private GameObject player; // 플레이어
-    [SerializeField] private GameObject gM; // 게임 관리자 GameManager
+    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
 
     int curMapNum; // 현재 맵 번호
     float height; // 높이
@@ -23,12 +23,12 @@ public class CameraMoving : MonoBehaviour
 
     Camera camera; // 유니티 카메라 컴포넌트
     Vector3 playerPos; // 플레이어의 위치를 나타내는 3차원 벡터
-    GameManager gm; // 게임 관리자 GameManager 클래스 객체
+    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
 
     void Start()
     {
-        this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
-        this.curMapNum = gm.CurMapNum; // gm에게서 플레이어가 현재 있는 맵 번호 값을 가져옵니다.
+        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+        this.curMapNum = GameManager.instance.CurMapNum; // gm에게서 플레이어가 현재 있는 맵 번호 값을 가져옵니다.
         this.camera = GameObject.Find("Main Camera").GetComponent<Camera>(); // Main Camera 이름을 가지는 GameObject 객체에서 카메라 컴포넌트를 가져옵니다.
         this.height = 2f * camera.orthographicSize; // camera.orthograpicSize 는 카메라 영역의 세로 길이의 반을 나타내서 세로 길이, 즉 높이를 구하기 위해 거기에 2배를 다시 곱하는 방식으로 구현했습니다.
         this.width = height * camera.aspect; // 카메라 영역의 가로 길이, 너비는 세로 길이와 화면 비율에 비례하므로 높이에 카메라 화면 비율을 곱하는 방식으로 구현했습니다.
@@ -50,10 +50,10 @@ public class CameraMoving : MonoBehaviour
     {
         Vector3 minTile = maps[curMapNum].CellToWorld(maps[curMapNum].cellBounds.min);
         Vector3 maxTile = maps[curMapNum].CellToWorld(maps[curMapNum].cellBounds.max);
-        minX = minTile.x + width/2;
-        maxX = maxTile.x - width/2;
-        minY = minTile.y + height/2;
-        maxY = maxTile.y - height/2;
+        minX = minTile.x + width / 2;
+        maxX = maxTile.x - width / 2;
+        minY = minTile.y + height / 2;
+        maxY = maxTile.y - height / 2;
     }
 
     /* Method : CheckPlayerPos
@@ -64,11 +64,11 @@ public class CameraMoving : MonoBehaviour
     void CheckPlayerPos()
     {
         playerPos = this.player.transform.position;
-        if(playerPos.x >= minX && playerPos.x <= maxX)
+        if (playerPos.x >= minX && playerPos.x <= maxX)
         {
             transform.position = new Vector3(playerPos.x, transform.position.y, transform.position.z);
         }
-        if(playerPos.y >= minY && playerPos.y <= maxY)
+        if (playerPos.y >= minY && playerPos.y <= maxY)
         {
             transform.position = new Vector3(transform.position.x, playerPos.y, transform.position.z);
         }
@@ -97,9 +97,9 @@ public class CameraMoving : MonoBehaviour
      */
     void Moving()
     {
-        if (this.curMapNum != gm.CurMapNum)
+        if (this.curMapNum != GameManager.instance.CurMapNum)
         {
-            this.curMapNum = gm.CurMapNum;
+            this.curMapNum = GameManager.instance.CurMapNum;
             SetLimit();
         }
         CheckPlayerPos();

@@ -5,7 +5,7 @@ using UnityEngine;
 /* Class : DialogueData
  * Description : npc의 대화 데이터를 담당하는 클래스입니다.
  */
-public class DialogueData 
+public class DialogueData
 {
     int npcId; // npc를 식별하는 아이디
     string npcName; // npc의 이름

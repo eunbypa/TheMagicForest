@@ -14,7 +14,7 @@ public class Merchant_Npc : Npc
         enter, sellSuccess, nothingSelected, noSpaceRemained, noEnoughGoldNoSell, exit
     };
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    [SerializeField] private GameObject gM; // 게임 관리자 GameManager
+    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private GameObject dM; // 대화 데이터 관리자 DialogueManager
 
     int diaIdx = 0; // 다음으로 보낼 대사 데이터 위치 정보
@@ -25,14 +25,14 @@ public class Merchant_Npc : Npc
     string[] sellingItemType = new string[2] { "hpPotion", "mpPotion" }; // 위치 index 기준 판매중인 아이템 타입 
     bool getMoney = false; // 플레이어에게서 플레이어가 구매한 물품 가격만큼 돈을 받았는지 여부
 
-    GameManager gm; // 게임 관리자 GameManager 클래스 객체
+    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
     DialogueManager dm; // 대화 데이터 관리자 DialogueManager 클래스 객체
     DialogueData d; // npc가 현재 말해야 할 대사 데이터 저장
     DialogueState ds; // 대화 상태
 
     void Start()
     {
-        gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+        //gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
         dm = dM.GetComponent<DialogueManager>(); // dM GameObject 객체에 할당된 DialogueManager 클래스 컴포넌트를 가져옵니다.
         ds = DialogueState.enter; // 대화 상태를 기본값으로 초기화합니다.
         d = dm.DiaData[NpcId - 1]; // 상인 npc의 경우 모든 대사가 dm의 DiaData에 있고 한 문장씩 각각의 상황에 맞게 배치되어있습니다. 그래서 시작 단계에 미리 대사 데이터을 바로 가져와 이 클래스의 DialogueData 객체에
@@ -47,8 +47,8 @@ public class Merchant_Npc : Npc
      */
     public override bool DialogueReady()
     {
-        if(Wait) return false;
-        if(diaIdx == 0)
+        if (Wait) return false;
+        if (diaIdx == 0)
         {
             OpenShop();
         }
@@ -57,13 +57,13 @@ public class Merchant_Npc : Npc
             SetDiaState();
             GetDiaData();
             diaIdx = (int)ds + 1;
-            gm.ChangeTalkNpc(NpcId, d.NpcName);
-            gm.TextData = dialogue.ToCharArray();
-            if(ds != DialogueState.exit) Wait = true;
+            GameManager.instance.ChangeTalkNpc(NpcId, d.NpcName);
+            GameManager.instance.TextData = dialogue.ToCharArray();
+            if (ds != DialogueState.exit) Wait = true;
         }
         else
         {
-            gm.FinishTalk = true;
+            GameManager.instance.FinishTalk = true;
             diaIdx = 0;
             Wait = false;
         }
@@ -77,9 +77,10 @@ public class Merchant_Npc : Npc
     public override void SetDiaState()
     {
         if (diaIdx == 0) ds = DialogueState.enter;
-        else if (!gm.ShopExit) {
-            if (gm.SelectedItemLoc == -1) ds = DialogueState.nothingSelected;
-            else if (gm.NoEmptySpace) ds = DialogueState.noSpaceRemained;
+        else if (!GameManager.instance.ShopExit)
+        {
+            if (GameManager.instance.SelectedItemLoc == -1) ds = DialogueState.nothingSelected;
+            else if (GameManager.instance.NoEmptySpace) ds = DialogueState.noSpaceRemained;
             else if (!getMoney) ds = DialogueState.noEnoughGoldNoSell;
             else if (getMoney) ds = DialogueState.sellSuccess;
         }
@@ -102,7 +103,7 @@ public class Merchant_Npc : Npc
      */
     public void OpenShop()
     {
-        gm.ShopOn();
+        GameManager.instance.ShopOn();
     }
 
     /* Method : GetSellingItemId
@@ -124,20 +125,20 @@ public class Merchant_Npc : Npc
     public void SellItem(int idx, int num)
     {
         priceSum = sellingItemPrice[idx] * num;
-        if (gm.CurGold < priceSum)
+        if (GameManager.instance.CurGold < priceSum)
         {
             getMoney = false;
             return;
         }
         getMoney = true;
-        gm.GoldDecrease(priceSum);
-        if(sellingItemType[idx] == "hpPotion")
+        GameManager.instance.GoldDecrease(priceSum);
+        if (sellingItemType[idx] == "hpPotion")
         {
-            gm.GetItem(new HpPotion(sellingItemId[idx]), num);
+            GameManager.instance.GetItem(new HpPotion(sellingItemId[idx]), num);
         }
         if (sellingItemType[idx] == "mpPotion")
         {
-            gm.GetItem(new MpPotion(sellingItemId[idx]), num);
+            GameManager.instance.GetItem(new MpPotion(sellingItemId[idx]), num);
         }
     }
 
@@ -145,14 +146,14 @@ public class Merchant_Npc : Npc
     {
         if (Other.gameObject.tag == "Player") // 플레이어가 npc와 접촉한 경우
         {
-            if (gm.npcTalk != null) gm.npcTalk = null; // delegate 초기화
-            if (gm.unLockWait != null) gm.unLockWait = null; // delegate 초기화
-            if (gm.sellRequest != null) gm.sellRequest = null; // delegate 초기화
-            if (gm.getItemId != null) gm.getItemId = null; // delegate 초기화
-            gm.npcTalk += DialogueReady; // delegate에 메서드 할당
-            gm.unLockWait += UnLockWait; // delegate에 메서드 할당
-            gm.sellRequest += SellItem; // delegate에 메서드 할당
-            gm.getItemId += GetSellingItemId; // delegate에 메서드 할당
+            if (GameManager.instance.npcTalk != null) GameManager.instance.npcTalk = null; // delegate 초기화
+            if (GameManager.instance.unLockWait != null) GameManager.instance.unLockWait = null; // delegate 초기화
+            if (GameManager.instance.sellRequest != null) GameManager.instance.sellRequest = null; // delegate 초기화
+            if (GameManager.instance.getItemId != null) GameManager.instance.getItemId = null; // delegate 초기화
+            GameManager.instance.npcTalk += DialogueReady; // delegate에 메서드 할당
+            GameManager.instance.unLockWait += UnLockWait; // delegate에 메서드 할당
+            GameManager.instance.sellRequest += SellItem; // delegate에 메서드 할당
+            GameManager.instance.getItemId += GetSellingItemId; // delegate에 메서드 할당
         }
     }
 }
