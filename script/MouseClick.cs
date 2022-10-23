@@ -12,13 +12,10 @@ public class MouseClick : MonoBehaviour, IPointerClickHandler
 {
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
     [SerializeField] private int idx; // 이미지 위치(ex : 인벤토리 1번째 칸)
-    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
-
-    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
 
     void Start()
     {
-        //gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+        
     }
 
 

@@ -8,7 +8,8 @@ using UnityEngine;
  */
 public class QuestManager : MonoBehaviour
 {
-    private List<QuestData> questDataList = new List<QuestData>(); // 퀘스트 데이터
+    public static QuestManager instance; // 싱글톤 패턴 
+    List<QuestData> questDataList = new List<QuestData>(); // 퀘스트 데이터
 
     char[] LineSeperate = new char[] { '\n' }; // 줄바꿈
     char[] CSVSeperate = new char[] { ',' }; // csv는 쉼표를 기준으로 데이터를 나누기 때문에 데이터를 분리하기 위한 쉼표 
@@ -24,6 +25,7 @@ public class QuestManager : MonoBehaviour
 
     void Awake()
     {
+        instance = this;
         //csv 파일 읽어들이는 작업
         ReadData("QuestList");
         ReadData("Quest_Requirement");

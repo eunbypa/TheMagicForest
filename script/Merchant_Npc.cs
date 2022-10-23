@@ -13,9 +13,6 @@ public class Merchant_Npc : Npc
     {
         enter, sellSuccess, nothingSelected, noSpaceRemained, noEnoughGoldNoSell, exit
     };
-    // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
-    [SerializeField] private GameObject dM; // 대화 데이터 관리자 DialogueManager
 
     int diaIdx = 0; // 다음으로 보낼 대사 데이터 위치 정보
     int priceSum = 0; // 판매 금액 총 합
@@ -25,18 +22,13 @@ public class Merchant_Npc : Npc
     string[] sellingItemType = new string[2] { "hpPotion", "mpPotion" }; // 위치 index 기준 판매중인 아이템 타입 
     bool getMoney = false; // 플레이어에게서 플레이어가 구매한 물품 가격만큼 돈을 받았는지 여부
 
-    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
-    DialogueManager dm; // 대화 데이터 관리자 DialogueManager 클래스 객체
     DialogueData d; // npc가 현재 말해야 할 대사 데이터 저장
     DialogueState ds; // 대화 상태
 
     void Start()
     {
-        //gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
-        dm = dM.GetComponent<DialogueManager>(); // dM GameObject 객체에 할당된 DialogueManager 클래스 컴포넌트를 가져옵니다.
         ds = DialogueState.enter; // 대화 상태를 기본값으로 초기화합니다.
-        d = dm.DiaData[NpcId - 1]; // 상인 npc의 경우 모든 대사가 dm의 DiaData에 있고 한 문장씩 각각의 상황에 맞게 배치되어있습니다. 그래서 시작 단계에 미리 대사 데이터을 바로 가져와 이 클래스의 DialogueData 객체에
-                                   // 할당해주었습니다.
+        d = DialogueManager.instance.DiaData[NpcId - 1]; // 상인 npc의 경우 모든 대사가 dm의 DiaData에 있고 한 문장씩 각각의 상황에 맞게 배치되어있습니다. 그래서 시작 단계에 미리 대사 데이터을 바로 가져와 이 클래스의 DialogueData 객체에 할당해주었습니다.
     }
 
     /* Method : DialogueReady

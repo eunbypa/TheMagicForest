@@ -25,7 +25,6 @@ public class GameManager : MonoBehaviour
     public GetItemId getItemId; // delegate 변수
 
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    [SerializeField] private GameObject qM; // 퀘스트 데이터 관리자 QuestManager
     [SerializeField] private GameObject[] skills; // 스킬 GameObject 배열
     [SerializeField] private GameObject yes; // 퀘스트 수락 버튼 GameObject
     [SerializeField] private GameObject no; // 퀘스트 거절 버튼 GameObject
@@ -94,6 +93,7 @@ public class GameManager : MonoBehaviour
     int curQuestNpcId; // 현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 npc의 아이디
     int finishReqNum = 0; // 퀘스트 조건들에서 완료한 조건 수
     int selectedItemLoc = -1; // 선택된 아이템의 칸 위치(인벤토리 or 상점), -1 : 선택된 아이템이 없음을 의미
+    int monsterPower = 0; // 몬스터의 공격력
     float percent = 0; // 그래프 증가 혹은 감소 게이지 퍼센트 값
     string tmp = null; // 대사 출력에 쓰일 임시 문자열
     char[] textData = null; // npc의 대사를 나타내는 문자 배열
@@ -110,9 +110,8 @@ public class GameManager : MonoBehaviour
     bool shopExit = false; // 상점 퇴장 여부
     bool clickLock = false; // 맨 앞에 다른 UI 창이 켜져있으면 뒤쪽 UI들에 대한 마우스 클릭 이벤트 제한하도록 함
     List<int> curQuestReqNum = new List<int>(); // 현재 진행중인 퀘스트 성공에 필요한 조건 목록
-
+    Vector3 playerPos; // 플레이어의 현재 위치
     InventoryManager im; // 인벤토리 관리자 InventoryManager 클래스 객체
-    QuestManager qm; // 퀘스트 데이터 관리자 QuestManager 클래스 객체
     Animator ani; // 유니티 애니메이션 컴포넌트
 
     void Awake()
@@ -128,7 +127,6 @@ public class GameManager : MonoBehaviour
         this.wfs = new WaitForSeconds(0.05f); // 대기 시간
         this.wfs2 = new WaitForSeconds(0.5f); // 대기 시간
         this.im = inven.GetComponent<InventoryManager>(); // inven GameObject 에서 Inventory Manager 클래스 컴포넌트를 가져옵니다.
-        this.qm = qM.GetComponent<QuestManager>(); // qM GameObject 객체에 할당된 QuestManager 클래스 컴포넌트를 가져옵니다.
 
         //향후 데이터 저장&로드 구현 시 수정해야 함
         this.curGold = Convert.ToInt32(gold.text); // 현재 플레이어가 보유중인 골드
@@ -137,9 +135,17 @@ public class GameManager : MonoBehaviour
         this.curMp = Convert.ToInt32(mp.text); // 현재 플레이어의 마력
         this.curMaxMp = Convert.ToInt32(maxMp.text); // 현재 플레이어의 마력 최댓값
         this.curMaxExp = Convert.ToInt32(maxExp.text); // 현재 플레이어의 경험치 최댓값
-        this.curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId; // 현재 진행가능한 퀘스트를 가지고 있는 npc 아이디
+        this.curQuestNpcId = QuestManager.instance.QuestDataList[curQuestNum - 1].NpcId; // 현재 진행가능한 퀘스트를 가지고 있는 npc 아이디
     }
 
+    /* Property */
+    public int CurLevel
+    {
+        get
+        {
+            return curLevel;
+        }
+    }
     /* Property */
     public int CurGold
     {
@@ -186,6 +192,18 @@ public class GameManager : MonoBehaviour
         get
         {
             return selectedItemLoc;
+        }
+    }
+    /* Property */
+    public int MonsterPower
+    {
+        get
+        {
+            return monsterPower;
+        }
+        set
+        {
+            monsterPower = value;
         }
     }
     /* Property */
@@ -284,7 +302,18 @@ public class GameManager : MonoBehaviour
             return im;
         }
     }
-
+    /* Property */
+    public Vector3 PlayerPos
+    {
+        get
+        {
+            return playerPos;
+        }
+        set
+        {
+            playerPos = value;
+        }
+    }
     /* Method : WaitForTeleportReady
      * Description : 텔레포트 준비 완료까지 기다리는 동작을 수행하는 메서드입니다.
      * Return Value : void
@@ -385,8 +414,16 @@ public class GameManager : MonoBehaviour
     public void HpUp(int n) // 최댓값 초과 여부 검사조건 나중에 추가해야함
     {
         curHp += n;
-        percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
-        hpGraph.fillAmount += percent;
+        if (curHp <= curMaxHp)
+        {
+            percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
+            hpGraph.fillAmount += percent;
+        }
+        else
+        {
+            curHp = curMaxHp;
+            hpGraph.fillAmount = 1f;
+        }
         hp.text = Convert.ToString(curHp);
     }
 
@@ -398,8 +435,17 @@ public class GameManager : MonoBehaviour
     public void HPDown(int n) // 0 이하 여부 검사조건 나중에 추가해야함
     {
         curHp -= n;
-        percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
-        hpGraph.fillAmount -= percent;
+        if (curHp >= 0)
+        {
+            percent = (float)((float)(n) * (1.0 / (float)(curMaxHp)));
+            hpGraph.fillAmount -= percent;
+        }
+        else
+        {
+            curHp = 0;
+            hpGraph.fillAmount = 0f;
+            //게임 오버 메서드 추가해야 함
+        }
         hp.text = Convert.ToString(curHp);
     }
 
@@ -411,8 +457,16 @@ public class GameManager : MonoBehaviour
     public void MPUp(int n) // 최댓값 초과 여부 검사조건 나중에 추가해야함
     {
         curMp += n;
-        percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
-        mpGraph.fillAmount += percent;
+        if (curMp <= curMaxMp)
+        {
+            percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
+            mpGraph.fillAmount += percent;
+        }
+        else
+        {
+            curMp = curMaxMp;
+            mpGraph.fillAmount = 1f;
+        }
         mp.text = Convert.ToString(curMp);
     }
 
@@ -424,8 +478,17 @@ public class GameManager : MonoBehaviour
     public void MPDown(int n)
     {
         curMp -= n;
-        percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
-        mpGraph.fillAmount -= percent;
+        if (curMp >= 0)
+        {
+            percent = (float)((float)(n) * (1.0 / (float)(curMaxMp)));
+            mpGraph.fillAmount -= percent;
+        }
+        else
+        {
+            curMp = 0;
+            mpGraph.fillAmount = 0;
+
+        }
         mp.text = Convert.ToString(curMp);
     }
 
@@ -457,6 +520,10 @@ public class GameManager : MonoBehaviour
         curExp = 0;
         expGraph.fillAmount = 0f;
         exp.text = Convert.ToString(curExp);
+        foreach(GameObject sk in skills)
+        {
+            sk.GetComponent<Skill>().AttackPower += 5;
+        }
     }
 
     /* Method : InventoryOn
@@ -788,17 +855,17 @@ public class GameManager : MonoBehaviour
     public void ShowQuestInfo()
     {
         questUI.SetActive(true);
-        questTitle.text = qm.QuestDataList[curQuestNum - 1].Title;
-        questNpcName.text = qm.QuestDataList[curQuestNum - 1].NpcName;
-        questInfo.text = qm.QuestDataList[curQuestNum - 1].Info;
+        questTitle.text = QuestManager.instance.QuestDataList[curQuestNum - 1].Title;
+        questNpcName.text = QuestManager.instance.QuestDataList[curQuestNum - 1].NpcName;
+        questInfo.text = QuestManager.instance.QuestDataList[curQuestNum - 1].Info;
         questT.color = Color.white;
         questTitle.color = Color.white;
         questNpc.color = Color.white;
         questNpcName.color = Color.white;
         questInfo.color = Color.white;
-        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
+        for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + "0 / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            questReqName[i].text = QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + "0 / " + Convert.ToString(QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]);
             reqList[i].SetActive(true);
             questReqName[i].color = Color.white;
             curQuestReqNum.Add(0);
@@ -815,20 +882,20 @@ public class GameManager : MonoBehaviour
     public void QuestUpdate(string type, int id = 0)
     {
         if (!accept) return;
-        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
+        for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
-            if (qm.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || qm.QuestDataList[curQuestNum - 1].Req_Id[i] == id))
+            if (curQuestReqNum[i] == QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]) continue;
+            if (QuestManager.instance.QuestDataList[curQuestNum - 1].Type[i] == type && (id == 0 || QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Id[i] == id))
             {
-                if (curQuestReqNum[i] < qm.QuestDataList[curQuestNum - 1].Req_Num[i])
+                if (curQuestReqNum[i] < QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
                     curQuestReqNum[i]++;
-                    questReqName[i].text = qm.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(qm.QuestDataList[curQuestNum - 1].Req_Num[i]);
+                    questReqName[i].text = QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]);
                 }
-                if (curQuestReqNum[i] == qm.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
+                if (curQuestReqNum[i] == QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
         }
-        if (finishReqNum == qm.QuestDataList[curQuestNum - 1].Type.Count)
+        if (finishReqNum == QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count)
         {
             QuestSuccess();
         }
@@ -847,7 +914,7 @@ public class GameManager : MonoBehaviour
         questNpc.color = Color.yellow;
         questNpcName.color = Color.yellow;
         questInfo.color = Color.yellow;
-        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].Type.Count; i++)
+        for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
             questReqName[i].color = Color.yellow;
         }
@@ -866,12 +933,12 @@ public class GameManager : MonoBehaviour
         accept = false;
         success = false;
         QuestReward();
-        for (int i = qm.QuestDataList[curQuestNum - 1].Type.Count - 1; i >= 0; i--)
+        for (int i = QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count - 1; i >= 0; i--)
         {
             curQuestReqNum.RemoveAt(i);
         }
         curQuestNum++;
-        if (curQuestNum <= qm.QuestDataList.Count) curQuestNpcId = qm.QuestDataList[curQuestNum - 1].NpcId;
+        if (curQuestNum <= QuestManager.instance.QuestDataList.Count) curQuestNpcId = QuestManager.instance.QuestDataList[curQuestNum - 1].NpcId;
         else
         {
             curQuestNpcId = 0;
@@ -884,15 +951,15 @@ public class GameManager : MonoBehaviour
      */
     public void QuestReward()
     {
-        for (int i = 0; i < qm.QuestDataList[curQuestNum - 1].RewardType.Count; i++)
+        for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].RewardType.Count; i++)
         {
-            if (qm.QuestDataList[curQuestNum - 1].RewardType[i] == "exp")
+            if (QuestManager.instance.QuestDataList[curQuestNum - 1].RewardType[i] == "exp")
             {
-                ExpUp(qm.QuestDataList[curQuestNum - 1].Reward[i]);
+                ExpUp(QuestManager.instance.QuestDataList[curQuestNum - 1].Reward[i]);
             }
-            if (qm.QuestDataList[curQuestNum - 1].RewardType[i] == "gold")
+            if (QuestManager.instance.QuestDataList[curQuestNum - 1].RewardType[i] == "gold")
             {
-
+                GoldIncrease(QuestManager.instance.QuestDataList[curQuestNum - 1].Reward[i]);
             }
         }
     }

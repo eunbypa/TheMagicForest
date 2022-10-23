@@ -14,7 +14,6 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject MagicStone; // 마법석
     [SerializeField] private GameObject MagicStick; // 마법지팡이
     [SerializeField] private GameObject skill; // 스킬
-    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private float speed = 5f; // 이동 속도
     [SerializeField] private int curCollidingNum = 0; // 현재 플레이어와 충돌중인 물체 수
     [SerializeField] private bool move = true; // 이동 가능 여부
@@ -63,13 +62,13 @@ public class Player : MonoBehaviour
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 Rigidbody2D 컴포넌트를 가져옵니다.
         this.ani = GetComponent<Animator>(); // 현재 클래스가 할당된 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         this.sg = GetComponent<SortingGroup>(); // 현재 클래스가 할당된 GameObject 객체에서 SortingGroup 컴포넌트를 가져옵니다.
-        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
         GameManager.instance.unLockAct += UnLockAct; // gm의 delegate 변수인 unLockAct에 현재 클래스의 UnLockAct 함수를 할당합니다.
         GameManager.instance.setMagic += SetMagicStone; // gm의 delegate 변수인 setMagic에 현재 클래스의 SetMagicStone 함수를 할당합니다.
     }
 
     void Update()
     {
+        GameManager.instance.PlayerPos = transform.position; // 플레이어 위치 실시간 갱신
         EnteringKey();
         if (GameManager.instance.SkDisable) // 스킬 사용 후 스킬 쿨타임이 끝날 때까지 스킬 사용이 불가능한 상태
         {
@@ -196,12 +195,12 @@ public class Player : MonoBehaviour
     {
         if (!move)
         {
-            rb.velocity = new Vector2(0, 0).normalized * 0;
+            rb.velocity = new Vector2(0, 0).normalized * speed;
             return;
         }
         if (actLock)
         {
-            rb.velocity = new Vector2(0, 0).normalized * 0;
+            rb.velocity = new Vector2(0, 0).normalized * speed;
             ani.SetTrigger("stop");
             return;
         }
@@ -368,6 +367,7 @@ public class Player : MonoBehaviour
             {
                 if (transform.position.x > Other.transform.position.x) transform.position = new Vector2(transform.position.x + 0.2f, transform.position.y); // 공격받은 방향으로 살짝 넉백하는 동작
                 else transform.position = new Vector2(transform.position.x - 0.2f, transform.position.y);
+                GameManager.instance.HPDown(GameManager.instance.MonsterPower); // 몬스터의 공격력 만큼 체력 감소
                 hurtPeriod = HurtEvent();
                 StartCoroutine(hurtPeriod);
             }
@@ -633,7 +633,7 @@ public class Player : MonoBehaviour
     IEnumerator HurtEvent()
     {
         getHurt = true;
-        GameManager.instance.HPDown(5); // 향후 수정해야 함 -> 데미지가 고정된 상태
+        //GameManager.instance.HPDown(5); // 향후 수정해야 함 -> 데미지가 고정된 상태
         ani.SetTrigger("hurt");
         yield return wfs;
         getHurt = false;

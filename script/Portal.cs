@@ -8,7 +8,6 @@ using UnityEngine;
 public class Portal : MonoBehaviour
 {
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private GameObject player; // 플레이어
     [SerializeField] private GameObject destination; // 도착지 포탈
     [SerializeField] private GameObject curMap; // 현재 맵
@@ -17,11 +16,11 @@ public class Portal : MonoBehaviour
     [SerializeField] private int destinationMapNum; // 도착지 맵 번호
 
     bool teleport = false; // 플레이어가 포탈과 접촉해 있어서 텔레포트가 가능한 상태인지 여부
-    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
+
 
     void Start()
     {
-        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
+
     }
 
     void Update()

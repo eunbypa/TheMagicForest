@@ -7,6 +7,7 @@ using UnityEngine;
  */
 public class Skill : MonoBehaviour
 {
+    [SerializeField] private int attackPower; // 스킬 공격력
     int goX = 0; // x축 이동 방향
     int goY = 0; // y축 이동 방향
     float coolTime = 2f; // 스킬 쿨타임
@@ -16,6 +17,18 @@ public class Skill : MonoBehaviour
     Animator ani; // 유니티 애니메이션 컴포넌트
     Rigidbody2D rb; // 유니티에서 객체의 물리이동에 필요한 RigidBody 컴포넌트
 
+    /* Property */
+    public int AttackPower
+    {
+        get
+        {
+            return attackPower;
+        }
+        set
+        {
+            attackPower = value;
+        }
+    }
     /* Property */
     public float CoolTime
     {

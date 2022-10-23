@@ -14,25 +14,15 @@ public class Normal_Npc : Npc
     {
         normal, questAsk, questRefuse, questAccept, questDoing, questSuccess, questReply
     };
-    // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
-    [SerializeField] private GameObject dM; // 대화 데이터 관리자 DialogueManager
-    [SerializeField] private GameObject qM; // 퀘스트 데이터 관리자 QuestManager
     [SerializeField] private GameObject questBallon; // 퀘스트 활성화 시 npc 위에 뜨는 말풍선
 
     int diaIdx = 0; // 다음 순서에 말할 대사 데이터 위치
     DialogueState ds; // 대화 상태
-    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
-    DialogueManager dm; // 대화 데이터 관리자 DialogueManager 클래스 객체
-    QuestManager qm; // 퀘스트 데이터 관리자 QuestManager 클래스 객체
     Animator ani; // 유니티 애니메이션 컴포넌트
     DialogueData d; // npc가 현재 말해야 할 대사 데이터 저장
 
     void Start()
     {
-        //gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
-        dm = dM.GetComponent<DialogueManager>(); // dM GameObject 객체에 할당된 DialogueManager 클래스 컴포넌트를 가져옵니다.
-        qm = qM.GetComponent<QuestManager>(); // qM GameObject 객체에 할당된 QuestManager 클래스 컴포넌트를 가져옵니다.
         ds = DialogueState.normal; // npc의 대화 상태를 기본값으로 초기화합니다.
         ani = questBallon.GetComponent<Animator>(); // questBallon GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
     }
@@ -120,9 +110,9 @@ public class Normal_Npc : Npc
         }
         else if (GameManager.instance.CurQuestNpcId != 0 && GameManager.instance.Accept)
         {
-            for (int i = 0; i < qm.QuestDataList[GameManager.instance.CurQuestNum - 1].Type.Count; i++)
+            for (int i = 0; i < QuestManager.instance.QuestDataList[GameManager.instance.CurQuestNum - 1].Type.Count; i++)
             {
-                if (qm.QuestDataList[GameManager.instance.CurQuestNum - 1].Type[i] == "NPC대화" && qm.QuestDataList[GameManager.instance.CurQuestNum - 1].Req_Id[i] == NpcId)
+                if (QuestManager.instance.QuestDataList[GameManager.instance.CurQuestNum - 1].Type[i] == "NPC대화" && QuestManager.instance.QuestDataList[GameManager.instance.CurQuestNum - 1].Req_Id[i] == NpcId)
                 {
                     ds = DialogueState.questReply;
                 }
@@ -140,33 +130,33 @@ public class Normal_Npc : Npc
         switch (ds)
         {
             case DialogueState.normal:
-                d = dm.DiaData[NpcId - 1];
+                d = DialogueManager.instance.DiaData[NpcId - 1];
                 break;
             case DialogueState.questAsk:
-                d = dm.QuestAskDiaData[GameManager.instance.CurQuestNum - 1];
+                d = DialogueManager.instance.QuestAskDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questAccept:
-                d = dm.QuestAcceptDiaData[GameManager.instance.CurQuestNum - 1];
+                d = DialogueManager.instance.QuestAcceptDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questRefuse:
-                d = dm.QuestRefuseDiaData[GameManager.instance.CurQuestNum - 1];
+                d = DialogueManager.instance.QuestRefuseDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questDoing:
-                d = dm.QuestDoingDiaData[GameManager.instance.CurQuestNum - 1];
+                d = DialogueManager.instance.QuestDoingDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questSuccess:
-                d = dm.QuestSuccessDiaData[GameManager.instance.CurQuestNum - 1];
+                d = DialogueManager.instance.QuestSuccessDiaData[GameManager.instance.CurQuestNum - 1];
                 break;
             case DialogueState.questReply:
-                for (int i = 0; i < dm.QuestReplyDiaData.Count; i++)
+                for (int i = 0; i < DialogueManager.instance.QuestReplyDiaData.Count; i++)
                 {
-                    if (GameManager.instance.CurQuestNum == dm.QuestReplyDiaData[i].Item1)
+                    if (GameManager.instance.CurQuestNum == DialogueManager.instance.QuestReplyDiaData[i].Item1)
                     {
-                        for (int j = 0; j < dm.QuestReplyDiaData[i].Item2.Count; j++)
+                        for (int j = 0; j < DialogueManager.instance.QuestReplyDiaData[i].Item2.Count; j++)
                         {
-                            if (NpcId == dm.QuestReplyDiaData[i].Item2[j].NpcId)
+                            if (NpcId == DialogueManager.instance.QuestReplyDiaData[i].Item2[j].NpcId)
                             {
-                                d = dm.QuestReplyDiaData[i].Item2[j];
+                                d = DialogueManager.instance.QuestReplyDiaData[i].Item2[j];
                             }
                         }
                     }

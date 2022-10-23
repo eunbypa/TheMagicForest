@@ -8,6 +8,7 @@ using UnityEngine;
  */
 public class DialogueManager : MonoBehaviour
 {
+    public static DialogueManager instance; // 싱글톤 패턴
     int checkFirst = 0; // csv파일의 맨 첫 번째 줄은 저장할 데이터에 해당하지 않으므로 이 경우 저장 과정을 생략하고자 첫 번째 줄을 읽은 상태인지 나타냄
     int curNum = 0; // 현재 읽고 있는 데이터가 몇번째 집합체의 데이터인지 그 정보를 저장함(ex : 1번 npc의 대사는 1번을 기준으로 묶여있으므로 그 묶여있는 대사가 어디까지 있는지 파악하는 용도)
     char[] LineSeperate = new char[] { '\n' }; // 줄바꿈
@@ -80,6 +81,7 @@ public class DialogueManager : MonoBehaviour
 
     void Awake()
     {
+        instance = this;
         //csv 파일 읽어들이고 해당 리스트에 저장하는 작업
         ReadDiaData("NpcScript", ref diaData);
         ReadDiaData("QuestScript_Ask", ref questAskDiaData);
