@@ -240,7 +240,7 @@ public class Player : MonoBehaviour
     void SkillEvent()
     {
         skillUse = true;
-        if (GameManager.instance.Accept) // 진행중인 퀘스트가 있을 때 어떤 행동을 할때마다 퀘스트 조건 검사 함수에 전달해 이 행동이 해당되는지 검사
+        if (GameManager.instance.Accept) 
         {
             GameManager.instance.QuestUpdate("마법사용");
         }
