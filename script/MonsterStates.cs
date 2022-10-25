@@ -62,11 +62,13 @@ namespace MonsterStates
     {
         /* Method : Enter
         * Description : ChasePlayer 상태 진입 시 1회 호출됩니다. 몬스터의 현재 위치에서 플레이어의 현재 위치까지 최단 경로를 계산하기 위해 entity의 SetShortestPath 메서드를 호출합니다.
+        * 단, 플레이어가 다른 맵으로 이동한 경우 entity의 SetShortestPath 메서드를 호출하기 전 빠져나옵니다.
         * Parameter : Monster entity - 몬스터
         * Return Value : void
         */
         public override void Enter(Monster entity)
         {
+            if (entity.RealMapNum != GameManager.instance.CurMapNum) return;
             entity.SetShortestPath();
         }
         /* Method : Execute
@@ -123,7 +125,7 @@ namespace MonsterStates
             entity.Attack();
         }
         /* Method : Execute
-        * Description : AttackPlayer 상태를 빠져나가지 않는 이상 계속 호출됩니다. Hurt 상태와 ChasePlayer 상태로 전이될 수 있습니다. Wait로 1초 기다리는 이유는 몬스터의 공격 동작이 끝나는 데에 
+        * Description : AttackPlayer 상태를 빠져나가지 않는 이상 계속 호출됩니다. Hurt 상태, ChasePlayer 상태로 전이될 수 있습니다. Wait로 1초 기다리는 이유는 몬스터의 공격 동작이 끝나는 데에 
         * 1초가 소요되기 때문입니다. 몬스터가 플레이어를 인식할 수 있는 범위 내에 들어오면 ChasePlayer로 전이됩니다.
         * Parameter : Monster entity - 몬스터
         * Return Value : void
@@ -136,8 +138,12 @@ namespace MonsterStates
                 entity.AttackDone = true;
                 entity.Wait = 0;
             }
-            if (entity.GetHurt) entity.ChangeState(MonsterState.hurt);
-            if (entity.AttackDone) 
+            if (entity.GetHurt)
+            {
+                entity.ChangeState(MonsterState.hurt);
+                return;
+            }
+            if (entity.AttackDone)
             {
                 if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) > 5) // 공격 범위에서 멀어졌으므로 다시 추격
                 {
@@ -172,21 +178,16 @@ namespace MonsterStates
             entity.Hurt();
         }
         /* Method : Execute
-        * Description : Hurt 상태를 빠져나가지 않는 이상 계속 호출됩니다. Normal 상태와 AttackPlayer 상태, ChasePlayer 상태, Die 상태로 전이될 수 있습니다. Wait로 다친 동작을 완료할 때까지 기다립니다.
-        * Normal 상태로 전이되는 조건은 플레이어가 다른 맵으로 이동한 경우고 AttackPlayer 상태로 전이되는 조건은 플레이어가 몬스터의 공격 범위 내에 들어올 때 입니다.
+        * Description : Hurt 상태를 빠져나가지 않는 이상 계속 호출됩니다. AttackPlayer 상태, ChasePlayer 상태, Die 상태로 전이될 수 있습니다. Wait로 다친 동작을 완료할 때까지 기다립니다.
+        * AttackPlayer 상태로 전이되는 조건은 플레이어가 몬스터의 공격 범위 내에 들어올 때 입니다.
         * 몬스터가 플레이어를 인식할 수 있는 범위 내에 들어오면 ChasePlayer로 전이됩니다. 현재 hp가 0이 되면 Die 상태로 전이됩니다.
         * Parameter : Monster entity - 몬스터
         * Return Value : void
         */
         public override void Execute(Monster entity)
         {
-            if (!entity.GetHurt) 
+            if (!entity.GetHurt)
             {
-                if (entity.RealMapNum != GameManager.instance.CurMapNum)
-                {
-                    entity.ChangeState(MonsterState.normal);
-                    return;
-                }
                 if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) <= 5)
                 {
                     entity.ChangeState(MonsterState.attackPlayer);
@@ -216,7 +217,7 @@ namespace MonsterStates
         */
         public override void Exit(Monster entity)
         {
-            entity.GetHurt = false; 
+            entity.GetHurt = false;
             entity.Wait = 0;
         }
     }
@@ -251,7 +252,7 @@ namespace MonsterStates
         */
         public override void Exit(Monster entity)
         {
-            
+
         }
     }
 }

@@ -10,19 +10,18 @@ public class PathFinding
 {
     List<List<TileData>> tiles; // 2차원 타일 데이터 배열
     List<Vector3> path; // 최단 경로
-    int[] moveX = new int[] { -1, 0, 1, 0}; // 상하좌우
-    int[] moveY = new int[] { 0, -1, 0, 1};
-    int[] move2X = new int[] {-1, -1, 1, 1}; // 대각선 
-    int[] move2Y = new int[] {-1, 1, -1, 1};
+    int[] moveX = new int[] { -1, 0, 1, 0 }; // 상하좌우
+    int[] moveY = new int[] { 0, -1, 0, 1 };
+    int[] move2X = new int[] { -1, -1, 1, 1 }; // 대각선 
+    int[] move2Y = new int[] { -1, 1, -1, 1 };
 
     /* Method : SetTiles
      * Description : 맵 관리자가 미리 나눠놓은 2차원 타일 데이터 배열을 가져와서 tiles에 할당하는 메서드입니다.
      * Return Value : void
      */
-    public void SetTiles
+    public void SetTiles()
     {
         tiles = MapManager.instance.tiles;
-
     }
     /* Method : FindPath
      * Description : 출발지에서 목적지까지의 최단 경로를 찾는 동작을 수행하는 메서드입니다. 출발지와 목적지의 월드 좌표로 셀 좌표를 가져온 다음 이동할 수 있는 타일의 셀 좌표 정보를 가지는 openList와
@@ -54,20 +53,21 @@ public class PathFinding
         H[start.Item2, start.Item1] = 0;
         openList.Add(new Tuple<int, int>(start.Item1, start.Item2));
         int loop = 0;
-        while (openList.Count != 0) {
+        while (openList.Count != 0)
+        {
             int curX = openList[0].Item1;
             int curY = openList[0].Item2;
             openList.RemoveAt(0);
-            closedList[curY, curX] = true; 
+            closedList[curY, curX] = true;
             if (curX == end.Item1 && curY == end.Item2) break; // 도착
-            for (int i = 0; i < 4; i++) 
+            for (int i = 0; i < 4; i++)
             {
                 int nextX = curX + moveX[i];
                 int nextY = curY + moveY[i];
-                if (nextX < 0 || nextY < 0 || nextX >= cLength || nextY >= rLength) continue; 
+                if (nextX < 0 || nextY < 0 || nextX >= cLength || nextY >= rLength) continue;
                 if (tiles[nextY][nextX].Obstacle) continue;
                 if (closedList[nextY, nextX]) continue;
-                int g = tiles[curY][curX].G + 10; 
+                int g = tiles[curY][curX].G + 10;
                 int h = (Math.Abs(nextX - end.Item1) + Math.Abs(nextY - end.Item2)) * 10; ;
                 if (F[nextY, nextX] != 0 && F[nextY, nextX] < g + h) continue;
                 G[nextY, nextX] = g;
@@ -80,11 +80,11 @@ public class PathFinding
             {
                 int nextX = curX + move2X[i];
                 int nextY = curY + move2Y[i];
-                if (nextX < 0 || nextY < 0 || nextX >= cLength || nextY >= rLength) continue; 
-                if (tiles[nextY][nextX].Obstacle || tiles[curY][nextX].Obstacle || tiles[nextY][curX].Obstacle) continue; 
-                if (closedList[nextY, nextX]) continue; 
-                int g = tiles[curY][curX].G + 14; 
-                int h = (Math.Abs(nextX - end.Item1) + Math.Abs(nextY - end.Item2)) * 10; 
+                if (nextX < 0 || nextY < 0 || nextX >= cLength || nextY >= rLength) continue;
+                if (tiles[nextY][nextX].Obstacle || tiles[curY][nextX].Obstacle || tiles[nextY][curX].Obstacle) continue;
+                if (closedList[nextY, nextX]) continue;
+                int g = tiles[curY][curX].G + 14;
+                int h = (Math.Abs(nextX - end.Item1) + Math.Abs(nextY - end.Item2)) * 10;
                 if (F[nextY, nextX] != 0 && F[nextY, nextX] < g + h) continue;
                 G[nextY, nextX] = g;
                 H[nextY, nextX] = h;
@@ -95,7 +95,7 @@ public class PathFinding
             openList.Sort((x, y) =>
             {
                 if (F[x.Item2, x.Item1] < F[y.Item2, y.Item1]) return -1;
-                else if (F[x.Item2, x.Item1] == F[y.Item2, y.Item1]) return 0; 
+                else if (F[x.Item2, x.Item1] == F[y.Item2, y.Item1]) return 0;
                 else return 1;
             });
         }
@@ -103,7 +103,7 @@ public class PathFinding
         TileData tmp = tiles[end.Item2][end.Item1];
         if (tmp.Parent == null) return null;
 
-        while (tmp.Parent != tmp) 
+        while (tmp.Parent != tmp)
         {
             path.Add(tmp.Parent.WorldPosition);
             tmp = tmp.Parent;

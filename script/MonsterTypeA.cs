@@ -48,7 +48,7 @@ public class MonsterTypeA : Monster
      */
     public override void MovingChoice()
     {
-        if(movingChoice == null)
+        if (movingChoice == null)
         {
             movingChoice = RandomChoice();
             StartCoroutine(movingChoice);
@@ -65,12 +65,12 @@ public class MonsterTypeA : Monster
         if (x == -1)
         {
             left = true;
-            transform.localScale = new Vector3(-1, 1, 1); 
+            mainBody.transform.localScale = new Vector3(-1, 1, 1);
         }
         else
         {
             left = false;
-            transform.localScale = new Vector3(1, 1, 1); 
+            mainBody.transform.localScale = new Vector3(1, 1, 1);
         }
     }
     /* Method : Moving
@@ -120,14 +120,14 @@ public class MonsterTypeA : Monster
         if (shortestPath.Count != 0)
         {
             if (transform.position.Equals(shortestPath[0]))
-            { 
+            {
                 curPathPos = shortestPath[0];
                 shortestPath.RemoveAt(0);
             }
             else
             {
                 ani.SetTrigger("move");
-                if ((shortestPath[0].x - curPathPos.x) * lastXDirection < 0) 
+                if ((shortestPath[0].x - curPathPos.x) * lastXDirection < 0)
                 {
                     lastXDirection = (shortestPath[0].x - curPathPos.x) > 0 ? 1 : -1;
                     Flip(lastXDirection);
@@ -147,8 +147,8 @@ public class MonsterTypeA : Monster
      */
     public override void Attack()
     {
-        if (GameManager.instance.PlayerPos.x >= transform.position.x && left) Flip(1); 
-        if (GameManager.instance.PlayerPos.x < transform.position.x && !left) Flip(-1); 
+        if (GameManager.instance.PlayerPos.x >= transform.position.x && left) Flip(1);
+        if (GameManager.instance.PlayerPos.x < transform.position.x && !left) Flip(-1);
         AttackDone = false;
         ani.SetTrigger("attack");
     }
@@ -157,7 +157,7 @@ public class MonsterTypeA : Monster
      * Return Value : void
      */
     public override void Hurt()
-    { 
+    {
         CurHp -= hurtDamage;
         if (CurHp >= 0)
         {
@@ -185,8 +185,8 @@ public class MonsterTypeA : Monster
         if (!DyingDone)
         {
             Wait += Time.deltaTime;
-            hpBar.SetActive(false); 
-            ani.SetTrigger("die"); 
+            hpBar.SetActive(false);
+            ani.SetTrigger("die");
             if (Wait >= 0.25f)
             {
                 DyingDone = true;
@@ -204,11 +204,11 @@ public class MonsterTypeA : Monster
      * 최단 경로를 계산합니다. 이 때, 랜덤하게 정해진 위치가 이동할 수 없는 위치일 수 있으므로 do-while문으로 이동 가능한 위치가 선정될 때까지 반복문을 돌리도록 구현했습니다. 이 과정에서 혹시나 무한루프를 탈
      * 까 싶어서 반복이 최대 10000을 넘어가면 루프를 탈출하게끔 했습니다.
      */
-    IEnumerator RandomChoice() 
+    IEnumerator RandomChoice()
     {
         int x = 0, y = 0, loop = 0;
         Vector3 randomPos;
-        if(shortestPath != null)
+        if (shortestPath != null)
         {
             shortestPath = null;
             yield return wfs;
@@ -218,17 +218,17 @@ public class MonsterTypeA : Monster
         do
         {
             if (Vector3Int.FloorToInt(transform.position).x - 5 > Vector3Int.FloorToInt(minPos).x && Vector3Int.FloorToInt(transform.position).x + 5 < Vector3Int.FloorToInt(maxPos).x)
-                x = rand.Next(Vector3Int.FloorToInt(transform.position).x - 5, Vector3Int.FloorToInt(transform.position).x + 5);
+                x = Random.Range(Vector3Int.FloorToInt(transform.position).x - 5, Vector3Int.FloorToInt(transform.position).x + 5);
             else if (Vector3Int.FloorToInt(transform.position).x - 5 > Vector3Int.FloorToInt(minPos).x)
-                x = rand.Next(Vector3Int.FloorToInt(transform.position).x - 5, Vector3Int.FloorToInt(transform.position).x);
+                x = Random.Range(Vector3Int.FloorToInt(transform.position).x - 5, Vector3Int.FloorToInt(transform.position).x);
             else
-                x = rand.Next(Vector3Int.FloorToInt(transform.position).x + 1, Vector3Int.FloorToInt(transform.position).x + 5);
+                x = Random.Range(Vector3Int.FloorToInt(transform.position).x + 1, Vector3Int.FloorToInt(transform.position).x + 5);
             if (Vector3Int.FloorToInt(transform.position).y - 5 > Vector3Int.FloorToInt(minPos).y && Vector3Int.FloorToInt(transform.position).y + 5 < Vector3Int.FloorToInt(maxPos).y)
-                y = rand.Next(Vector3Int.FloorToInt(transform.position).y - 5, Vector3Int.FloorToInt(transform.position).y + 5);
+                y = Random.Range(Vector3Int.FloorToInt(transform.position).y - 5, Vector3Int.FloorToInt(transform.position).y + 5);
             else if (Vector3Int.FloorToInt(transform.position).y - 5 > Vector3Int.FloorToInt(minPos).y)
-                y = rand.Next(Vector3Int.FloorToInt(transform.position).y - 5, Vector3Int.FloorToInt(transform.position).y);
+                y = Random.Range(Vector3Int.FloorToInt(transform.position).y - 5, Vector3Int.FloorToInt(transform.position).y);
             else
-                y = rand.Next(Vector3Int.FloorToInt(transform.position).y + 1, Vector3Int.FloorToInt(transform.position).y + 5);
+                y = Random.Range(Vector3Int.FloorToInt(transform.position).y + 1, Vector3Int.FloorToInt(transform.position).y + 5);
             if ((minPos.x + 1) % 2 == 0) x = (x % 2 == 0) ? x : x + 1;
             else x = (x % 2 == 1) ? x : x + 1;
             if ((minPos.y + 1) % 2 == 0) x = (y % 2 == 0) ? y : y + 1;
@@ -246,7 +246,7 @@ public class MonsterTypeA : Monster
         CurPos = transform.position;
         if (!MapManager.instance.MonsterMaps[locatedMapNum].HasTile(MapManager.instance.MonsterMaps[locatedMapNum].WorldToCell(CurPos))) yield break;
         shortestPath = pathFinding.FindPath(Vector3Int.FloorToInt(CurPos), Vector3Int.FloorToInt(randomPos), locatedMapNum);
-        if(shortestPath == null)
+        if (shortestPath == null)
         {
             movingChoice = null;
         }
@@ -257,7 +257,7 @@ public class MonsterTypeA : Monster
     //충돌 처리
     void OnTriggerEnter2D(Collider2D Other)
     {
-        if(Other.gameObject.tag == "skill") // 플레이어의 스킬 공격 받음
+        if (Other.gameObject.tag == "skill") // 플레이어의 스킬 공격 받음
         {
             hurtDamage = Other.gameObject.GetComponent<Skill>().AttackPower;
             GetHurt = true;

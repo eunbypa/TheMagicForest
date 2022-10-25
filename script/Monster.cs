@@ -15,6 +15,7 @@ public class Monster : MonoBehaviour
     [SerializeField] protected int locatedMapNum; // 몬스터가 있는 맵만 가지는 별도의 번호(기존 맵 번호와는 별도의 값, 몬스터가 있는 맵만을 기준으로 함)
     [SerializeField] protected int attackPower; // 공격력
     [SerializeField] protected int maxHp; // 전체 체력
+    [SerializeField] protected int speed; // 속도
     [SerializeField] protected Image hpGraph; // 체력 그래프
     [SerializeField] protected GameObject hpBar; // 체력 바 GameObject
     [SerializeField] protected GameObject monsterOwnedGold; // 몬스터를 물리치면 얻을 수 있는 골드 GameObject
@@ -39,7 +40,7 @@ public class Monster : MonoBehaviour
     protected int direction; // 움직일 방향 index
     protected int hurtDamage; // 스킬에 맞았을 때 받은 데미지 값
     protected bool left = false; // 시선이 왼쪽을 향해 있는지 여부, 기본값은 오른쪽
-    protected System.Random rand = new System.Random(); // 난수 생성
+    //protected System.Random rand = new System.Random(); // 난수 생성
     protected IEnumerator movingChoice; // HurtEvent 코루틴 변수
     protected WaitForSeconds wfs; // 코루틴에서 제어권을 돌려주고 기다리는 시간
     protected List<Vector3> shortestPath; // 추격 시 이동할 최단 경로
@@ -168,7 +169,7 @@ public class Monster : MonoBehaviour
     {
         states[(int)MonsterStates.MonsterState.normal] = new MonsterStates.Normal();
         states[(int)MonsterStates.MonsterState.chasePlayer] = new MonsterStates.ChasePlayer();
-        states[(int)MonsterStates.MonsterState.attackPlayer] = new MonsterStates.AttackPlayer(); 
+        states[(int)MonsterStates.MonsterState.attackPlayer] = new MonsterStates.AttackPlayer();
         states[(int)MonsterStates.MonsterState.hurt] = new MonsterStates.Hurt();
         states[(int)MonsterStates.MonsterState.die] = new MonsterStates.Die();
     }
