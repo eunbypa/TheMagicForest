@@ -39,7 +39,6 @@ public class Monster : MonoBehaviour
     protected int lastXDirection; // 가장 최근에 움직인 x축 방향 (-1 : 왼쪽, 1 : 오른쪽)
     protected int direction; // 움직일 방향 index
     protected int hurtDamage; // 스킬에 맞았을 때 받은 데미지 값
-    protected bool left = false; // 시선이 왼쪽을 향해 있는지 여부, 기본값은 오른쪽
     //protected System.Random rand = new System.Random(); // 난수 생성
     protected IEnumerator movingChoice; // HurtEvent 코루틴 변수
     protected WaitForSeconds wfs; // 코루틴에서 제어권을 돌려주고 기다리는 시간

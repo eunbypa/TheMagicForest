@@ -22,6 +22,8 @@ public class MonsterTypeA : Monster
         CurPos = transform.position; // 현재 좌표
         wfs = new WaitForSeconds(3f); // 대기 시간
         lastXDirection = 1; // 최근 x축 이동 방향 기본값을 1로 설정
+        pathFinding.SetTiles();
+        pathFinding.FindPath(new Vector3Int(491, 101, 0), new Vector3Int(481, 99, 0), locatedMapNum);
     }
 
     void Update()
@@ -64,12 +66,10 @@ public class MonsterTypeA : Monster
     {
         if (x == -1)
         {
-            left = true;
             mainBody.transform.localScale = new Vector3(-1, 1, 1);
         }
         else
         {
-            left = false;
             mainBody.transform.localScale = new Vector3(1, 1, 1);
         }
     }
@@ -147,8 +147,16 @@ public class MonsterTypeA : Monster
      */
     public override void Attack()
     {
-        if (GameManager.instance.PlayerPos.x >= transform.position.x && left) Flip(1);
-        if (GameManager.instance.PlayerPos.x < transform.position.x && !left) Flip(-1);
+        if (GameManager.instance.PlayerPos.x >= transform.position.x && lastXDirection == -1)
+        {
+            lastXDirection = 1;
+            Flip(lastXDirection);
+        }
+        if (GameManager.instance.PlayerPos.x < transform.position.x && lastXDirection == 1)
+        {
+            lastXDirection = -1;
+            Flip(lastXDirection);
+        }
         AttackDone = false;
         ani.SetTrigger("attack");
     }
