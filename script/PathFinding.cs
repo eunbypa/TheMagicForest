@@ -52,7 +52,7 @@ public class PathFinding
         G[start.Item2, start.Item1] = 0;
         H[start.Item2, start.Item1] = 0;
         openList.Add(new Tuple<int, int>(start.Item1, start.Item2));
-        int loop = 0;
+
         while (openList.Count != 0)
         {
             int curX = openList[0].Item1;
@@ -74,7 +74,11 @@ public class PathFinding
                 H[nextY, nextX] = h;
                 F[nextY, nextX] = g + h;
                 tiles[nextY][nextX].Parent = tiles[curY][curX];
-                openList.Add(new Tuple<int, int>(nextX, nextY));
+                Tuple<int, int> t = new Tuple<int, int>(nextX, nextY);
+                if (!openList.Contains(t)) 
+                {
+                    openList.Add(t);
+                }
             }
             for (int i = 0; i < 4; i++)
             {
@@ -90,7 +94,11 @@ public class PathFinding
                 H[nextY, nextX] = h;
                 F[nextY, nextX] = g + h;
                 tiles[nextY][nextX].Parent = tiles[curY][curX];
-                openList.Add(new Tuple<int, int>(nextX, nextY));
+                Tuple<int, int> t = new Tuple<int, int>(nextX, nextY);
+                if (!openList.Contains(t)) 
+                {
+                    openList.Add(t);
+                }
             }
             openList.Sort((x, y) =>
             {
