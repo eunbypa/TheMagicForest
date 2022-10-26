@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /* Class : Item
- * Description : 게임 아이템을 담당하는 클래스입니다.
+ * Description : 게임 아이템을 담당하는 클래스입니다. MonoBehaviour 클래스를 상속받습니다.
  */
-public class Item
+public class Item : MonoBehaviour
 {
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
     [SerializeField] private int itemId; // 아이템을 식별하는 아이디
