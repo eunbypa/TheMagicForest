@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject MagicStone; // 마법석
     [SerializeField] private GameObject MagicStick; // 마법지팡이
     [SerializeField] private GameObject skill; // 스킬
+    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private float speed = 5f; // 이동 속도
     [SerializeField] private int curCollidingNum = 0; // 현재 플레이어와 충돌중인 물체 수
     [SerializeField] private bool move = true; // 이동 가능 여부
@@ -62,6 +63,8 @@ public class Player : MonoBehaviour
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 Rigidbody2D 컴포넌트를 가져옵니다.
         this.ani = GetComponent<Animator>(); // 현재 클래스가 할당된 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         this.sg = GetComponent<SortingGroup>(); // 현재 클래스가 할당된 GameObject 객체에서 SortingGroup 컴포넌트를 가져옵니다.
+        //this.sk = skill.GetComponent<Skill>();
+        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
         GameManager.instance.unLockAct += UnLockAct; // gm의 delegate 변수인 unLockAct에 현재 클래스의 UnLockAct 함수를 할당합니다.
         GameManager.instance.setMagic += SetMagicStone; // gm의 delegate 변수인 setMagic에 현재 클래스의 SetMagicStone 함수를 할당합니다.
     }
@@ -240,7 +243,7 @@ public class Player : MonoBehaviour
     void SkillEvent()
     {
         skillUse = true;
-        if (GameManager.instance.Accept) 
+        if (GameManager.instance.Accept) // 진행중인 퀘스트가 있을 때 어떤 행동을 할때마다 퀘스트 조건 검사 함수에 전달해 이 행동이 해당되는지 검사
         {
             GameManager.instance.QuestUpdate("마법사용");
         }
@@ -251,7 +254,7 @@ public class Player : MonoBehaviour
         sk.Setting(transform.position.x, transform.position.y, directionX, directionY);
         ani.SetTrigger("skill");
         skOn = true;
-        GameManager.instance.MPDown(skillMp);
+        GameManager.instance.MpDown(skillMp);
         GameManager.instance.CheckCoolTime(remainCool);
     }
 
@@ -273,16 +276,28 @@ public class Player : MonoBehaviour
     {
         skill = sk;
         this.sk = skill.GetComponent<Skill>();
+        if (GameManager.instance.CurQuestNum >= 2) SetMagicStick();
     }
 
     /* Method : SetMagicStick
      * Description : 플레이어가 마법석 변경 시 마법 지팡이 모습도 알맞게 변경되도록 하는 메서드입니다.
      * Return Value : void
      */
-    void SetMagicStick() // 다른 마법석 상태도 추가해야 함 아직 바람만 추가한 상태
+    void SetMagicStick()
     {
         spResolver = MagicStone.GetComponent<SpriteResolver>();
-        spResolver.SetCategoryAndLabel("MagicStone", "wind");
+        if (GameManager.instance.WaterSelected)
+        {
+            spResolver.SetCategoryAndLabel("MagicStone", "water");
+        }
+        else if (GameManager.instance.DirtSelected)
+        {
+            spResolver.SetCategoryAndLabel("MagicStone", "dirt");
+        }
+        else if (GameManager.instance.WindSelected)
+        {
+            spResolver.SetCategoryAndLabel("MagicStone", "wind");
+        }
         spResolver = MagicStick.GetComponent<SpriteResolver>();
         spResolver.SetCategoryAndLabel("MagicStick", "hold");
     }
@@ -357,6 +372,17 @@ public class Player : MonoBehaviour
     //해당 태그를 가진 물체와 충돌 상태면 플레이어의 레이어 값을 더 낮게 설정하는 방식 -> 향후 수정 필요(레이어 값이 명시되어도 괜찮을까?)
     void OnTriggerEnter2D(Collider2D Other)
     {
+        if (Other.gameObject.tag == "Gold")
+        {
+            GameManager.instance.GoldIncrease(Other.gameObject.GetComponent<Gold>().GoldNum);
+            Other.gameObject.SetActive(false);
+        }
+        if (Other.gameObject.tag == "Item")
+        {
+            Item item = Other.gameObject.GetComponent<Item>();
+            GameManager.instance.GetItem(item, 1);
+            Other.gameObject.SetActive(false);
+        }
         if (Other.gameObject.tag == "MagicStoneTable")
         {
             tableContact = true;
@@ -367,7 +393,7 @@ public class Player : MonoBehaviour
             {
                 if (transform.position.x > Other.transform.position.x) transform.position = new Vector2(transform.position.x + 0.2f, transform.position.y); // 공격받은 방향으로 살짝 넉백하는 동작
                 else transform.position = new Vector2(transform.position.x - 0.2f, transform.position.y);
-                GameManager.instance.HPDown(GameManager.instance.MonsterPower); // 몬스터의 공격력 만큼 체력 감소
+                GameManager.instance.HpDown(GameManager.instance.MonsterPower); // 몬스터의 공격력 만큼 체력 감소
                 hurtPeriod = HurtEvent();
                 StartCoroutine(hurtPeriod);
             }
@@ -633,7 +659,6 @@ public class Player : MonoBehaviour
     IEnumerator HurtEvent()
     {
         getHurt = true;
-        //GameManager.instance.HPDown(5); // 향후 수정해야 함 -> 데미지가 고정된 상태
         ani.SetTrigger("hurt");
         yield return wfs;
         getHurt = false;

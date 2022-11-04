@@ -29,6 +29,7 @@ public class Portal : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.UpArrow)) // 플레이어가 위쪽 방향키를 누른 경우 
             {
+                MonsterManager.instance.ResetMonstersOnMap(departureMapNum); // 텔레포트 하기 전 만약 그 맵에 몬스터들이 있으면 몬스터를 비활성화 함
                 GameManager.instance.WaitForTeleportReady(); // 텔레포트 완료까지 걸리는 시간만큼 대기하기 위해 gm의 WaitForTeleportReady 메서드 호출
             }
             if (GameManager.instance.TeleportReady) TeleportEvent(); // 텔레포트 준비가 끝났으면 Teleport 시작
@@ -37,12 +38,13 @@ public class Portal : MonoBehaviour
 
     /* Method : TeleportEvent
      * Description : 텔레포트 시 동작을 수행하는 메서드입니다. gm의 TeleportMap 함수에 도착지 맵 번호를 매개변수로 전달해서 이동 후의 맵 번호를 알 수 있게 했고 플레이어의 위치를 도착지 포탈 위치로 바꾸도록
-     * 구현했습니다. 그리고 현재 맵을 비활성화하고 도착지 맵을 활성화합니다.  
+     * 구현했습니다. 그리고 현재 맵, 몬스터를 비활성화하고 도착지 맵, 몬스터를 활성화합니다.  
      * Return Value : void
      */
     public void TeleportEvent()
     {
         GameManager.instance.TeleportMap(destinationMapNum);
+        MonsterManager.instance.SetMonstersOnMap(destinationMapNum);
         player.transform.position = new Vector2(destination.transform.position.x, destination.transform.position.y);
         curMap.SetActive(false);
         nextMap.SetActive(true);

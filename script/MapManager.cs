@@ -16,11 +16,10 @@ public class MapManager : MonoBehaviour
     void Awake()
     {
         instance = this;
-        DivideMapIntoTiles(0); // 나중에 텔레포트로 맵이 변경될 때마다 해당 맵을 타일 데이터로 나누도록 수정해야 함
     }
     void Start()
     {
-       
+
     }
     /* Property */
     public Tilemap[] MonsterMaps
@@ -46,12 +45,12 @@ public class MapManager : MonoBehaviour
         for (int i = minTile.y + 1; i < maxTile.y; i += 2)
         {
             tiles.Add(new List<TileData>());
-            for(int j = minTile.x + 1; j < maxTile.x; j += 2)
+            for (int j = minTile.x + 1; j < maxTile.x; j += 2)
             {
                 TileData tileData;
                 Vector3 pos = new Vector3(j, i, 0);
-                if(monsterMaps[idx].HasTile(monsterMaps[idx].WorldToCell(pos))) tileData = new TileData(false, pos);
-                else tileData = new TileData(true, pos); 
+                if (monsterMaps[idx].HasTile(monsterMaps[idx].WorldToCell(pos))) tileData = new TileData(false, pos);
+                else tileData = new TileData(true, pos);
                 tiles[(i - minTile.y - 1) / 2].Add(tileData);
             }
         }
@@ -61,11 +60,11 @@ public class MapManager : MonoBehaviour
      * Parameter : Vector3Int pos - 월드 좌표를 int 형태로 나타낸 값, int idx - 맵 index
      * Return Value : Tuple<int, int> - Tuple.Itme1 : 열, Tuple.Item2 : 행
      */
-    public Tuple<int, int> GetCellFromWorld(Vector3Int pos, int idx) 
+    public Tuple<int, int> GetCellFromWorld(Vector3Int pos, int idx)
     {
-        Vector3Int minTile = Vector3Int.FloorToInt(monsterMaps[idx].CellToWorld(monsterMaps[idx].cellBounds.min)); 
+        Vector3Int minTile = Vector3Int.FloorToInt(monsterMaps[idx].CellToWorld(monsterMaps[idx].cellBounds.min));
         int row, column;
-        if(Math.Abs(minTile.x + 1) % 2 == 0)
+        if (Math.Abs(minTile.x + 1) % 2 == 0)
         {
             column = Math.Abs(pos.x) % 2 != 0 ? (pos.x - minTile.x - 1 + 1) / 2 : (pos.x - minTile.x - 1) / 2;
         }
@@ -73,7 +72,7 @@ public class MapManager : MonoBehaviour
         {
             column = Math.Abs(pos.x) % 2 == 0 ? (pos.x - minTile.x - 1 + 1) / 2 : (pos.x - minTile.x - 1) / 2;
         }
-        if(Math.Abs(minTile.y + 1) % 2 == 0)
+        if (Math.Abs(minTile.y + 1) % 2 == 0)
         {
             row = Math.Abs(pos.y) % 2 != 0 ? (pos.y - minTile.y - 1 + 1) / 2 : (pos.y - minTile.y - 1) / 2;
         }
@@ -81,6 +80,6 @@ public class MapManager : MonoBehaviour
         {
             row = Math.Abs(pos.y) % 2 == 0 ? (pos.y - minTile.y - 1 + 1) / 2 : (pos.y - minTile.y - 1) / 2;
         }
-        return new Tuple<int, int>(column, row); 
+        return new Tuple<int, int>(column, row);
     }
 }

@@ -106,7 +106,7 @@ public class InventoryManager : MonoBehaviour
     /* Method : FindItem
      * Description : 인벤토리 내 보유중인 아이템들 중 해당 아이디를 가지는 아이템 탐색 동작을 수행하는 메서드입니다. 만약 보유중일 경우 해당 아이템의 위치 값을 반환하고 보유중인 아이템이 아니라면 -1을 반환합니다.  
      * Parameter : int itemId - 아이템 아이디
-     * Return Value : void
+     * Return Value : int
      */
     public int FindItem(int itemId)
     {
@@ -118,5 +118,15 @@ public class InventoryManager : MonoBehaviour
             }
         }
         return -1;
+    }
+
+    /* Method : ShowSelectedItemInfo
+     * Description : 인벤토리 내 선택된 아이템의 정보를 보여주는 동작을 수행하는 메서드입니다. 
+     * Parameter : int idx - 아이템 위치
+     * Return Value : void
+     */
+    public void ShowSelectedItemInfo(int idx)
+    {
+        invenItemList[idx].ShowItemInfo();
     }
 }

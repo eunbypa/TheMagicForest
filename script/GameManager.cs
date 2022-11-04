@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject questUI; // 퀘스트 정보창 GameObject
     [SerializeField] private GameObject skillImage; // 플레이어가 현재 사용 가능한 스킬 이미지 GameObject
     [SerializeField] private GameObject inven; // 인벤토리 GameObject
+    [SerializeField] private GameObject useItem; // 아이템 사용 버튼 GameObject
     [SerializeField] private GameObject[] invenItemSpaces; // 인벤토리 각 아이템 칸 GameObject 배열
     [SerializeField] private GameObject[] invenItemQuantitySpaces; // 인벤토리 각 아이템 수량 칸 GameObject 배열
     [SerializeField] private GameObject[] reqList; // 퀘스트 요구사항 조건 GameObject 배열
@@ -61,12 +62,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image npcImage; // npc 이미지
     [SerializeField] private TMPro.TMP_Text npcName; // npc 이름
     [SerializeField] private TMPro.TMP_Text talk; // npc의 대사
-    [SerializeField] private TMPro.TMP_Text questT;
+    [SerializeField] private TMPro.TMP_Text questT; // 퀘스트 제목
     [SerializeField] private TMPro.TMP_Text questTitle; // 퀘스트 제목
     [SerializeField] private TMPro.TMP_Text questNpc; // 퀘스트를 준 npc
     [SerializeField] private TMPro.TMP_Text questNpcName; // 퀘스트를 준 npc 이름
     [SerializeField] private TMPro.TMP_Text questInfo; // 퀘스트 정보
     [SerializeField] private TMPro.TMP_Text[] questReqName; // 퀘스트 요구사항 진행 정도 데이터 배열
+    [SerializeField] private TMPro.TMP_Text itemName; // 아이템 이름
+    [SerializeField] private TMPro.TMP_Text itemInfo; // 아이템 정보
     [SerializeField] private Image[] shopSelectedItem; // 상점에서 선택된 아이템이 무엇인지 표시하기 위해 사용된 이미지 배열
     [SerializeField] private Image[] invenItemList; // 인벤토리 각 칸에 들어갈 아이템 이미지 배열
     [SerializeField] private TMPro.TMP_Text[] invenItemQuantityList; // 인벤토리 각 칸에 들어갈 아이템 수량 배열
@@ -82,18 +85,21 @@ public class GameManager : MonoBehaviour
     int curMapNum = 0; // 현재 맵 번호
     int curNpcId = 0; // 현재 플레이어와 접촉중인 npc 아이디
     int curLevel = 1; // 플레이어의 현재 레벨
-    int curGold = 0; //  플레이어가 현재 보유중인 골드
-    int curHp = 0; // 플레이어의 현재 체력
-    int curMaxHp = 0; // 플레이어의 현재 체력 최댓값
-    int curMp = 0; // 플레이어의 현재 마력
-    int curMaxMp = 0; // 플레이어의 현재 마력 최댓값
+    int curGold = 1000; //  플레이어가 현재 보유중인 골드
+    int curHp = 100; // 플레이어의 현재 체력
+    int curMaxHp = 100; // 플레이어의 현재 체력 최댓값
+    int curMp = 100; // 플레이어의 현재 마력
+    int curMaxMp = 100; // 플레이어의 현재 마력 최댓값
     int curExp = 0; // 플레이어의 현재 경험치
-    int curMaxExp = 0; // 플레이어의 레벨업에 필요한 현재 경험치 최댓값
+    int curMaxExp = 100; // 플레이어의 레벨업에 필요한 현재 경험치 최댓값
     int curQuestNum = 1; // 현재 진행 가능한 혹은 진행중인 퀘스트 번호
     int curQuestNpcId; // 현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 npc의 아이디
     int finishReqNum = 0; // 퀘스트 조건들에서 완료한 조건 수
-    int selectedItemLoc = -1; // 선택된 아이템의 칸 위치(인벤토리 or 상점), -1 : 선택된 아이템이 없음을 의미
+    int selectedInvenItemLoc = -1; // 선택된 아이템의 칸 위치(인벤토리), -1 : 선택된 아이템이 없음을 의미
+    int selectedShopItemLoc = -1; // 선택된 아이템의 칸 위치(상점), -1 : 선택된 아이템이 없음을 의미
+    int curUsedItemLoc = -1; // 현재 사용할 아이템의 칸 위치(인벤토리), -1 : 사용할 아이템이 없음
     int monsterPower = 0; // 몬스터의 공격력
+    int[] curShortCutPotions = new int[2]; // 포션 단축키에 올려져 있는 포션의 아이템 아이디 목록
     float percent = 0; // 그래프 증가 혹은 감소 게이지 퍼센트 값
     string tmp = null; // 대사 출력에 쓰일 임시 문자열
     char[] textData = null; // npc의 대사를 나타내는 문자 배열
@@ -107,6 +113,7 @@ public class GameManager : MonoBehaviour
     bool dirtSelected = false; // 흙 마법석 선택 여부
     bool windSelected = false; // 바람 마법석 선택 여부
     bool noEmptySpace = false; // 인벤토리 내 빈공간이 없는지 여부
+    bool invenOn = false; // 인벤토리 창이 켜져 있는지 여부
     bool shopExit = false; // 상점 퇴장 여부
     bool clickLock = false; // 맨 앞에 다른 UI 창이 켜져있으면 뒤쪽 UI들에 대한 마우스 클릭 이벤트 제한하도록 함
     List<int> curQuestReqNum = new List<int>(); // 현재 진행중인 퀘스트 성공에 필요한 조건 목록
@@ -187,11 +194,23 @@ public class GameManager : MonoBehaviour
         }
     }
     /* Property */
-    public int SelectedItemLoc
+    public int SelectedShopItemLoc
     {
         get
         {
-            return selectedItemLoc;
+            return selectedShopItemLoc;
+        }
+    }
+    /* Property */
+    public int CurUsedItemLoc
+    {
+        get
+        {
+            return curUsedItemLoc;
+        }
+        set
+        {
+            curUsedItemLoc = value;
         }
     }
     /* Property */
@@ -249,6 +268,10 @@ public class GameManager : MonoBehaviour
     /* Property */
     public bool WaterSelected
     {
+        get
+        {
+            return waterSelected;
+        }
         set
         {
             waterSelected = value;
@@ -257,6 +280,10 @@ public class GameManager : MonoBehaviour
     /* Property */
     public bool DirtSelected
     {
+        get
+        {
+            return dirtSelected;
+        }
         set
         {
             dirtSelected = value;
@@ -265,6 +292,10 @@ public class GameManager : MonoBehaviour
     /* Property */
     public bool WindSelected
     {
+        get
+        {
+            return windSelected;
+        }
         set
         {
             windSelected = value;
@@ -432,7 +463,7 @@ public class GameManager : MonoBehaviour
      * Parameter : int n - 체력 값
      * Return Value : void
      */
-    public void HPDown(int n) // 0 이하 여부 검사조건 나중에 추가해야함
+    public void HpDown(int n) // 0 이하 여부 검사조건 나중에 추가해야함
     {
         curHp -= n;
         if (curHp >= 0)
@@ -454,7 +485,7 @@ public class GameManager : MonoBehaviour
      * Parameter : int n - 마력 값
      * Return Value : void
      */
-    public void MPUp(int n) // 최댓값 초과 여부 검사조건 나중에 추가해야함
+    public void MpUp(int n) // 최댓값 초과 여부 검사조건 나중에 추가해야함
     {
         curMp += n;
         if (curMp <= curMaxMp)
@@ -475,7 +506,7 @@ public class GameManager : MonoBehaviour
      * Parameter : int n - 마력 값
      * Return Value : void
      */
-    public void MPDown(int n)
+    public void MpDown(int n)
     {
         curMp -= n;
         if (curMp >= 0)
@@ -520,7 +551,7 @@ public class GameManager : MonoBehaviour
         curExp = 0;
         expGraph.fillAmount = 0f;
         exp.text = Convert.ToString(curExp);
-        foreach(GameObject sk in skills)
+        foreach (GameObject sk in skills)
         {
             sk.GetComponent<Skill>().AttackPower += 5;
         }
@@ -532,12 +563,11 @@ public class GameManager : MonoBehaviour
      */
     public void InventoryOn()
     {
+        invenOn = true;
         for (int i = 0; i < im.MaxSize; i++)
         {
             if (i < im.InvenItemList.Count)
             {
-                invenItemList[i].sprite = itemImages[im.InvenItemList[i].ItemId - 1];
-                invenItemQuantityList[i].text = Convert.ToString(im.InvenItemQuantityList[i]);
                 invenItemSpaces[i].SetActive(true);
                 invenItemQuantitySpaces[i].SetActive(true);
             }
@@ -550,12 +580,95 @@ public class GameManager : MonoBehaviour
         inven.SetActive(true);
     }
 
+    /* Method : InventoryUpdate
+     * Description : 인벤토리 아이템 보유 현황을 업데이트 하는 메서드입니다.
+     * Return Value : void
+     */
+    public void InventoryUpdate()
+    {
+        for (int i = 0; i < im.MaxSize; i++)
+        {
+            if (i < im.InvenItemList.Count)
+            {
+                invenItemList[i].sprite = itemImages[im.InvenItemList[i].ItemId - 1];
+                invenItemQuantityList[i].text = Convert.ToString(im.InvenItemQuantityList[i]);
+            }
+            else
+            {
+                invenItemList[i].sprite = null;
+                invenItemQuantityList[i].text = null;
+            }
+        }
+    }
+
+    /* Method : ShowItemInfo
+     * Description : 인벤토리 아이템 선택 시 아이템 정보를 보여주는 동작을 하는 메서드입니다.
+     * Parameter : string name - 아이템 이름, string info - 아이템 정보
+     * Return Value : void
+     */
+    public void ShowItemInfo(string name, string info)
+    {
+        itemName.text = name;
+        itemInfo.text = info;
+    }
+
+    /* Method : ClearItemInfo
+     * Description : 인벤토리 아이템 정보창을 빈 상태로 초기화합니다.
+     * Return Value : void
+     */
+    public void ClearItemInfo()
+    {
+        itemName.text = null;
+        itemInfo.text = null;
+        CloseUseItemButton();
+    }
+
+    /* Method : OpenUseItemButton
+    * Description : 아이템 사용 버튼을 활성화합니다.
+    * Return Value : void
+    */
+    public void OpenUseItemButton()
+    {
+        useItem.SetActive(true);
+    }
+
+    /* Method : CloseUseItemButton
+    * Description : 아이템 사용 버튼을 비활성화합니다.
+    * Return Value : void
+    */
+    public void CloseUseItemButton()
+    {
+        useItem.SetActive(false);
+    }
+
+    /* Method : UsePotion
+     * Description : 플레이어가 포션 아이템을 사용 시 관련 동작을 수행하는 메서드입니다. 현재 사용할 아이템이 인벤토리 내 어느 위치에 있는지 나타내는 curUsedItemLoc을 이용해 해당 아이템의 수량을 감소시키고
+     * 아이템의 UseItem 함수를 호출합니다. 그리고 인벤토리 아이템 보유 현황을 업데이트합니다.
+     * Return Value : void
+     */
+    public void UsePotion()
+    {
+        Potion potion = im.InvenItemList[curUsedItemLoc] as Potion;
+        int curNum = im.InvenItemQuantityList[curUsedItemLoc];
+        im.ItemQuantityDecrease(curUsedItemLoc, 1);
+        curNum--;
+        potion.UseItem();
+        InventoryUpdate();
+        if (invenOn && curNum == 0)
+        {
+            InventoryOn();
+            if (selectedInvenItemLoc == curUsedItemLoc) SelectedItemFromInven(selectedInvenItemLoc);
+        }
+    }
+
     /* Method : InventoryOff
      * Description : 인벤토리 창을 닫는 동작을 수행하는 메서드입니다.
      * Return Value : void
      */
     public void InventoryOff()
     {
+        invenOn = false;
+        if (selectedInvenItemLoc != -1) SelectedItemFromInven(selectedInvenItemLoc);
         inven.SetActive(false);
     }
 
@@ -576,7 +689,7 @@ public class GameManager : MonoBehaviour
      */
     public void ShopOff()
     {
-        selectedItemLoc = -1;
+        selectedShopItemLoc = -1;
         shopExit = true;
         unLockWait();
         ClearTalk();
@@ -603,7 +716,7 @@ public class GameManager : MonoBehaviour
         clickLock = false;
         itemQuantityInput.text = null;
         enterNumberUI.SetActive(false);
-        sellRequest(selectedItemLoc, num);
+        sellRequest(selectedShopItemLoc, num);
         unLockWait();
         ClearTalk();
         TalkEvent();
@@ -623,6 +736,7 @@ public class GameManager : MonoBehaviour
         {
             im.ItemQuantityIncrease(idx, num);
         }
+        InventoryUpdate();
     }
 
     /* Method : EnterItemQuantity
@@ -631,14 +745,14 @@ public class GameManager : MonoBehaviour
      */
     public void EnterItemQuantity()
     {
-        if (selectedItemLoc == -1)
+        if (selectedShopItemLoc == -1)
         {
             unLockWait();
             ClearTalk();
             TalkEvent();
             return;
         }
-        if (im.IsFull && im.FindItem(getItemId(selectedItemLoc)) == -1) noEmptySpace = true;
+        if (im.IsFull && im.FindItem(getItemId(selectedShopItemLoc)) == -1) noEmptySpace = true;
         else noEmptySpace = false;
         if (noEmptySpace)
         {
@@ -652,34 +766,88 @@ public class GameManager : MonoBehaviour
     }
 
     /* Method : SelectedItem
-     * Description : 마우스 왼쪽 버튼으로 선택된 아이템의 위치를 기준으로 해당 아이템이 선택되었단 의미에서 이미지 불투명도를 조정하고 선택된 위치 값을 selectedItemLoc에 저장하는 메서드입니다.
-     * 이미 선택되어 있던 이미지가 다시 선택되거나 다른 이미지를 선택하면 기존에 선택된 이미지가 선택되지 않은 상태로 돌아가도록 구현했습니다.
+     * Description : 아이템을 선택하는 동작이 일어날 수 있는 곳은 인벤토리와 상점입니다. 그렇기 때문에 케이스를 나누어서 알맞은 아이템 선택 관련 동작을 수행하도록 구현했습니다. 
      * Parameter : int idx - 위치
      * Return Value : void
      */
     public void SelectedItem(int idx)
     {
-        if (clickLock) return;
+        if (invenOn) SelectedItemFromInven(idx);
+        else SelectedItemFromShop(idx);
+    }
+
+    /* Method : SelectedItemFromInven
+     * Description : 인벤토리에서 마우스 왼쪽 버튼으로 선택된 아이템의 위치를 기준으로 해당 아이템이 선택되었단 의미에서 이미지 불투명도를 조정하고 선택된 위치 값을 selectedInvenItemLoc에 저장하는 메서드입니다.
+     * 이미 선택되어 있던 이미지가 다시 선택되거나 다른 이미지를 선택하면 기존에 선택된 이미지가 선택되지 않은 상태로 돌아가도록 구현했습니다.
+     * Parameter : int idx - 위치
+     * Return Value : void
+     */
+    public void SelectedItemFromInven(int idx)
+    {
         Color color;
-        if (selectedItemLoc == idx)
+        if (selectedInvenItemLoc == idx)
         {
-            color = shopSelectedItem[selectedItemLoc].color;
-            color.a = 0f;
-            shopSelectedItem[selectedItemLoc].color = color;
-            selectedItemLoc = -1;
+            color = invenItemList[selectedInvenItemLoc].color;
+            color.a = 1f;
+            invenItemList[selectedInvenItemLoc].color = color;
+            color = invenItemQuantityList[selectedInvenItemLoc].color;
+            color.a = 1f;
+            invenItemQuantityList[selectedInvenItemLoc].color = color;
+            selectedInvenItemLoc = -1;
+            ClearItemInfo();
         }
         else
         {
-            if (selectedItemLoc != -1)
+            if (selectedInvenItemLoc != -1)
             {
-                color = shopSelectedItem[selectedItemLoc].color;
-                color.a = 0f;
-                shopSelectedItem[selectedItemLoc].color = color;
+                color = invenItemList[selectedInvenItemLoc].color;
+                color.a = 1f;
+                invenItemList[selectedInvenItemLoc].color = color;
+                color = invenItemQuantityList[selectedInvenItemLoc].color;
+                color.a = 1f;
+                invenItemQuantityList[selectedInvenItemLoc].color = color;
+                ClearItemInfo();
             }
-            selectedItemLoc = idx;
-            color = shopSelectedItem[selectedItemLoc].color;
+            selectedInvenItemLoc = idx;
+            color = invenItemList[selectedInvenItemLoc].color;
             color.a = 0.5f;
-            shopSelectedItem[selectedItemLoc].color = color;
+            invenItemList[selectedInvenItemLoc].color = color;
+            color = invenItemQuantityList[selectedInvenItemLoc].color;
+            color.a = 0.5f;
+            invenItemQuantityList[selectedInvenItemLoc].color = color;
+            im.ShowSelectedItemInfo(selectedInvenItemLoc);
+        }
+    }
+
+    /* Method : SelectedItemFromShop
+     * Description : 상점에서 마우스 왼쪽 버튼으로 선택된 아이템의 위치를 기준으로 해당 아이템이 선택되었단 의미에서 이미지 불투명도를 조정하고 선택된 위치 값을 selectedShopItemLoc에 저장하는 메서드입니다.
+     * 이미 선택되어 있던 이미지가 다시 선택되거나 다른 이미지를 선택하면 기존에 선택된 이미지가 선택되지 않은 상태로 돌아가도록 구현했습니다.
+     * Parameter : int idx - 위치
+     * Return Value : void
+     */
+    public void SelectedItemFromShop(int idx)
+    {
+        if (clickLock) return;
+        Color color;
+        if (selectedShopItemLoc == idx)
+        {
+            color = shopSelectedItem[selectedShopItemLoc].color;
+            color.a = 0f;
+            shopSelectedItem[selectedShopItemLoc].color = color;
+            selectedShopItemLoc = -1;
+        }
+        else
+        {
+            if (selectedShopItemLoc != -1)
+            {
+                color = shopSelectedItem[selectedShopItemLoc].color;
+                color.a = 0f;
+                shopSelectedItem[selectedShopItemLoc].color = color;
+            }
+            selectedShopItemLoc = idx;
+            color = shopSelectedItem[selectedShopItemLoc].color;
+            color.a = 0.5f;
+            shopSelectedItem[selectedShopItemLoc].color = color;
         }
     }
 
@@ -890,8 +1058,7 @@ public class GameManager : MonoBehaviour
                 if (curQuestReqNum[i] < QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i])
                 {
                     curQuestReqNum[i]++;
-                    questReqName[i].text = QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " 
-                         + Convert.ToString(QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]);
+                    questReqName[i].text = QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]);
                 }
                 if (curQuestReqNum[i] == QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
             }
@@ -995,6 +1162,7 @@ public class GameManager : MonoBehaviour
      */
     public void SwitchingMagicStone()
     {
+        if (!waterSelected && !dirtSelected && !windSelected) return;
         if (waterSelected)
         {
             skill.sprite = skImages[0];

@@ -15,7 +15,7 @@ public class Merchant_Npc : Npc
     };
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
     [SerializeField] private GameObject[] sellingItems; // 판매중인 아이템 GameObject 객체
-                                                        
+
     int diaIdx = 0; // 다음으로 보낼 대사 데이터 위치 정보
     int priceSum = 0; // 판매 금액 총 합
     int[] sellingItemId = new int[2] { 1, 2 }; // 위치 index 기준 판매중인 아이템 id
@@ -73,7 +73,7 @@ public class Merchant_Npc : Npc
         if (diaIdx == 0) ds = DialogueState.enter;
         else if (!GameManager.instance.ShopExit)
         {
-            if (GameManager.instance.SelectedItemLoc == -1) ds = DialogueState.nothingSelected;
+            if (GameManager.instance.SelectedShopItemLoc == -1) ds = DialogueState.nothingSelected;
             else if (GameManager.instance.NoEmptySpace) ds = DialogueState.noSpaceRemained;
             else if (!getMoney) ds = DialogueState.noEnoughGoldNoSell;
             else if (getMoney) ds = DialogueState.sellSuccess;
@@ -126,14 +126,6 @@ public class Merchant_Npc : Npc
         }
         getMoney = true;
         GameManager.instance.GoldDecrease(priceSum);
-        /*if (sellingItemType[idx] == "hpPotion")
-        {
-            GameManager.instance.GetItem(new HpPotion(sellingItemId[idx]), num);
-        }
-        if (sellingItemType[idx] == "mpPotion")
-        {
-            GameManager.instance.GetItem(new MpPotion(sellingItemId[idx]), num);
-        }*/
         GameManager.instance.GetItem(sellingItems[idx].GetComponent<Item>(), num);
     }
 

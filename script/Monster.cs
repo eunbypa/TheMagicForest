@@ -39,8 +39,8 @@ public class Monster : MonoBehaviour
     protected int lastXDirection; // 가장 최근에 움직인 x축 방향 (-1 : 왼쪽, 1 : 오른쪽)
     protected int direction; // 움직일 방향 index
     protected int hurtDamage; // 스킬에 맞았을 때 받은 데미지 값
-    //protected System.Random rand = new System.Random(); // 난수 생성
-    protected IEnumerator movingChoice; // HurtEvent 코루틴 변수
+    protected Vector3 firstPos; // 처음 위치
+    protected IEnumerator movingChoice; // RandomChoice 코루틴 변수
     protected WaitForSeconds wfs; // 코루틴에서 제어권을 돌려주고 기다리는 시간
     protected List<Vector3> shortestPath; // 추격 시 이동할 최단 경로
 
@@ -58,6 +58,14 @@ public class Monster : MonoBehaviour
         get
         {
             return realMapNum;
+        }
+    }
+    /* Property */
+    public int LocatedMapNum
+    {
+        get
+        {
+            return locatedMapNum;
         }
     }
     /* Property */

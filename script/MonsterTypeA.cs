@@ -22,8 +22,6 @@ public class MonsterTypeA : Monster
         CurPos = transform.position; // 현재 좌표
         wfs = new WaitForSeconds(3f); // 대기 시간
         lastXDirection = 1; // 최근 x축 이동 방향 기본값을 1로 설정
-        pathFinding.SetTiles();
-        pathFinding.FindPath(new Vector3Int(491, 101, 0), new Vector3Int(481, 99, 0), locatedMapNum);
     }
 
     void Update()
@@ -40,9 +38,9 @@ public class MonsterTypeA : Monster
     {
         CurHp = maxHp;
         hpGraph.fillAmount = 1f;
+        movingChoice = null;
+        if (!firstPos.Equals(new Vector3(0, 0, 0))) transform.position = firstPos;
         stateMachine.ChangeState(states[(int)MonsterStates.MonsterState.normal]);
-        monsterOwnedGold.SetActive(false);
-        monsterOwnedItem.SetActive(false);
     }
     /* Method : MovingChoice
      * Description : RandomChoice 코루틴을 통해 다음으로 이동할 위치를 랜덤하게 선택하는 메서드입니다.
@@ -50,6 +48,10 @@ public class MonsterTypeA : Monster
      */
     public override void MovingChoice()
     {
+        if (firstPos.Equals(new Vector3(0, 0, 0)))
+        {
+            firstPos = transform.position;
+        }
         if (movingChoice == null)
         {
             movingChoice = RandomChoice();
