@@ -21,7 +21,6 @@ public class Merchant_Npc : Npc
     int[] sellingItemId = new int[2] { 1, 2 }; // 위치 index 기준 판매중인 아이템 id
     int[] sellingItemPrice = new int[2] { 100, 100 }; // 위치 index 기준 판매중인 아이템 가격
     string dialogue;
-    //string[] sellingItemType = new string[2] { "hpPotion", "mpPotion" }; // 위치 index 기준 판매중인 아이템 타입 
     bool getMoney = false; // 플레이어에게서 플레이어가 구매한 물품 가격만큼 돈을 받았는지 여부
 
     DialogueData d; // npc가 현재 말해야 할 대사 데이터 저장
@@ -103,7 +102,7 @@ public class Merchant_Npc : Npc
     /* Method : GetSellingItemId
      * Description : 판매중인 아이템 목록의 위치를 기준으로 해당 아이템의 아이디를 반환하는 메서드입니다.
      * Parameter : int idx - 위치
-     * Return Value : void
+     * Return Value : int
      */
     public int GetSellingItemId(int idx)
     {
@@ -114,6 +113,7 @@ public class Merchant_Npc : Npc
      * Description : 아이템 판매 동작을 수행하는 메서드입니다. gm에게서 플레이어가 현재 보유중인 골드의 값을 파악하고 해당 값이 플레이어가 구매하고자 하는 아이템 가격의 합보다 작으면 getMoney를 false로 설정하고
      * 메서드를 빠져나옵니다. 이 경우가 아니면 판매가 성공적으로 진행되어 gm에 해당 가격만큼 플레이어의 골드를 차감하는 함수를 호출하고 어느 위치의 아이템인지 파악 후 해당 아이템 객체를 수량과 함께 gm의
      * GetItem함수에 매개변수로 전달하도록 구현했습니다.
+     * Parameter : int idx - 아이템 위치, int num - 구매 수량
      * Return Value : void
      */
     public void SellItem(int idx, int num)
