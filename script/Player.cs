@@ -14,7 +14,6 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject MagicStone; // 마법석
     [SerializeField] private GameObject MagicStick; // 마법지팡이
     [SerializeField] private GameObject skill; // 스킬
-    //[SerializeField] private GameObject gM; // 게임 관리자 GameManager
     [SerializeField] private float speed = 5f; // 이동 속도
     [SerializeField] private int curCollidingNum = 0; // 현재 플레이어와 충돌중인 물체 수
     [SerializeField] private bool move = true; // 이동 가능 여부
@@ -52,7 +51,6 @@ public class Player : MonoBehaviour
     Rigidbody2D rb; // 유니티에서 객체의 물리이동에 필요한 RigidBody 컴포넌트
     Animator ani; // 유니티 애니메이션 컴포넌트
     SortingGroup sg; // 유니티에서 복합체를 하나의 레이어를 기준으로 해서 그룹으로 정렬하고자 할 때 사용하는 SortingGroup 컴포넌트
-    //GameManager gm; // 게임 관리자 GameManager 클래스 객체
     Skill sk; // 스킬 클래스 객체
 
     void Start()
@@ -63,8 +61,6 @@ public class Player : MonoBehaviour
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 Rigidbody2D 컴포넌트를 가져옵니다.
         this.ani = GetComponent<Animator>(); // 현재 클래스가 할당된 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         this.sg = GetComponent<SortingGroup>(); // 현재 클래스가 할당된 GameObject 객체에서 SortingGroup 컴포넌트를 가져옵니다.
-        //this.sk = skill.GetComponent<Skill>();
-        //this.gm = gM.GetComponent<GameManager>(); // gM GameObject 객체에 할당된 GameManager 클래스 컴포넌트를 가져옵니다.
         GameManager.instance.unLockAct += UnLockAct; // gm의 delegate 변수인 unLockAct에 현재 클래스의 UnLockAct 함수를 할당합니다.
         GameManager.instance.setMagic += SetMagicStone; // gm의 delegate 변수인 setMagic에 현재 클래스의 SetMagicStone 함수를 할당합니다.
     }
@@ -94,7 +90,7 @@ public class Player : MonoBehaviour
 
     /* Method : EnteringKey
      * Description : 플레이어가 키 입력 시 어떤 키를 입력했는지 각각에 맞는 동작을 수행하도록 하는 메서드입니다.
-     * 이동 : 상하좌우 방향키, Npc와 대화 or 맵 특정 오브젝트와 상호작용 : Space 바, 스킬 사용 : S 키
+     * 이동 : 상하좌우 방향키, Npc와 대화 or 맵 특정 오브젝트와 상호작용 : Space 바, 스킬 사용 : S 키, 포션 사용 단축키 : A, D키
      * 이동 방향키 입력 상태에 따라 플레이어의 현재 이동 방향과 플레이어가 가장 최근에 이동한 방향 값을 가져오도록 구현했습니다. 
      * S 키를 눌러 스킬을 사용하고자 할 때 1번 퀘스트가 완료되지 않았으면 키를 눌러도 아무런 동작이 수행되지 않도록 했고, 해당 조건을 통과하면 gm을 통해 스킬 사용 불가능 상태 여부 확인 후
      * 현재 마력 수치를 가져와 스킬 사용에 필요한 마력이 남아있는지 여부를 검사해 두 조건을 다 만족하면 스킬 동작을 수행하도록 구현했습니다.
@@ -187,6 +183,14 @@ public class Player : MonoBehaviour
                 }
             }
         }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            PotionEvent(0);
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            PotionEvent(1);
+        }
     }
 
     /* Method : MoveEvent
@@ -267,6 +271,23 @@ public class Player : MonoBehaviour
         GameManager.instance.TalkEvent();
     }
 
+    /* Method : PotionEvent
+     * Description : 플레이어가 단축키 A또는 D를 클릭하여 포션을 사용하는 경우 관련 동작을 수행하는 메서드입니다.
+     * Parameter : int idx - 위치(A 키 : 0, D 키 : 1)
+     * Return Value : void
+     */
+    void PotionEvent(int idx)
+    {
+        if (GameManager.instance.CurShortCutPotions[idx] != -1)
+        {
+            if (GameManager.instance.InvenManager.FindItem(GameManager.instance.CurShortCutPotions[idx]) != -1)
+            {
+                GameManager.instance.CurUsedItemLoc = GameManager.instance.InvenManager.FindItem(GameManager.instance.CurShortCutPotions[idx]);
+                GameManager.instance.UsePotion();
+            }
+        }
+    }
+
     /* Method : SetMagicStone
      * Description : 플레이어가 마법석 변경 시 해당 마법석에 맞는 스킬을 매개변수로 받아서 현재 사용 가능한 스킬에 할당하는 메서드입니다.
      * Parameter : GameObject sk - 스킬(게임 오브젝트 형태)
@@ -276,14 +297,14 @@ public class Player : MonoBehaviour
     {
         skill = sk;
         this.sk = skill.GetComponent<Skill>();
-        if (GameManager.instance.CurQuestNum >= 2) SetMagicStick();
+        if(GameManager.instance.CurQuestNum >= 2) SetMagicStick();
     }
 
     /* Method : SetMagicStick
      * Description : 플레이어가 마법석 변경 시 마법 지팡이 모습도 알맞게 변경되도록 하는 메서드입니다.
      * Return Value : void
      */
-    void SetMagicStick()
+    void SetMagicStick() 
     {
         spResolver = MagicStone.GetComponent<SpriteResolver>();
         if (GameManager.instance.WaterSelected)
@@ -372,7 +393,7 @@ public class Player : MonoBehaviour
     //해당 태그를 가진 물체와 충돌 상태면 플레이어의 레이어 값을 더 낮게 설정하는 방식 -> 향후 수정 필요(레이어 값이 명시되어도 괜찮을까?)
     void OnTriggerEnter2D(Collider2D Other)
     {
-        if (Other.gameObject.tag == "Gold")
+        if(Other.gameObject.tag == "Gold")
         {
             GameManager.instance.GoldIncrease(Other.gameObject.GetComponent<Gold>().GoldNum);
             Other.gameObject.SetActive(false);

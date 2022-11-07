@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject shopUI; // 상점 창 GameObject
     [SerializeField] private GameObject enterNumberUI; // 구매할 아이템 수량 입력창 GameObject
     [SerializeField] private GameObject blackOut; // 화면 블랙아웃 동작하는 이미지 GameObject
+    [SerializeField] private GameObject dragImage; // 드래그 이미지 사본 GameObject
     [SerializeField] private TMP_InputField itemQuantityInput; //아이템 수량 입력칸
     [SerializeField] private TMPro.TMP_Text level; // 플레이어 레벨 
     [SerializeField] private TMPro.TMP_Text gold; //  플레이어가 보유중인 골드
@@ -98,8 +99,9 @@ public class GameManager : MonoBehaviour
     int selectedInvenItemLoc = -1; // 선택된 아이템의 칸 위치(인벤토리), -1 : 선택된 아이템이 없음을 의미
     int selectedShopItemLoc = -1; // 선택된 아이템의 칸 위치(상점), -1 : 선택된 아이템이 없음을 의미
     int curUsedItemLoc = -1; // 현재 사용할 아이템의 칸 위치(인벤토리), -1 : 사용할 아이템이 없음
+    int curDragItemLoc = -1; // 현재 드래그 되고 있는 아이템 인벤토리 내 위치, -1 : 드래그 중인 아이템이 없음
     int monsterPower = 0; // 몬스터의 공격력
-    int[] curShortCutPotions = new int[2]; // 포션 단축키에 올려져 있는 포션의 아이템 아이디 목록
+    int[] curShortCutPotions = new int[]{ -1, -1 }; // 포션 단축키에 올려져 있는 포션의 아이템 아이디 목록
     float percent = 0; // 그래프 증가 혹은 감소 게이지 퍼센트 값
     string tmp = null; // 대사 출력에 쓰일 임시 문자열
     char[] textData = null; // npc의 대사를 나타내는 문자 배열
@@ -214,6 +216,18 @@ public class GameManager : MonoBehaviour
         }
     }
     /* Property */
+    public int CurDragItemLoc
+    {
+        get
+        {
+            return curDragItemLoc;
+        }
+        set
+        {
+            curDragItemLoc = value;
+        }
+    }
+    /* Property */
     public int MonsterPower
     {
         get
@@ -223,6 +237,18 @@ public class GameManager : MonoBehaviour
         set
         {
             monsterPower = value;
+        }
+    }
+    /* Property */
+    public int[] CurShortCutPotions
+    {
+        get
+        {
+            return curShortCutPotions;
+        }
+        set
+        {
+            curShortCutPotions = value;
         }
     }
     /* Property */
@@ -343,6 +369,14 @@ public class GameManager : MonoBehaviour
         set
         {
             playerPos = value;
+        }
+    }
+    /* Property */
+    public GameObject DragImage
+    {
+        get
+        {
+            return dragImage;
         }
     }
     /* Method : WaitForTeleportReady
@@ -551,7 +585,7 @@ public class GameManager : MonoBehaviour
         curExp = 0;
         expGraph.fillAmount = 0f;
         exp.text = Convert.ToString(curExp);
-        foreach (GameObject sk in skills)
+        foreach(GameObject sk in skills)
         {
             sk.GetComponent<Skill>().AttackPower += 5;
         }
@@ -668,7 +702,7 @@ public class GameManager : MonoBehaviour
     public void InventoryOff()
     {
         invenOn = false;
-        if (selectedInvenItemLoc != -1) SelectedItemFromInven(selectedInvenItemLoc);
+        if(selectedInvenItemLoc != -1) SelectedItemFromInven(selectedInvenItemLoc);
         inven.SetActive(false);
     }
 
