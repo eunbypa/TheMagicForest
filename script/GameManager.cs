@@ -682,6 +682,7 @@ public class GameManager : MonoBehaviour
      */
     public void UsePotion()
     {
+        QuestUpdate("Æ÷¼Ç»ç¿ë");
         Potion potion = im.InvenItemList[curUsedItemLoc] as Potion;
         int curNum = im.InvenItemQuantityList[curUsedItemLoc];
         im.ItemQuantityDecrease(curUsedItemLoc, 1);
@@ -764,6 +765,7 @@ public class GameManager : MonoBehaviour
      */
     public void GetItem(Item item, int num)
     {
+        QuestUpdate("¾ÆÀÌÅÛÈ¹µæ", item.ItemId);
         int idx = im.FindItem(item.ItemId);
         if (idx == -1) im.ItemInsert(item, num);
         else
@@ -1130,6 +1132,10 @@ public class GameManager : MonoBehaviour
      */
     public void QuestDone()
     {
+        for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count; i++)
+        {
+            reqList[i].SetActive(false);
+        }
         questUI.SetActive(false);
         if (curQuestNum == 1) skillImage.SetActive(true);
         accept = false;

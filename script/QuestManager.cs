@@ -41,7 +41,6 @@ public class QuestManager : MonoBehaviour
      */
     void ReadData(string s)
     {
-        int i = 0;
         int curNum = 0;
         int checkFirst = 0;
         TextAsset textset = Resources.Load<TextAsset>(s);
@@ -63,14 +62,13 @@ public class QuestManager : MonoBehaviour
                     questDataList.Add(qdata);
                 }
                 curNum++;
-                i++;
-                if (i == 3) return;
             }
             if (s == "QuestList")
             {
                 questDataList[curNum - 1].Title = SplitLine[1];
                 questDataList[curNum - 1].NpcId = Convert.ToInt32(SplitLine[2]);
                 questDataList[curNum - 1].NpcName = SplitLine[3];
+                SplitLine[4] = SplitLine[4].Replace("½°Ç¥", ",");
                 questDataList[curNum - 1].Info = SplitLine[4];
             }
             if (s == "Quest_Requirement")
