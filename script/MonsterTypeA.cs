@@ -39,7 +39,7 @@ public class MonsterTypeA : Monster
         CurHp = maxHp;
         hpGraph.fillAmount = 1f;
         movingChoice = null;
-        if (!firstPos.Equals(new Vector3(0, 0, 0))) transform.position = firstPos;
+        if(!firstPos.Equals(new Vector3(0, 0, 0))) transform.position = firstPos;
         stateMachine.ChangeState(states[(int)MonsterStates.MonsterState.normal]);
     }
     /* Method : MovingChoice
@@ -168,6 +168,7 @@ public class MonsterTypeA : Monster
      */
     public override void Hurt()
     {
+        EffectSoundManager.instance.PlayEffectSound("hurt");
         CurHp -= hurtDamage;
         if (CurHp >= 0)
         {

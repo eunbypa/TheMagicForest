@@ -580,6 +580,7 @@ public class GameManager : MonoBehaviour
      */
     public void LevelUp()
     {
+        EffectSoundManager.instance.PlayEffectSound("levelUp");
         curLevel++;
         level.text = Convert.ToString(curLevel);
         curExp = 0;
@@ -597,6 +598,7 @@ public class GameManager : MonoBehaviour
      */
     public void InventoryOn()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         invenOn = true;
         for (int i = 0; i < im.MaxSize; i++)
         {
@@ -682,6 +684,7 @@ public class GameManager : MonoBehaviour
      */
     public void UsePotion()
     {
+        EffectSoundManager.instance.PlayEffectSound("potionUse");
         QuestUpdate("Æ÷¼Ç»ç¿ë");
         Potion potion = im.InvenItemList[curUsedItemLoc] as Potion;
         int curNum = im.InvenItemQuantityList[curUsedItemLoc];
@@ -702,6 +705,7 @@ public class GameManager : MonoBehaviour
      */
     public void InventoryOff()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         invenOn = false;
         if(selectedInvenItemLoc != -1) SelectedItemFromInven(selectedInvenItemLoc);
         inven.SetActive(false);
@@ -724,6 +728,7 @@ public class GameManager : MonoBehaviour
      */
     public void ShopOff()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         selectedShopItemLoc = -1;
         shopExit = true;
         unLockWait();
@@ -745,6 +750,7 @@ public class GameManager : MonoBehaviour
      */
     public void BuyItemRequest()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         if (itemQuantityInput.text == null) return;
         int num = Convert.ToInt32(itemQuantityInput.text);
         if (num <= 0) return;
@@ -765,6 +771,7 @@ public class GameManager : MonoBehaviour
      */
     public void GetItem(Item item, int num)
     {
+        EffectSoundManager.instance.PlayEffectSound("getItem");
         QuestUpdate("¾ÆÀÌÅÛÈ¹µæ", item.ItemId);
         int idx = im.FindItem(item.ItemId);
         if (idx == -1) im.ItemInsert(item, num);
@@ -781,6 +788,7 @@ public class GameManager : MonoBehaviour
      */
     public void EnterItemQuantity()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         if (selectedShopItemLoc == -1)
         {
             unLockWait();
@@ -808,6 +816,7 @@ public class GameManager : MonoBehaviour
      */
     public void SelectedItem(int idx)
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         if (invenOn) SelectedItemFromInven(idx);
         else SelectedItemFromShop(idx);
     }
@@ -973,6 +982,7 @@ public class GameManager : MonoBehaviour
      */
     public void OpenCurQuestList()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         down.SetActive(false);
         up.SetActive(true);
         progressingQuest.SetActive(true);
@@ -984,6 +994,7 @@ public class GameManager : MonoBehaviour
      */
     public void CloseCurQuestList()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         down.SetActive(true);
         up.SetActive(false);
         progressingQuest.SetActive(false);
@@ -1031,6 +1042,7 @@ public class GameManager : MonoBehaviour
      */
     public void QuestAccept()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         accept = true;
         unLockWait();
         CloseYesOrNoButton();
@@ -1045,6 +1057,7 @@ public class GameManager : MonoBehaviour
      */
     public void QuestRefuse()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         accept = false;
         unLockWait();
         CloseYesOrNoButton();
@@ -1202,6 +1215,7 @@ public class GameManager : MonoBehaviour
      */
     public void SwitchingMagicStone()
     {
+        EffectSoundManager.instance.PlayEffectSound("buttonClick");
         if (!waterSelected && !dirtSelected && !windSelected) return;
         if (waterSelected)
         {

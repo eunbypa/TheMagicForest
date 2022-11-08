@@ -43,6 +43,7 @@ public class Player : MonoBehaviour
     bool skOn = false; // 스킬 활성화 여부
     bool getHurt = false; // 다친 상태 여부
     bool actLock = false; // 플레이어의 움직임, 스킬 사용과 같은 행동 제한 여부
+    string curMagic; // 현재 사용중인 마법
 
     IEnumerator hurtPeriod; // HurtEvent 코루틴 변수
     WaitForSeconds wfs; // 코루틴에서 제어권을 돌려주고 기다리는 시간
@@ -310,14 +311,17 @@ public class Player : MonoBehaviour
         if (GameManager.instance.WaterSelected)
         {
             spResolver.SetCategoryAndLabel("MagicStone", "water");
+            curMagic = "waterMagic";
         }
         else if (GameManager.instance.DirtSelected)
         {
             spResolver.SetCategoryAndLabel("MagicStone", "dirt");
+            curMagic = "dirtMagic";
         }
         else if (GameManager.instance.WindSelected)
         {
             spResolver.SetCategoryAndLabel("MagicStone", "wind");
+            curMagic = "windMagic";
         }
         spResolver = MagicStick.GetComponent<SpriteResolver>();
         spResolver.SetCategoryAndLabel("MagicStick", "hold");
@@ -343,6 +347,7 @@ public class Player : MonoBehaviour
                 wait = 0;
                 sk.Attack = true;
                 skOn = false;
+                EffectSoundManager.instance.PlayEffectSound(curMagic);
             }
         }
         if (sk.Attack)
@@ -395,11 +400,13 @@ public class Player : MonoBehaviour
     {
         if(Other.gameObject.tag == "Gold")
         {
+            EffectSoundManager.instance.PlayEffectSound("getGold");
             GameManager.instance.GoldIncrease(Other.gameObject.GetComponent<Gold>().GoldNum);
             Other.gameObject.SetActive(false);
         }
         if (Other.gameObject.tag == "Item")
         {
+            EffectSoundManager.instance.PlayEffectSound("getItem");
             Item item = Other.gameObject.GetComponent<Item>();
             GameManager.instance.GetItem(item, 1);
             Other.gameObject.SetActive(false);
@@ -412,6 +419,7 @@ public class Player : MonoBehaviour
         {
             if (getHurt == false)
             {
+                EffectSoundManager.instance.PlayEffectSound("hurt");
                 if (transform.position.x > Other.transform.position.x) transform.position = new Vector2(transform.position.x + 0.2f, transform.position.y); // 공격받은 방향으로 살짝 넉백하는 동작
                 else transform.position = new Vector2(transform.position.x - 0.2f, transform.position.y);
                 GameManager.instance.HpDown(GameManager.instance.MonsterPower); // 몬스터의 공격력 만큼 체력 감소
