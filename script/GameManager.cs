@@ -746,13 +746,23 @@ public class GameManager : MonoBehaviour
 
     /* Method : BuyItemRequest
      * Description : 상점에서 플레이어의 아이템 구매 요청이 발생하면 상인 npc에게 선택된 아이템과 입력받은 수량을 매개변수로 보내서 판매 요청 동작을 수행하는 메서드입니다. 
+     * 입력된 정보가 없거나 정수 형태의 입력이 아니거나 입력 값이 0보다 작거나 같은 경우 다음 동작을 수행하기 전 메서드를 빠져나옵니다.
      * Return Value : void
      */
     public void BuyItemRequest()
     {
         EffectSoundManager.instance.PlayEffectSound("buttonClick");
-        if (itemQuantityInput.text == null) return;
-        int num = Convert.ToInt32(itemQuantityInput.text);
+        if (itemQuantityInput.text.Length == 0) return;
+        int num = 0;
+        try
+        {
+            num = Convert.ToInt32(itemQuantityInput.text);
+        }
+        catch (Exception e)
+        {
+            Debug.Log("정수가 아님");
+            return;
+        }
         if (num <= 0) return;
         clickLock = false;
         itemQuantityInput.text = null;
