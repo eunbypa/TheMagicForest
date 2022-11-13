@@ -7,16 +7,41 @@ using UnityEngine;
  */
 public class InventoryManager : MonoBehaviour
 {
+    public static InventoryManager instance; // 싱글톤 패턴
     int maxSize = 28; // 인벤토리 최대 칸 수
     bool isFull = false; // 가방이 빈 공간 없이 다 찼는지 여부
 
     List<Item> invenItemList = new List<Item>(); // 인벤토리 각 칸에 위치한 아이템 나타냄
     List<int> invenItemQuantityList = new List<int>(); // 인벤토리 각 칸의 아이템 수량을 나타냄
 
-    //향후 데이터 저장&로드 기능 구현 시 저장된 데이터에서 인벤토리 정보를 가져오는 작업 구현 예정
+    void Awake()
+    {
+        instance = this;
+    }
     void Start()
     {
-
+        if (DataManager.instance.Data.invenItemIdList != null)
+        {
+            //Debug.Log(DataManager.instance.Data.invenItemIdList.Count);
+            for (int i = 0; i < DataManager.instance.Data.invenItemIdList.Count; i++)
+            {
+                this.invenItemList.Add(GameManager.instance.Items[DataManager.instance.Data.invenItemIdList[i] - 1].GetComponent<Item>());
+                //Debug.Log(DataManager.instance.Data.invenItemIdList[i]);
+                //Debug.Log(GameManager.instance.Items[DataManager.instance.Data.invenItemIdList[i] - 1].GetComponent<Item>().ItemId);
+            }
+        }
+        if (DataManager.instance.Data.invenItemQuantityList != null)
+        {
+            for (int i = 0; i < DataManager.instance.Data.invenItemIdList.Count; i++)
+            { 
+                this.invenItemQuantityList.Add(DataManager.instance.Data.invenItemQuantityList[i]);
+            }
+        }
+        GameManager.instance.InventoryUpdate();
+    }
+    void Update()
+    {
+        //Debug.Log(this.invenItemList.Count);
     }
 
     /* Property */

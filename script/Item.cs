@@ -22,7 +22,7 @@ public class Item : MonoBehaviour
     }
     /* Property */
     public string ItemName
-    {
+    { 
         get
         {
             return itemName;

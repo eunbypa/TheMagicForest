@@ -82,6 +82,9 @@ public class DialogueManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+    }
+    void Start()
+    {
         //csv 파일 읽어들이고 해당 리스트에 저장하는 작업
         ReadDiaData("NpcScript", ref diaData);
         ReadDiaData("QuestScript_Ask", ref questAskDiaData);
@@ -124,7 +127,7 @@ public class DialogueManager : MonoBehaviour
             {
                 dList[curNum - 1].NpcId = Convert.ToInt32(SplitLine[0]);
                 dList[curNum - 1].NpcName = SplitLine[1];
-                SplitLine[2] = SplitLine[2].Replace("닉네임", "로빈"); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
+                SplitLine[2] = SplitLine[2].Replace("닉네임", GameManager.instance.PlayerName); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
                 SplitLine[2] = SplitLine[2].Replace("쉼표", ",");
                 dList[curNum - 1].Dialogue.Add(SplitLine[2]);
             }
@@ -132,7 +135,7 @@ public class DialogueManager : MonoBehaviour
             {
                 dList[curNum - 1].NpcId = Convert.ToInt32(SplitLine[1]);
                 dList[curNum - 1].NpcName = SplitLine[2];
-                SplitLine[3] = SplitLine[3].Replace("닉네임", "로빈"); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
+                SplitLine[3] = SplitLine[3].Replace("닉네임", GameManager.instance.PlayerName); // 나중에 타이틀 씬에서 입력받은 닉네임 정보를 저장하는 코드로 바꿔야 함. 지금은 예시용
                 SplitLine[3] = SplitLine[3].Replace("쉼표", ",");
                 dList[curNum - 1].Dialogue.Add(SplitLine[3]);
             }

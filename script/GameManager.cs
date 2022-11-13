@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
 
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
     [SerializeField] private GameObject[] skills; // 스킬 GameObject 배열
+    [SerializeField] private GameObject[] items; // 아이템 GameObject 배열
     [SerializeField] private GameObject yes; // 퀘스트 수락 버튼 GameObject
     [SerializeField] private GameObject no; // 퀘스트 거절 버튼 GameObject
     [SerializeField] private GameObject skillLocked; // 스킬 쿨타임을 기다리는 동안 스킬 사용불가능 표시를 나타내는 이미지 GameObject 
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject blackOut; // 화면 블랙아웃 동작하는 이미지 GameObject
     [SerializeField] private GameObject dragImage; // 드래그 이미지 사본 GameObject
     [SerializeField] private TMP_InputField itemQuantityInput; //아이템 수량 입력칸
+    [SerializeField] private TMPro.TMP_Text name; // 플레이어 이름
     [SerializeField] private TMPro.TMP_Text level; // 플레이어 레벨 
     [SerializeField] private TMPro.TMP_Text gold; //  플레이어가 보유중인 골드
     [SerializeField] private Image hpGraph; // 플레이어 체력 그래프
@@ -94,7 +96,7 @@ public class GameManager : MonoBehaviour
     int curExp = 0; // 플레이어의 현재 경험치
     int curMaxExp = 100; // 플레이어의 레벨업에 필요한 현재 경험치 최댓값
     int curQuestNum = 1; // 현재 진행 가능한 혹은 진행중인 퀘스트 번호
-    int curQuestNpcId; // 현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 npc의 아이디
+    int curQuestNpcId = 3; // 현재 진행 가능한 혹은 진행중인 퀘스트를 가지고 있는 npc의 아이디
     int finishReqNum = 0; // 퀘스트 조건들에서 완료한 조건 수
     int selectedInvenItemLoc = -1; // 선택된 아이템의 칸 위치(인벤토리), -1 : 선택된 아이템이 없음을 의미
     int selectedShopItemLoc = -1; // 선택된 아이템의 칸 위치(상점), -1 : 선택된 아이템이 없음을 의미
@@ -104,6 +106,7 @@ public class GameManager : MonoBehaviour
     int[] curShortCutPotions = new int[]{ -1, -1 }; // 포션 단축키에 올려져 있는 포션의 아이템 아이디 목록
     float percent = 0; // 그래프 증가 혹은 감소 게이지 퍼센트 값
     string tmp = null; // 대사 출력에 쓰일 임시 문자열
+    string playerName; // 플레이어 이름
     char[] textData = null; // npc의 대사를 나타내는 문자 배열
     bool isTalking = false; // 대화중 즉 대사가 출력되는 중인지 여부
     bool teleportReady = false; // 텔레포트 준비 완료 여부
@@ -118,14 +121,52 @@ public class GameManager : MonoBehaviour
     bool invenOn = false; // 인벤토리 창이 켜져 있는지 여부
     bool shopExit = false; // 상점 퇴장 여부
     bool clickLock = false; // 맨 앞에 다른 UI 창이 켜져있으면 뒤쪽 UI들에 대한 마우스 클릭 이벤트 제한하도록 함
-    List<int> curQuestReqNum = new List<int>(); // 현재 진행중인 퀘스트 성공에 필요한 조건 목록
+    List<int> curQuestReqNum = new List<int>(); // 현재 진행중인 퀘스트 성공에 필요한 조건 수행 상태 목록
     Vector3 playerPos; // 플레이어의 현재 위치
-    InventoryManager im; // 인벤토리 관리자 InventoryManager 클래스 객체
+    //InventoryManager im; // 인벤토리 관리자 InventoryManager 클래스 객체
     Animator ani; // 유니티 애니메이션 컴포넌트
 
     void Awake()
     {
         instance = this;
+        // 저장된 데이터를 기반으로 초기화
+        if (DataManager.instance.Data.playerPos != null) this.playerPos = DataManager.instance.Data.playerPos;
+        this.curMapNum = DataManager.instance.Data.curMapNum;
+        if (DataManager.instance.Data.level > 0) this.curLevel = DataManager.instance.Data.level;
+        this.level.text = Convert.ToString(this.curLevel);
+        this.playerName = DataManager.instance.Data.name;
+        this.name.text = this.playerName;
+        if (DataManager.instance.Data.gold != -1) this.curGold = DataManager.instance.Data.gold;
+        this.gold.text = Convert.ToString(this.curGold);
+        if (DataManager.instance.Data.maxHp != -1) this.curMaxHp = DataManager.instance.Data.maxHp; // 현재 플레이어의 체력 최댓값
+        if (DataManager.instance.Data.curHp != -1) HpDown(this.curMaxHp - DataManager.instance.Data.curHp); // 현재 체력에 맞게 체력그래프 설정
+        this.hp.text = Convert.ToString(this.curHp);
+        this.maxHp.text = Convert.ToString(this.curMaxHp);
+        if (DataManager.instance.Data.maxMp != -1) this.curMaxMp = DataManager.instance.Data.maxMp; // 현재 플레이어의 마력 최댓값
+        if (DataManager.instance.Data.curMp != -1) MpDown(this.curMaxMp - DataManager.instance.Data.curMp); // 현재 마력에 맞게 마력그래프 설정
+        this.mp.text = Convert.ToString(this.curMp);
+        this.maxMp.text = Convert.ToString(this.curMaxMp);
+        if (DataManager.instance.Data.maxExp != -1) this.curMaxExp = DataManager.instance.Data.maxExp; // 현재 플레이어의 경험치 최댓값
+        if (DataManager.instance.Data.curExp != -1) ExpUp(DataManager.instance.Data.curExp); // 현재 경험치에 맞게 경험치그래프 설정
+        this.exp.text = Convert.ToString(this.curExp);
+        this.maxExp.text = Convert.ToString(this.curMaxExp);
+        if (DataManager.instance.Data.magicStone != null)
+        {
+            switch (DataManager.instance.Data.magicStone) {
+                case "물의마법석":
+                    waterSelected = true;
+                    break;
+                case "흙의마법석":
+                    dirtSelected = true;
+                    break;
+                case "바람의마법석":
+                    windSelected = true;
+                    break;
+            }
+        }
+        if (DataManager.instance.Data.shortCutPotions != null) this.curShortCutPotions = DataManager.instance.Data.shortCutPotions;
+        if (DataManager.instance.Data.curQuestNum > 0) this.curQuestNum = DataManager.instance.Data.curQuestNum;
+        if (DataManager.instance.Data.curQuestNpcId != 0) this.curQuestNpcId = DataManager.instance.Data.curQuestNpcId;
     }
 
     void Start()
@@ -135,16 +176,25 @@ public class GameManager : MonoBehaviour
         this.waitForTeleport = WaitForTeleport(); // 코루틴 할당
         this.wfs = new WaitForSeconds(0.05f); // 대기 시간
         this.wfs2 = new WaitForSeconds(0.5f); // 대기 시간
-        this.im = inven.GetComponent<InventoryManager>(); // inven GameObject 에서 Inventory Manager 클래스 컴포넌트를 가져옵니다.
-
-        //향후 데이터 저장&로드 구현 시 수정해야 함
-        this.curGold = Convert.ToInt32(gold.text); // 현재 플레이어가 보유중인 골드
-        this.curHp = Convert.ToInt32(hp.text); // 현재 플레이어의 체력
-        this.curMaxHp = Convert.ToInt32(maxHp.text); // 현재 플레이어의 체력 최댓값
-        this.curMp = Convert.ToInt32(mp.text); // 현재 플레이어의 마력
-        this.curMaxMp = Convert.ToInt32(maxMp.text); // 현재 플레이어의 마력 최댓값
-        this.curMaxExp = Convert.ToInt32(maxExp.text); // 현재 플레이어의 경험치 최댓값
-        this.curQuestNpcId = QuestManager.instance.QuestDataList[curQuestNum - 1].NpcId; // 현재 진행가능한 퀘스트를 가지고 있는 npc 아이디
+        //저장된 데이터를 바탕으로 초기화
+        this.accept = DataManager.instance.Data.accept;
+        this.success = DataManager.instance.Data.success;
+        if (this.success)
+        {
+            this.curQuestReqNum = DataManager.instance.Data.curQuestReqNum;
+            ShowQuestInfo();
+            QuestSuccess();
+        }
+        else if (this.accept)
+        {
+            this.curQuestReqNum = DataManager.instance.Data.curQuestReqNum;
+            ShowQuestInfo();
+            for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count; i++)
+            {
+                if (curQuestReqNum[i] == QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]) finishReqNum++;
+            }
+        }
+        if (curQuestNum > 1) skillImage.SetActive(true);
     }
 
     /* Property */
@@ -164,11 +214,59 @@ public class GameManager : MonoBehaviour
         }
     }
     /* Property */
+    public int CurHp
+    {
+        get
+        {
+            return curHp;
+        }
+    }
+    /* Property */
+    public int CurMaxHp
+    {
+        get
+        {
+            return curMaxHp;
+        }
+    }
+    /* Property */
     public int CurMp
     {
         get
         {
             return curMp;
+        }
+    }
+    /* Property */
+    public int CurMaxMp
+    {
+        get
+        {
+            return curMaxMp;
+        }
+    }
+    /* Property */
+    public int CurExp
+    {
+        get
+        {
+            return curExp;
+        }
+        set
+        {
+            curExp = value;
+        }
+    }
+    /* Property */
+    public int CurMaxExp
+    {
+        get
+        {
+            return curMaxExp;
+        }
+        set
+        {
+            curMaxExp = value;
         }
     }
     /* Property */
@@ -252,6 +350,18 @@ public class GameManager : MonoBehaviour
         }
     }
     /* Property */
+    public List<int> CurQuestReqNum
+    {
+        get
+        {
+            return curQuestReqNum;
+        }
+        set
+        {
+            curQuestReqNum = value;
+        }
+    }
+    /* Property */
     public bool Accept
     {
         get
@@ -281,6 +391,14 @@ public class GameManager : MonoBehaviour
         set
         {
             textData = value;
+        }
+    }
+    /* Property */
+    public string PlayerName
+    {
+        get
+        {
+            return playerName;
         }
     }
     /* Property */
@@ -351,14 +469,14 @@ public class GameManager : MonoBehaviour
             return noEmptySpace;
         }
     }
-    /* Property */
+    /* Property 
     public InventoryManager InvenManager
     {
         get
         {
             return im;
         }
-    }
+    }*/
     /* Property */
     public Vector3 PlayerPos
     {
@@ -377,6 +495,22 @@ public class GameManager : MonoBehaviour
         get
         {
             return dragImage;
+        }
+    }
+    /* Property */
+    public GameObject[] Items
+    {
+        get
+        {
+            return items;
+        }
+    }
+    /* Property */
+    public Sprite[] ItemImages
+    {
+        get
+        {
+            return itemImages;
         }
     }
     /* Method : WaitForTeleportReady
@@ -598,11 +732,12 @@ public class GameManager : MonoBehaviour
      */
     public void InventoryOn()
     {
+        Debug.Log("인벤토리 아이템 개수 : " + InventoryManager.instance.InvenItemList.Count);
         EffectSoundManager.instance.PlayEffectSound("buttonClick");
         invenOn = true;
-        for (int i = 0; i < im.MaxSize; i++)
+        for (int i = 0; i < InventoryManager.instance.MaxSize; i++)
         {
-            if (i < im.InvenItemList.Count)
+            if (i < InventoryManager.instance.InvenItemList.Count)
             {
                 invenItemSpaces[i].SetActive(true);
                 invenItemQuantitySpaces[i].SetActive(true);
@@ -622,12 +757,12 @@ public class GameManager : MonoBehaviour
      */
     public void InventoryUpdate()
     {
-        for (int i = 0; i < im.MaxSize; i++)
+        for (int i = 0; i < InventoryManager.instance.MaxSize; i++)
         {
-            if (i < im.InvenItemList.Count)
+            if (i < InventoryManager.instance.InvenItemList.Count)
             {
-                invenItemList[i].sprite = itemImages[im.InvenItemList[i].ItemId - 1];
-                invenItemQuantityList[i].text = Convert.ToString(im.InvenItemQuantityList[i]);
+                invenItemList[i].sprite = itemImages[InventoryManager.instance.InvenItemList[i].ItemId - 1];
+                invenItemQuantityList[i].text = Convert.ToString(InventoryManager.instance.InvenItemQuantityList[i]);
             }
             else
             {
@@ -686,9 +821,9 @@ public class GameManager : MonoBehaviour
     {
         EffectSoundManager.instance.PlayEffectSound("potionUse");
         QuestUpdate("포션사용");
-        Potion potion = im.InvenItemList[curUsedItemLoc] as Potion;
-        int curNum = im.InvenItemQuantityList[curUsedItemLoc];
-        im.ItemQuantityDecrease(curUsedItemLoc, 1);
+        Potion potion = InventoryManager.instance.InvenItemList[curUsedItemLoc] as Potion;
+        int curNum = InventoryManager.instance.InvenItemQuantityList[curUsedItemLoc];
+        InventoryManager.instance.ItemQuantityDecrease(curUsedItemLoc, 1);
         curNum--;
         potion.UseItem();
         InventoryUpdate();
@@ -783,11 +918,11 @@ public class GameManager : MonoBehaviour
     {
         EffectSoundManager.instance.PlayEffectSound("getItem");
         QuestUpdate("아이템획득", item.ItemId);
-        int idx = im.FindItem(item.ItemId);
-        if (idx == -1) im.ItemInsert(item, num);
+        int idx = InventoryManager.instance.FindItem(item.ItemId);
+        if (idx == -1) InventoryManager.instance.ItemInsert(item, num);
         else
         {
-            im.ItemQuantityIncrease(idx, num);
+            InventoryManager.instance.ItemQuantityIncrease(idx, num);
         }
         InventoryUpdate();
     }
@@ -806,7 +941,7 @@ public class GameManager : MonoBehaviour
             TalkEvent();
             return;
         }
-        if (im.IsFull && im.FindItem(getItemId(selectedShopItemLoc)) == -1) noEmptySpace = true;
+        if (InventoryManager.instance.IsFull && InventoryManager.instance.FindItem(getItemId(selectedShopItemLoc)) == -1) noEmptySpace = true;
         else noEmptySpace = false;
         if (noEmptySpace)
         {
@@ -839,6 +974,7 @@ public class GameManager : MonoBehaviour
      */
     public void SelectedItemFromInven(int idx)
     {
+        //Debug.Log(" GM에서 : " + im.InvenItemList.Count);
         Color color;
         if (selectedInvenItemLoc == idx)
         {
@@ -870,7 +1006,7 @@ public class GameManager : MonoBehaviour
             color = invenItemQuantityList[selectedInvenItemLoc].color;
             color.a = 0.5f;
             invenItemQuantityList[selectedInvenItemLoc].color = color;
-            im.ShowSelectedItemInfo(selectedInvenItemLoc);
+            InventoryManager.instance.ShowSelectedItemInfo(selectedInvenItemLoc);
         }
     }
 
@@ -1092,10 +1228,10 @@ public class GameManager : MonoBehaviour
         questInfo.color = Color.white;
         for (int i = 0; i < QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count; i++)
         {
-            questReqName[i].text = QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + "0 / " + Convert.ToString(QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]);
+            if(QuestManager.instance.QuestDataList[curQuestNum - 1].Type.Count != curQuestReqNum.Count) curQuestReqNum.Add(0);
+            questReqName[i].text = QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Name[i] + " " + Convert.ToString(curQuestReqNum[i]) + " / " + Convert.ToString(QuestManager.instance.QuestDataList[curQuestNum - 1].Req_Num[i]);
             reqList[i].SetActive(true);
             questReqName[i].color = Color.white;
-            curQuestReqNum.Add(0);
         }
     }
 
@@ -1246,5 +1382,10 @@ public class GameManager : MonoBehaviour
         }
         QuestUpdate("마법석선택");
         SelectMagicStoneUIOff();
+    }
+
+    public void Store()
+    {
+        DataManager.instance.Store();
     }
 }

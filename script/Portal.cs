@@ -38,12 +38,14 @@ public class Portal : MonoBehaviour
 
     /* Method : TeleportEvent
      * Description : 텔레포트 시 동작을 수행하는 메서드입니다. gm의 TeleportMap 함수에 도착지 맵 번호를 매개변수로 전달해서 이동 후의 맵 번호를 알 수 있게 했고 플레이어의 위치를 도착지 포탈 위치로 바꾸도록
-     * 구현했습니다. 그리고 현재 맵, 몬스터를 비활성화하고 도착지 맵, 몬스터를 활성화합니다.  
+     * 구현했습니다. 그리고 도착지 맵의 배경음악을 재생하기 위해 SoundManager의 PlayBGM을 호출합니다. 현재 맵, 몬스터를 비활성화하고 도착지 맵, 몬스터를 활성화합니다.  
      * Return Value : void
      */
     public void TeleportEvent()
     {
         GameManager.instance.TeleportMap(destinationMapNum);
+        BackGroundMusicManager.instance.StopBGM();
+        BackGroundMusicManager.instance.PlayBGM(destinationMapNum);
         MonsterManager.instance.SetMonstersOnMap(destinationMapNum);
         player.transform.position = new Vector2(destination.transform.position.x, destination.transform.position.y);
         curMap.SetActive(false);

@@ -41,6 +41,7 @@ public class QuestManager : MonoBehaviour
      */
     void ReadData(string s)
     {
+        int i = 0;
         int curNum = 0;
         int checkFirst = 0;
         TextAsset textset = Resources.Load<TextAsset>(s);
@@ -62,6 +63,8 @@ public class QuestManager : MonoBehaviour
                     questDataList.Add(qdata);
                 }
                 curNum++;
+                i++;
+                if (i == 10) return;
             }
             if (s == "QuestList")
             {

@@ -14,6 +14,7 @@ public class Normal_Npc : Npc
     {
         normal, questAsk, questRefuse, questAccept, questDoing, questSuccess, questReply
     };
+    // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
     [SerializeField] private GameObject questBallon; // 퀘스트 활성화 시 npc 위에 뜨는 말풍선
 
     int diaIdx = 0; // 다음 순서에 말할 대사 데이터 위치
@@ -23,8 +24,19 @@ public class Normal_Npc : Npc
 
     void Start()
     {
-        ds = DialogueState.normal; // npc의 대화 상태를 기본값으로 초기화합니다.
         ani = questBallon.GetComponent<Animator>(); // questBallon GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
+        if (GameManager.instance.CurQuestNpcId == NpcId) // 현재 플레이어가 진행 가능한 퀘스트를 가진 npc인 경우
+        {
+            questBallon.SetActive(true);
+            if (GameManager.instance.Success)
+            {
+                ds = DialogueState.questDoing;
+                ani.SetTrigger("wait");
+            }
+            else if (GameManager.instance.Accept) ds = DialogueState.questAccept;
+            else ds = DialogueState.normal; // npc의 대화 상태를 기본값으로 초기화합니다.
+        }
+        else ds = DialogueState.normal; // npc의 대화 상태를 기본값으로 초기화합니다.
     }
 
     void Update()

@@ -17,15 +17,23 @@ public class MouseDrop : MonoBehaviour, IDropHandler
 
     void Start()
     {
+        if (GameManager.instance.CurShortCutPotions[idx] != -1)
+        {
+            GetComponent<Image>().sprite = GameManager.instance.ItemImages[GameManager.instance.CurShortCutPotions[idx] - 1];
+            Color color;
+            color = GetComponent<Image>().color;
+            color.a = 1f;
+            GetComponent<Image>().color = color;
+        }
     }
 
     void Update()
     {
         if (GameManager.instance.CurShortCutPotions[idx] != -1)
         {
-            if (GameManager.instance.InvenManager.FindItem(GameManager.instance.CurShortCutPotions[idx]) != -1)
+            if (InventoryManager.instance.FindItem(GameManager.instance.CurShortCutPotions[idx]) != -1)
             {
-                curQuantity.text = Convert.ToString(GameManager.instance.InvenManager.InvenItemQuantityList[GameManager.instance.InvenManager.FindItem(GameManager.instance.CurShortCutPotions[idx])]);
+                curQuantity.text = Convert.ToString(InventoryManager.instance.InvenItemQuantityList[InventoryManager.instance.FindItem(GameManager.instance.CurShortCutPotions[idx])]);
             }
             else curQuantity.text = "0";
         }
@@ -36,14 +44,14 @@ public class MouseDrop : MonoBehaviour, IDropHandler
         if(GameManager.instance.CurDragItemLoc != -1)
         {
             //포션 아이템을 드랍한 경우
-            if (GameManager.instance.InvenManager.InvenItemList[GameManager.instance.CurDragItemLoc].ItemId == 1 || GameManager.instance.InvenManager.InvenItemList[GameManager.instance.CurDragItemLoc].ItemId == 2)
+            if (InventoryManager.instance.InvenItemList[GameManager.instance.CurDragItemLoc].ItemId == 1 || InventoryManager.instance.InvenItemList[GameManager.instance.CurDragItemLoc].ItemId == 2)
             {
                 GetComponent<Image>().sprite = GameManager.instance.DragImage.GetComponent<Image>().sprite;
                 Color color;
                 color = GetComponent<Image>().color;
                 color.a = 1f;
                 GetComponent<Image>().color = color;
-                GameManager.instance.CurShortCutPotions[idx] = GameManager.instance.InvenManager.InvenItemList[GameManager.instance.CurDragItemLoc].ItemId;
+                GameManager.instance.CurShortCutPotions[idx] = InventoryManager.instance.InvenItemList[GameManager.instance.CurDragItemLoc].ItemId;
             }
         }
         GameManager.instance.CurDragItemLoc = -1;

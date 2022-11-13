@@ -7,21 +7,15 @@ using UnityEngine;
  */
 public class HpPotion : Potion
 {
-    int recoverHp = 10; // 사용 시 회복 수치 -> 지금은 값을 명시한 상태, 나중에 수정 필요
+    // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
+    [SerializeField] private int recoverHp; // 회복 체력
 
-    // HpPotion 생성자
-    // ItemId는 상위 클래스 Item에 속한 정보 
-    public HpPotion(int itemId)
+    /* Method : UseItem
+    * Description : 아이템 사용 시 동작을 수행하는 메서드입니다.
+    * Return Value : void
+    */
+    public override void UseItem()
     {
-        ItemId = itemId;
-    }
-
-    /* Method : ShowItemInfo
-     * Description : 인벤토리에서 마우스 왼쪽 버튼으로 아이템 클릭 시 해당 아이템 정보를 보여주는 동작을 수행하는 메서드입니다. (아직 미구현 상태)
-     * Return Value : void
-     */
-    public override void ShowItemInfo()
-    {
-
+        GameManager.instance.HpUp(recoverHp);
     }
 }

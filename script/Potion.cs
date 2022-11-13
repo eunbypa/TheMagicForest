@@ -15,7 +15,7 @@ public class Potion : Item
     {
         GameManager.instance.ShowItemInfo(ItemName, ItemInfo);
         GameManager.instance.OpenUseItemButton();
-        GameManager.instance.CurUsedItemLoc = GameManager.instance.InvenManager.FindItem(ItemId);
+        GameManager.instance.CurUsedItemLoc = InventoryManager.instance.FindItem(ItemId);
     }
 
     /* Method : UseItem

@@ -31,6 +31,7 @@ public class EffectSoundManager : MonoBehaviour
      */
     public void PlayEffectSound(string action)
     {
+        if (audioSource == null) return;
         switch (action)
         {
             case "waterMagic":

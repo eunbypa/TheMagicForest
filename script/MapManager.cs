@@ -11,6 +11,7 @@ using UnityEngine.Tilemaps;
 public class MapManager : MonoBehaviour
 {
     public static MapManager instance; // 싱글톤 패턴
+    [SerializeField] private GameObject[] gameMaps; // 전체 맵 GameObject 배열
     [SerializeField] private Tilemap[] monsterMaps; // 몬스터가 있는 맵들 
     public List<List<TileData>> tiles; // 맵을 각 타일로 나눈 데이터
     void Awake()
@@ -19,7 +20,7 @@ public class MapManager : MonoBehaviour
     }
     void Start()
     {
-
+        gameMaps[GameManager.instance.CurMapNum].SetActive(true);
     }
     /* Property */
     public Tilemap[] MonsterMaps

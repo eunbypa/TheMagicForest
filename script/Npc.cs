@@ -8,7 +8,7 @@ using UnityEngine;
 public abstract class Npc : MonoBehaviour
 {
     // [SerializeField] 는 유니티 Inspector에 해당 변수들이 표시되도록 하기 위해 사용했습니다.
-    [SerializeField] private int npcId; // npc를 식별하는 아이디
+    [SerializeField] private int npcId;
 
     bool wait = false; // 대화 대기 상태 여부
 

@@ -56,6 +56,7 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        if (!GameManager.instance.PlayerPos.Equals(new Vector3(0, 0, 0))) this.transform.position = GameManager.instance.PlayerPos; // 저장 데이터가 존재하면 플레이어의 위치를 세팅함
         this.hurtPeriod = HurtEvent(); // 코루틴 할당
         this.wfs = new WaitForSeconds(notHurtTime); // 무적 시간 설정
         this.spResolver = GetComponent<SpriteResolver>(); // 현재 클래스가 할당된 GameObject 객체에서 SpriteResolver 컴포넌트를 가져옵니다.
@@ -64,6 +65,7 @@ public class Player : MonoBehaviour
         this.sg = GetComponent<SortingGroup>(); // 현재 클래스가 할당된 GameObject 객체에서 SortingGroup 컴포넌트를 가져옵니다.
         GameManager.instance.unLockAct += UnLockAct; // gm의 delegate 변수인 unLockAct에 현재 클래스의 UnLockAct 함수를 할당합니다.
         GameManager.instance.setMagic += SetMagicStone; // gm의 delegate 변수인 setMagic에 현재 클래스의 SetMagicStone 함수를 할당합니다.
+        GameManager.instance.SwitchingMagicStone();
     }
 
     void Update()
@@ -281,9 +283,9 @@ public class Player : MonoBehaviour
     {
         if (GameManager.instance.CurShortCutPotions[idx] != -1)
         {
-            if (GameManager.instance.InvenManager.FindItem(GameManager.instance.CurShortCutPotions[idx]) != -1)
+            if (InventoryManager.instance.FindItem(GameManager.instance.CurShortCutPotions[idx]) != -1)
             {
-                GameManager.instance.CurUsedItemLoc = GameManager.instance.InvenManager.FindItem(GameManager.instance.CurShortCutPotions[idx]);
+                GameManager.instance.CurUsedItemLoc = InventoryManager.instance.FindItem(GameManager.instance.CurShortCutPotions[idx]);
                 GameManager.instance.UsePotion();
             }
         }

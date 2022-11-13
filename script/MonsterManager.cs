@@ -42,6 +42,7 @@ public class MonsterManager : MonoBehaviour
         waitForReset = WaitForReset(); // 코루틴 할당
         wfs = new WaitForSeconds(5f); // 대기 시간
         wfs2 = new WaitForSeconds(1f); // 대기 시간
+        SetMonstersOnMap(GameManager.instance.CurMapNum); // 현재 맵이 몬스터가 있는 맵이면 몬스터 활성화
     }
     /* Method : SetMonstersOnMap
      * Description : 해당 맵에 몬스터들을 모두 활성화하는 메서드입니다. 활성화하기 전 맵을 2차원 배열의 타일 데이터로 나누는 작업을 하기 위해 맵 관리자 클래스의 DivideMapIntoTiles 메서드를 호출합니다.

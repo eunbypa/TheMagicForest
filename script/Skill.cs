@@ -127,7 +127,7 @@ public class Skill : MonoBehaviour
      */
     public void Setting(float x, float y, int directionX, int directionY)
     {
-        this.transform.position = new Vector2(x, y + 3);
+        this.transform.position = new Vector2(x, y + 2);
         if ((directionX == 0) && (directionY == 0))
         {
             goX = -1;

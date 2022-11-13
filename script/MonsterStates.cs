@@ -51,7 +51,6 @@ namespace MonsterStates
         */
         public override void Exit(Monster entity)
         {
-            entity.MovingChoice();
             entity.Stop();
         }
     }
@@ -252,7 +251,7 @@ namespace MonsterStates
         */
         public override void Exit(Monster entity)
         {
-
+            entity.GetHurt = false;
         }
     }
 }
