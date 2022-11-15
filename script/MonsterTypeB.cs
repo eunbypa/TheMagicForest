@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/*Class : MonsterTypeA
-* Description : 몬스터 중 몸으로 직접 근접 공격하는 유형의 몬스터를 담당하는 클래스입니다. Monster 클래스를 상속받습니다.
+/*Class : MonsterTypeB
+* Description : 몬스터 중 특정 물체를 던지는 방식으로 원거리 공격하는 유형의 몬스터를 담당하는 클래스입니다. Monster 클래스를 상속받습니다.
 */
-public class MonsterTypeA : Monster
+public class MonsterTypeB : Monster
 {
     Vector3 curPathPos; // 현재 지나고 있는 경로 위치
-
+    [SerializeField] private GameObject mid; // 몬스터의 중심 GameObject
+    [SerializeField] private GameObject[] attackSkill; // 몬스터가 공격 시 던지는 물체 GameObject 배열
+    int attackIdx = 0; // 공격 패턴 상하좌우면 0, 대각선이면 4
+    int[] moveX = new int[] { -1, 0, 1, 0 }; // 상하좌우
+    int[] moveY = new int[] { 0, -1, 0, 1 }; 
+    int[] move2X = new int[] { -1, -1, 1, 1 }; // 대각선 
+    int[] move2Y = new int[] { -1, 1, -1, 1 };
+    IEnumerator hideSkill; // HideSkill 코루틴 변수
+    WaitForSeconds wfs2; // 코루틴에서 제어권을 돌려주고 기다리는 시간
     void Start()
     {
         SettingStates(); // states 배열에 몬스터가 가지는 상태들을 할당
@@ -19,8 +27,10 @@ public class MonsterTypeA : Monster
         ani = mainBody.GetComponent<Animator>(); // 자식 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         minPos = MapManager.instance.MonsterMaps[locatedMapNum].CellToWorld(MapManager.instance.MonsterMaps[locatedMapNum].cellBounds.min); // 몬스터가 위치한 맵의 min 좌표
         maxPos = MapManager.instance.MonsterMaps[locatedMapNum].CellToWorld(MapManager.instance.MonsterMaps[locatedMapNum].cellBounds.max); // 몬스터가 위치한 맵의 max 좌표
+        Debug.Log(minPos + " " + maxPos);
         CurPos = transform.position; // 현재 좌표
         wfs = new WaitForSeconds(3f); // 대기 시간
+        wfs2 = new WaitForSeconds(1f); // 대기 시간
         lastXDirection = 1; // 최근 x축 이동 방향 기본값을 1로 설정
     }
 
@@ -36,10 +46,15 @@ public class MonsterTypeA : Monster
      */
     public override void ResetState()
     {
+        for (int i = attackIdx; i < attackIdx + 4; i++)
+        {
+            attackSkill[i].SetActive(false);
+            //attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0).normalized;
+        }
         CurHp = maxHp;
         hpGraph.fillAmount = 1f;
         movingChoice = null;
-        if(!firstPos.Equals(new Vector3(0, 0, 0))) transform.position = firstPos;
+        if (!firstPos.Equals(new Vector3(0, 0, 0))) transform.position = firstPos;
         stateMachine.ChangeState(states[(int)MonsterStates.MonsterState.normal]);
     }
     /* Method : MovingChoice
@@ -161,6 +176,16 @@ public class MonsterTypeA : Monster
         }
         AttackDone = false;
         ani.SetTrigger("attack");
+        attackIdx = attackIdx == 0 ? 4 : 0; 
+        for(int i = attackIdx; i < attackIdx + 4; i++)
+        {
+            attackSkill[i].transform.position = mid.transform.position;
+            attackSkill[i].SetActive(true);
+            if (attackIdx == 0) attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(moveX[i], moveY[i]).normalized * 5;
+            else attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(move2X[i - attackIdx], move2Y[i - attackIdx]).normalized * 5;
+        }
+        hideSkill = HideSkill();
+        StartCoroutine(hideSkill);
     }
     /* Method : Hurt
      * Description : 몬스터가 다칠 때 관련된 동작을 수행하는 메서드입니다. 현재 hp를 받은 데미지만큼 깎고 체력 UI도 감소한 체력만큼 깎습니다. 현재 hp가 0이 아닐 때만 다친 동작의 애니메이션을 실행합니다.
@@ -228,6 +253,7 @@ public class MonsterTypeA : Monster
         }
         do
         {
+            Debug.Log("현재 위치 : " + Vector3Int.FloorToInt(transform.position));
             if (Vector3Int.FloorToInt(transform.position).x - 5 > Vector3Int.FloorToInt(minPos).x && Vector3Int.FloorToInt(transform.position).x + 5 < Vector3Int.FloorToInt(maxPos).x)
                 x = Random.Range(Vector3Int.FloorToInt(transform.position).x - 5, Vector3Int.FloorToInt(transform.position).x + 5);
             else if (Vector3Int.FloorToInt(transform.position).x - 5 > Vector3Int.FloorToInt(minPos).x)
@@ -240,15 +266,17 @@ public class MonsterTypeA : Monster
                 y = Random.Range(Vector3Int.FloorToInt(transform.position).y - 5, Vector3Int.FloorToInt(transform.position).y);
             else
                 y = Random.Range(Vector3Int.FloorToInt(transform.position).y + 1, Vector3Int.FloorToInt(transform.position).y + 5);
+            //Debug.Log(x);
             if ((minPos.x + 1) % 2 == 0) x = (x % 2 == 0) ? x : x + 1;
             else x = (x % 2 == 1) ? x : x + 1;
             if ((minPos.y + 1) % 2 == 0) y = (y % 2 == 0) ? y : y + 1;
             else y = (y % 2 == 1) ? y : y + 1;
+            //Debug.Log(x);
             randomPos = new Vector3(x, y, 0);
+            //Debug.Log("다음 위치 " + randomPos);
             loop++;
             if (loop > 10000)
             {
-                Debug.Log("무한루프");
                 break;
             }
         }
@@ -256,6 +284,7 @@ public class MonsterTypeA : Monster
         pathFinding.SetTiles();
         CurPos = transform.position;
         if (!MapManager.instance.MonsterMaps[locatedMapNum].HasTile(MapManager.instance.MonsterMaps[locatedMapNum].WorldToCell(CurPos))) yield break;
+        //Debug.Log(CurPos + " " + randomPos);
         shortestPath = pathFinding.FindPath(Vector3Int.FloorToInt(CurPos), Vector3Int.FloorToInt(randomPos), locatedMapNum);
         if (shortestPath == null)
         {
@@ -264,7 +293,19 @@ public class MonsterTypeA : Monster
         curPathPos = transform.position;
         yield break;
     }
-
+    /* Coroutine : HideSkill
+     * Description : 사용한 스킬이 제한 시간 이후 비활성화 되도록 하는 코루틴입니다.
+     */
+    IEnumerator HideSkill()
+    {
+        yield return wfs2;
+        for (int i = attackIdx; i < attackIdx + 4; i++)
+        {
+            attackSkill[i].SetActive(false);
+            //attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0).normalized;
+        }
+        yield break;
+    }
     //충돌 처리
     void OnTriggerEnter2D(Collider2D Other)
     {
