@@ -129,7 +129,6 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         instance = this;
-        // 저장된 데이터를 기반으로 초기화
         if (DataManager.instance.Data.playerPos != null) this.playerPos = DataManager.instance.Data.playerPos;
         this.curMapNum = DataManager.instance.Data.curMapNum;
         if (DataManager.instance.Data.level > 0) this.curLevel = DataManager.instance.Data.level;
@@ -176,7 +175,7 @@ public class GameManager : MonoBehaviour
         this.waitForTeleport = WaitForTeleport(); // 코루틴 할당
         this.wfs = new WaitForSeconds(0.05f); // 대기 시간
         this.wfs2 = new WaitForSeconds(0.5f); // 대기 시간
-        //저장된 데이터를 바탕으로 초기화
+        //this.im = inven.GetComponent<InventoryManager>(); // inven GameObject 에서 Inventory Manager 클래스 컴포넌트를 가져옵니다.
         this.accept = DataManager.instance.Data.accept;
         this.success = DataManager.instance.Data.success;
         if (this.success)
@@ -718,9 +717,17 @@ public class GameManager : MonoBehaviour
         curLevel++;
         level.text = Convert.ToString(curLevel);
         curExp = 0;
+        curMaxExp += 10;
         expGraph.fillAmount = 0f;
         exp.text = Convert.ToString(curExp);
-        foreach(GameObject sk in skills)
+        maxExp.text = Convert.ToString(curMaxExp);
+        curMaxHp += curLevel * 5;
+        maxHp.text = Convert.ToString(curMaxHp);
+        HpUp(curMaxHp);
+        curMaxMp += curLevel * 5;
+        maxMp.text = Convert.ToString(curMaxMp);
+        MpUp(curMaxMp);
+        foreach (GameObject sk in skills)
         {
             sk.GetComponent<Skill>().AttackPower += 5;
         }
@@ -1383,9 +1390,20 @@ public class GameManager : MonoBehaviour
         QuestUpdate("마법석선택");
         SelectMagicStoneUIOff();
     }
-
+    /* Method : Store
+     * Description : DataManager 클래스의 데이터 저장 동작을 수행하는 메서드를 호출하는 메서드입니다. 
+     * Return Value : void
+     */
     public void Store()
     {
         DataManager.instance.Store();
+    }
+    /* Method : Quit
+     * Description : 게임을 종료하는 메서드입니다. 
+     * Return Value : void
+     */
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

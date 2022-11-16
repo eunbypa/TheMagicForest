@@ -36,6 +36,7 @@ public class MonsterTypeA : Monster
      */
     public override void ResetState()
     {
+        hpBar.SetActive(false);
         CurHp = maxHp;
         hpGraph.fillAmount = 1f;
         movingChoice = null;

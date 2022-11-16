@@ -69,6 +69,7 @@ namespace MonsterStates
         {
             if (entity.RealMapNum != GameManager.instance.CurMapNum) return;
             entity.SetShortestPath();
+            //Debug.Log("추격");
         }
         /* Method : Execute
         * Description : ChasePlayer 상태를 빠져나가지 않는 이상 계속 호출됩니다. Hurt 상태와 Normal 상태 AttackPlayer 상태로 전이될 수 있습니다.
@@ -122,6 +123,7 @@ namespace MonsterStates
         public override void Enter(Monster entity)
         {
             entity.Attack();
+            //Debug.Log("공격");
         }
         /* Method : Execute
         * Description : AttackPlayer 상태를 빠져나가지 않는 이상 계속 호출됩니다. Hurt 상태, ChasePlayer 상태로 전이될 수 있습니다. Wait로 1초 기다리는 이유는 몬스터의 공격 동작이 끝나는 데에 
@@ -175,6 +177,7 @@ namespace MonsterStates
         public override void Enter(Monster entity)
         {
             entity.Hurt();
+            //Debug.Log("다침");
         }
         /* Method : Execute
         * Description : Hurt 상태를 빠져나가지 않는 이상 계속 호출됩니다. AttackPlayer 상태, ChasePlayer 상태, Die 상태로 전이될 수 있습니다. Wait로 다친 동작을 완료할 때까지 기다립니다.

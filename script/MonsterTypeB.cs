@@ -16,7 +16,7 @@ public class MonsterTypeB : Monster
     int[] moveY = new int[] { 0, -1, 0, 1 }; 
     int[] move2X = new int[] { -1, -1, 1, 1 }; // 대각선 
     int[] move2Y = new int[] { -1, 1, -1, 1 };
-    IEnumerator hideSkill; // HideSkill 코루틴 변수
+    IEnumerator hideSkill; // 코루틴 변수
     WaitForSeconds wfs2; // 코루틴에서 제어권을 돌려주고 기다리는 시간
     void Start()
     {
@@ -27,7 +27,7 @@ public class MonsterTypeB : Monster
         ani = mainBody.GetComponent<Animator>(); // 자식 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         minPos = MapManager.instance.MonsterMaps[locatedMapNum].CellToWorld(MapManager.instance.MonsterMaps[locatedMapNum].cellBounds.min); // 몬스터가 위치한 맵의 min 좌표
         maxPos = MapManager.instance.MonsterMaps[locatedMapNum].CellToWorld(MapManager.instance.MonsterMaps[locatedMapNum].cellBounds.max); // 몬스터가 위치한 맵의 max 좌표
-        Debug.Log(minPos + " " + maxPos);
+        //Debug.Log(minPos + " " + maxPos);
         CurPos = transform.position; // 현재 좌표
         wfs = new WaitForSeconds(3f); // 대기 시간
         wfs2 = new WaitForSeconds(1f); // 대기 시간
@@ -51,6 +51,7 @@ public class MonsterTypeB : Monster
             attackSkill[i].SetActive(false);
             //attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0).normalized;
         }
+        hpBar.SetActive(false);
         CurHp = maxHp;
         hpGraph.fillAmount = 1f;
         movingChoice = null;
@@ -175,15 +176,18 @@ public class MonsterTypeB : Monster
             Flip(lastXDirection);
         }
         AttackDone = false;
+        GameManager.instance.MonsterPower = AttackPower;
         ani.SetTrigger("attack");
-        attackIdx = attackIdx == 0 ? 4 : 0; 
+        attackIdx = attackIdx == 0 ? 4 : 0;
         for(int i = attackIdx; i < attackIdx + 4; i++)
         {
+            //Debug.Log(i + "활성화");
             attackSkill[i].transform.position = mid.transform.position;
             attackSkill[i].SetActive(true);
-            if (attackIdx == 0) attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(moveX[i], moveY[i]).normalized * 5;
-            else attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(move2X[i - attackIdx], move2Y[i - attackIdx]).normalized * 5;
+            if (attackIdx == 0) attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(moveX[i], moveY[i]).normalized * 7;
+            else attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(move2X[i - attackIdx], move2Y[i - attackIdx]).normalized * 7;
         }
+        
         hideSkill = HideSkill();
         StartCoroutine(hideSkill);
     }
@@ -231,6 +235,12 @@ public class MonsterTypeB : Monster
         }
         else
         {
+            StopCoroutine(hideSkill); // 즉시 비활성화
+            for (int i = attackIdx; i < attackIdx + 4; i++)
+            {
+                attackSkill[i].SetActive(false);
+                //Debug.Log(i + "비활성화");
+            }
             DyingDone = false;
             MonsterManager.instance.DieEvent(gameObject, ExpValue, MonsterId);
         }
@@ -253,7 +263,7 @@ public class MonsterTypeB : Monster
         }
         do
         {
-            Debug.Log("현재 위치 : " + Vector3Int.FloorToInt(transform.position));
+            //Debug.Log("현재 위치 : " + Vector3Int.FloorToInt(transform.position));
             if (Vector3Int.FloorToInt(transform.position).x - 5 > Vector3Int.FloorToInt(minPos).x && Vector3Int.FloorToInt(transform.position).x + 5 < Vector3Int.FloorToInt(maxPos).x)
                 x = Random.Range(Vector3Int.FloorToInt(transform.position).x - 5, Vector3Int.FloorToInt(transform.position).x + 5);
             else if (Vector3Int.FloorToInt(transform.position).x - 5 > Vector3Int.FloorToInt(minPos).x)
@@ -294,15 +304,16 @@ public class MonsterTypeB : Monster
         yield break;
     }
     /* Coroutine : HideSkill
-     * Description : 사용한 스킬이 제한 시간 이후 비활성화 되도록 하는 코루틴입니다.
+     * Description : 지정한 시간 이후 사용한 공격 스킬을 비활성화하는 메서드입니다.
      */
     IEnumerator HideSkill()
     {
+        int aIdx = attackIdx;
         yield return wfs2;
-        for (int i = attackIdx; i < attackIdx + 4; i++)
+        for (int i = aIdx; i < aIdx + 4; i++)
         {
             attackSkill[i].SetActive(false);
-            //attackSkill[i].GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0).normalized;
+            //Debug.Log(i + "비활성화");
         }
         yield break;
     }
