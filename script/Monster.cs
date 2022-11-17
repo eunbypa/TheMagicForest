@@ -12,6 +12,7 @@ public class Monster : MonoBehaviour
     [SerializeField] private int monsterId; // 몬스터를 식별하는 아이디
     [SerializeField] private int realMapNum; // 맵 기존 번호
     [SerializeField] private int expValue; // 물리치면 얻을 수 있는 경험치
+    [SerializeField] private int attackArea; // 공격 범위
     [SerializeField] protected int locatedMapNum; // 몬스터가 있는 맵만 가지는 별도의 번호(기존 맵 번호와는 별도의 값, 몬스터가 있는 맵만을 기준으로 함)
     [SerializeField] protected int attackPower; // 공격력
     [SerializeField] protected int maxHp; // 전체 체력
@@ -74,6 +75,14 @@ public class Monster : MonoBehaviour
         get
         {
             return expValue;
+        }
+    }
+    /* Property */
+    public int AttackArea
+    {
+        get
+        {
+            return attackArea;
         }
     }
     /* Property */

@@ -76,6 +76,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image[] shopSelectedItem; // 상점에서 선택된 아이템이 무엇인지 표시하기 위해 사용된 이미지 배열
     [SerializeField] private Image[] invenItemList; // 인벤토리 각 칸에 들어갈 아이템 이미지 배열
     [SerializeField] private TMPro.TMP_Text[] invenItemQuantityList; // 인벤토리 각 칸에 들어갈 아이템 수량 배열
+    [SerializeField] private Toggle[] selectMagicStoneToggles; // 마법석 선택 체크박스(Toggle) 배열
     [SerializeField] private Sprite[] npcImages; // npc 스프라이트(이미지) 배열
     [SerializeField] private Sprite[] skImages; // 스킬 스프라이트(이미지) 배열
     [SerializeField] private Sprite[] itemImages; // 아이템 스프라이트(이미지) 배열
@@ -154,14 +155,18 @@ public class GameManager : MonoBehaviour
             switch (DataManager.instance.Data.magicStone) {
                 case "물의마법석":
                     waterSelected = true;
+                    selectMagicStoneToggles[0].isOn = true;
                     break;
                 case "흙의마법석":
                     dirtSelected = true;
+                    selectMagicStoneToggles[1].isOn = true;
                     break;
                 case "바람의마법석":
                     windSelected = true;
+                    selectMagicStoneToggles[2].isOn = true;
                     break;
             }
+            
         }
         if (DataManager.instance.Data.shortCutPotions != null) this.curShortCutPotions = DataManager.instance.Data.shortCutPotions;
         if (DataManager.instance.Data.curQuestNum > 0) this.curQuestNum = DataManager.instance.Data.curQuestNum;
@@ -1385,8 +1390,8 @@ public class GameManager : MonoBehaviour
         {
             skill.sprite = skImages[2];
             setMagic(skills[2]);
-
         }
+        
         QuestUpdate("마법석선택");
         SelectMagicStoneUIOff();
     }

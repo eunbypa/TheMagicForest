@@ -8,9 +8,11 @@ using UnityEngine;
 public class Skill : MonoBehaviour
 {
     [SerializeField] private int attackPower; // 스킬 공격력
+    [SerializeField] private int speed; // 스킬 스피드
+    [SerializeField] private float coolTime; // 스킬 쿨타임
     int goX = 0; // x축 이동 방향
     int goY = 0; // y축 이동 방향
-    float coolTime = 2f; // 스킬 쿨타임
+    //float coolTime = 2f; // 스킬 쿨타임
     bool attack = false; // 스킬 공격 가능 상태 여부
     bool finish = false; // 스킬 비활성화 여부
     bool attackSuccess = false; // 스킬 공격 성공 여부
@@ -82,6 +84,7 @@ public class Skill : MonoBehaviour
     {
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 RigidBody2D 컴포넌트를 가져옵니다.
         this.ani = GetComponent<Animator>(); // 현재 클래스가 할당된 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
+        this.attackPower += GameManager.instance.CurLevel * 5;
     }
 
     void FixedUpdate()
@@ -100,7 +103,7 @@ public class Skill : MonoBehaviour
         if (attack)
         {
             ani.SetTrigger("set");
-            rb.velocity = new Vector2(goX, goY).normalized * 20;
+            rb.velocity = new Vector2(goX, goY).normalized * speed;
         }
         if (finish)
         {

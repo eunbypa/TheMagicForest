@@ -73,7 +73,8 @@ namespace MonsterStates
         }
         /* Method : Execute
         * Description : ChasePlayer 상태를 빠져나가지 않는 이상 계속 호출됩니다. Hurt 상태와 Normal 상태 AttackPlayer 상태로 전이될 수 있습니다.
-        * Normal 상태로 전이되는 조건은 플레이어가 다른 맵으로 이동한 경우고 AttackPlayer 상태로 전이되는 조건은 플레이어가 몬스터의 공격 범위 내에 들어올 때 입니다. 공격 범위는 5로 정했습니다.
+        * Normal 상태로 전이되는 조건은 플레이어가 다른 맵으로 이동한 경우고 AttackPlayer 상태로 전이되는 조건은 플레이어가 몬스터의 공격 범위 내에 들어올 때 입니다. 공격 범위는 몬스터의 AttackArea 값에 따라
+        * 달라집니다. 기존 플레이어 위치에서 2 이상 달라진 경우 최단 경로를 다시 계산합니다.
         * Parameter : Monster entity - 몬스터
         * Return Value : void
         */
@@ -90,7 +91,7 @@ namespace MonsterStates
                 return;
             }
             entity.Chasing();
-            if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) <= 5)
+            if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) <= entity.AttackArea)
             {
                 entity.ChangeState(MonsterState.attackPlayer);
                 return;
@@ -146,7 +147,7 @@ namespace MonsterStates
             }
             if (entity.AttackDone)
             {
-                if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) > 5) // 공격 범위에서 멀어졌으므로 다시 추격
+                if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) > entity.AttackArea) // 공격 범위에서 멀어졌으므로 다시 추격
                 {
                     entity.ChangeState(MonsterState.chasePlayer);
                     return;
@@ -190,7 +191,7 @@ namespace MonsterStates
         {
             if (!entity.GetHurt)
             {
-                if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) <= 5)
+                if (Math.Sqrt(Math.Pow(entity.CurPos.x - GameManager.instance.PlayerPos.x, 2) + Math.Pow(entity.CurPos.y - GameManager.instance.PlayerPos.y, 2)) <= entity.AttackArea)
                 {
                     entity.ChangeState(MonsterState.attackPlayer);
                     return;
