@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 /* Class : GameManager
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject enterNumberUI; // 구매할 아이템 수량 입력창 GameObject
     [SerializeField] private GameObject blackOut; // 화면 블랙아웃 동작하는 이미지 GameObject
     [SerializeField] private GameObject dragImage; // 드래그 이미지 사본 GameObject
+    [SerializeField] private GameObject gameOver; // 게임 오버 알림 GameObject
     [SerializeField] private TMP_InputField itemQuantityInput; //아이템 수량 입력칸
     [SerializeField] private TMPro.TMP_Text name; // 플레이어 이름
     [SerializeField] private TMPro.TMP_Text level; // 플레이어 레벨 
@@ -85,7 +87,7 @@ public class GameManager : MonoBehaviour
     IEnumerator waitForTeleport; // 텔레포트 대기 동작을 수행하는 WaitForTeleport 코루틴 변수
     WaitForSeconds wfs; // 대기 시간
     WaitForSeconds wfs2; // 대기 시간
-
+    WaitForSeconds wfs3; // 대기 시간
     int curMapNum = 0; // 현재 맵 번호
     int curNpcId = 0; // 현재 플레이어와 접촉중인 npc 아이디
     int curLevel = 1; // 플레이어의 현재 레벨
@@ -180,7 +182,7 @@ public class GameManager : MonoBehaviour
         this.waitForTeleport = WaitForTeleport(); // 코루틴 할당
         this.wfs = new WaitForSeconds(0.05f); // 대기 시간
         this.wfs2 = new WaitForSeconds(0.5f); // 대기 시간
-        //this.im = inven.GetComponent<InventoryManager>(); // inven GameObject 에서 Inventory Manager 클래스 컴포넌트를 가져옵니다.
+        this.wfs3 = new WaitForSeconds(5f); // 대기 시간
         this.accept = DataManager.instance.Data.accept;
         this.success = DataManager.instance.Data.success;
         if (this.success)
@@ -1402,6 +1404,28 @@ public class GameManager : MonoBehaviour
     public void Store()
     {
         DataManager.instance.Store();
+    }
+    /* Method : GameOver
+     * Description : 플레이어의 체력이 0이되면 게임 오버이므로 타이틀 씬으로 돌아가는 메서드입니다. 
+     * Return Value : void
+     */
+    public void GameOver()
+    {
+        GameObject gameObj = GameObject.FindWithTag("Player");
+        gameObj.SetActive(false);
+        //BackGroundMusicManager.instance.gameObject.SetActive(false);
+        //EffectSoundManager.instance.gameObject.SetActive(false);
+        blackOut.SetActive(true);
+        gameOver.SetActive(true);
+        StartCoroutine(BackToTitleScene());
+    }
+    /* Coroutine : TalkAnime
+     * Description : 대사를 한글자씩 순서대로 시간차를 두면서 출력하는 동작을 수행하는 코루틴입니다.
+     */
+    IEnumerator BackToTitleScene()
+    {
+        yield return wfs3;
+        SceneManager.LoadScene("TitleScene");
     }
     /* Method : Quit
      * Description : 게임을 종료하는 메서드입니다. 

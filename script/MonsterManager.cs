@@ -40,7 +40,7 @@ public class MonsterManager : MonoBehaviour
     {
         waitForRespawn = WaitForRespawn(); // 코루틴 할당
         //waitForReset = WaitForReset(); // 코루틴 할당
-        wfs = new WaitForSeconds(5f); // 대기 시간
+        wfs = new WaitForSeconds(15f); // 대기 시간
         //wfs2 = new WaitForSeconds(1f); // 대기 시간
         SetMonstersOnMap(GameManager.instance.CurMapNum); // 현재 맵이 몬스터가 있는 맵이면 몬스터 활성화
     }
@@ -73,8 +73,9 @@ public class MonsterManager : MonoBehaviour
         {
             monstersList[idx].Monsters[i].SetActive(false);
         }
-        /*StopCoroutine(waitForRespawn);
-        lastMap = idx;
+        StopCoroutine(waitForRespawn);
+        respawnList.Clear();
+        /*lastMap = idx;
         waitForReset = WaitForReset();
         StartCoroutine(waitForReset);*/
     }

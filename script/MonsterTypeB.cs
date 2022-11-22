@@ -18,6 +18,7 @@ public class MonsterTypeB : Monster
     int[] move2Y = new int[] { -1, 1, -1, 1 };
     IEnumerator hideSkill; // 코루틴 변수
     WaitForSeconds wfs2; // 코루틴에서 제어권을 돌려주고 기다리는 시간
+ 
     void Start()
     {
         SettingStates(); // states 배열에 몬스터가 가지는 상태들을 할당
@@ -32,6 +33,7 @@ public class MonsterTypeB : Monster
         wfs = new WaitForSeconds(3f); // 대기 시간
         wfs2 = new WaitForSeconds(1f); // 대기 시간
         lastXDirection = 1; // 최근 x축 이동 방향 기본값을 1로 설정
+        realSpeed = speed / (float)1000;
     }
 
     void Update()
@@ -150,7 +152,7 @@ public class MonsterTypeB : Monster
                     lastXDirection = (shortestPath[0].x - curPathPos.x) > 0 ? 1 : -1;
                     Flip(lastXDirection);
                 }
-                transform.position = Vector3.MoveTowards(gameObject.transform.position, shortestPath[0], 0.055f);
+                transform.position = Vector3.MoveTowards(gameObject.transform.position, shortestPath[0], realSpeed);
             }
         }
         else

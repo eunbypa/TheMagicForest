@@ -38,7 +38,7 @@ public class TitleSceneManager : MonoBehaviour
 
     void Start()
     {
-        
+
     }
     void Update()
     {

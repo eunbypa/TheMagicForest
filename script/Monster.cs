@@ -17,6 +17,7 @@ public class Monster : MonoBehaviour
     [SerializeField] protected int attackPower; // 공격력
     [SerializeField] protected int maxHp; // 전체 체력
     [SerializeField] protected int speed; // 속도
+    [SerializeField] protected int defaultDirection; // 몬스터의 기본 시선 방향 (-1 : 왼쪽, 1 : 오른쪽)
     [SerializeField] protected Image hpGraph; // 체력 그래프
     [SerializeField] protected GameObject hpBar; // 체력 바 GameObject
     [SerializeField] protected GameObject monsterOwnedGold; // 몬스터를 물리치면 얻을 수 있는 골드 GameObject
@@ -30,6 +31,7 @@ public class Monster : MonoBehaviour
     float wait = 0; // 동작 대기 시간을 나타냄
     Vector3 curPos; // 현재 위치
     Vector3 targetPos; // 최단 경로를 정하는 순간의 타겟인 플레이어의 위치
+    protected float realSpeed; // speed를 1000으로 나눈 값
     protected StateMachine<Monster> stateMachine = new StateMachine<Monster>();
     protected State<Monster>[] states = new State<Monster>[5];
     protected PathFinding pathFinding = new PathFinding();

@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
     int curExp = 0; // 현재 경험치
 
     int skillMp = 10; // 스킬 사용에 필요한 마력 수치
+    int attackedDirection; // 공격받은 방향
     float x = 0; // 현재 x축 이동 방향
     float y = 0; // 현재 y축 이동 방향
     float wait = 0; // 스킬 사용 시 각각의 단계 진입 여부를 가리기 위한 현재 대기중인 시간 값
@@ -43,6 +44,7 @@ public class Player : MonoBehaviour
     bool skOn = false; // 스킬 활성화 여부
     bool getHurt = false; // 다친 상태 여부
     bool actLock = false; // 플레이어의 움직임, 스킬 사용과 같은 행동 제한 여부
+    bool monsterContact = false; // 몬스터와 접촉 여부
     string curMagic; // 현재 사용중인 마법
 
     IEnumerator hurtPeriod; // HurtEvent 코루틴 변수
@@ -57,7 +59,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         if (!GameManager.instance.PlayerPos.Equals(new Vector3(0, 0, 0))) this.transform.position = GameManager.instance.PlayerPos; // 저장 데이터가 존재하면 플레이어의 위치를 세팅함
-        this.hurtPeriod = HurtEvent(); // 코루틴 할당
+        //this.hurtPeriod = HurtEvent(); // 코루틴 할당
         this.wfs = new WaitForSeconds(notHurtTime); // 무적 시간 설정
         this.spResolver = GetComponent<SpriteResolver>(); // 현재 클래스가 할당된 GameObject 객체에서 SpriteResolver 컴포넌트를 가져옵니다.
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 Rigidbody2D 컴포넌트를 가져옵니다.
@@ -84,6 +86,12 @@ public class Player : MonoBehaviour
         {
             SetMagicStick();
         }
+        if (monsterContact && hurtPeriod == null)
+        {
+            hurtPeriod = HurtEvent();
+            StartCoroutine(hurtPeriod);
+        }
+        if (GameManager.instance.CurHp == 0) GameManager.instance.GameOver();
     }
 
     void FixedUpdate()
@@ -419,15 +427,11 @@ public class Player : MonoBehaviour
         }
         if (Other.gameObject.tag == "MOP" || Other.gameObject.tag == "attack")
         {
-            if (getHurt == false)
-            {
-                EffectSoundManager.instance.PlayEffectSound("hurt");
-                if (transform.position.x > Other.transform.position.x) transform.position = new Vector2(transform.position.x + 0.2f, transform.position.y); // 공격받은 방향으로 살짝 넉백하는 동작
-                else transform.position = new Vector2(transform.position.x - 0.2f, transform.position.y);
-                GameManager.instance.HpDown(GameManager.instance.MonsterPower); // 몬스터의 공격력 만큼 체력 감소
-                hurtPeriod = HurtEvent();
-                StartCoroutine(hurtPeriod);
-            }
+            if (transform.position.x > Other.transform.position.x) attackedDirection = 1;
+            else attackedDirection = -1;
+            monsterContact = true;
+            //hurtPeriod = HurtEvent();
+            //StartCoroutine(hurtPeriod);
         }
         if (Other.gameObject.tag == "TREE0")
         {
@@ -660,6 +664,10 @@ public class Player : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D Other)
     {
+        if (Other.gameObject.tag == "MOP" || Other.gameObject.tag == "attack")
+        {
+            monsterContact = false;
+        }
         if ((Other.gameObject.tag == "TREE0") || (Other.gameObject.tag == "TREE") || (Other.gameObject.tag == "HOUSE") || (Other.gameObject.tag == "TREE2") || (Other.gameObject.tag == "HouseRoof") ||
             (Other.gameObject.tag == "TREE-1"))
         {
@@ -689,10 +697,16 @@ public class Player : MonoBehaviour
      */
     IEnumerator HurtEvent()
     {
+        if (getHurt == true) yield break;
         getHurt = true;
+        EffectSoundManager.instance.PlayEffectSound("hurt");
+        if (attackedDirection == 1) transform.position = new Vector2(transform.position.x + 0.2f, transform.position.y); // 공격받은 방향으로 살짝 넉백하는 동작
+        else transform.position = new Vector2(transform.position.x - 0.2f, transform.position.y);
+        GameManager.instance.HpDown(GameManager.instance.MonsterPower); // 몬스터의 공격력 만큼 체력 감소
         ani.SetTrigger("hurt");
         yield return wfs;
         getHurt = false;
+        hurtPeriod = null;
         yield break;
     }
 
