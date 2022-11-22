@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.U2D.Animation;
 
@@ -308,14 +309,14 @@ public class Player : MonoBehaviour
     {
         skill = sk;
         this.sk = skill.GetComponent<Skill>();
-        if(GameManager.instance.CurQuestNum >= 2) SetMagicStick();
+        if (GameManager.instance.CurQuestNum >= 2) SetMagicStick();
     }
 
     /* Method : SetMagicStick
      * Description : 플레이어가 마법석 변경 시 마법 지팡이 모습도 알맞게 변경되도록 하는 메서드입니다.
      * Return Value : void
      */
-    void SetMagicStick() 
+    void SetMagicStick()
     {
         spResolver = MagicStone.GetComponent<SpriteResolver>();
         if (GameManager.instance.WaterSelected)
@@ -408,7 +409,7 @@ public class Player : MonoBehaviour
     //해당 태그를 가진 물체와 충돌 상태면 플레이어의 레이어 값을 더 낮게 설정하는 방식 -> 향후 수정 필요(레이어 값이 명시되어도 괜찮을까?)
     void OnTriggerEnter2D(Collider2D Other)
     {
-        if(Other.gameObject.tag == "Gold")
+        if (Other.gameObject.tag == "Gold")
         {
             EffectSoundManager.instance.PlayEffectSound("getGold");
             GameManager.instance.GoldIncrease(Other.gameObject.GetComponent<Gold>().GoldNum);
@@ -433,8 +434,25 @@ public class Player : MonoBehaviour
             //hurtPeriod = HurtEvent();
             //StartCoroutine(hurtPeriod);
         }
-        if (Other.gameObject.tag == "TREE0")
+        if (Other.gameObject.tag == "TREE0" || Other.gameObject.tag == "TREE-1" || Other.gameObject.tag == "TREE" || Other.gameObject.tag == "TREE2" || Other.gameObject.tag == "HOUSE" ||
+            Other.gameObject.tag == "HouseRoof")
         {
+            ++curCollidingNum;
+            if (curCollidingNum == 1)
+            {
+                sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
+            }
+            else
+            {
+                if (sg.sortingOrder > Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1)
+                {
+                    sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
+                }
+            }
+        }
+        /*if (Other.gameObject.tag == "TREE0")
+        {
+            Debug.Log(Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder);
             ++curCollidingNum;
             if (curCollidingNum == 1)
             {
@@ -496,16 +514,17 @@ public class Player : MonoBehaviour
         }
         if (Other.gameObject.tag == "HOUSE")
         {
+            //Debug.Log(Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder);
             ++curCollidingNum;
             if (curCollidingNum == 1)
             {
-                sg.sortingOrder = -6;
+                sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
             }
             else
             {
-                if (sg.sortingOrder > -6)
+                if (sg.sortingOrder > Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1)
                 {
-                    sg.sortingOrder = -6;
+                    sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
                 }
             }
         }
@@ -523,7 +542,7 @@ public class Player : MonoBehaviour
                     sg.sortingOrder = -2;
                 }
             }
-        }
+        }*/
         if (Other.gameObject.tag == "NPC")
         {
             ++curCollidingNum;
@@ -532,26 +551,41 @@ public class Player : MonoBehaviour
             {
                 if (transform.position.y > Other.transform.position.y)
                 {
-                    sg.sortingOrder = -1;
+                    sg.sortingOrder = Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1;
                 }
             }
             else
             {
                 if (transform.position.y > Other.transform.position.y)
                 {
-                    if (sg.sortingOrder > -1)
+                    if (sg.sortingOrder > Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1)
                     {
-                        sg.sortingOrder = -1;
+                        sg.sortingOrder = Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1;
                     }
                 }
             }
         }
-
+        
     }
 
     void OnTriggerStay2D(Collider2D Other)
     {
-        if (Other.gameObject.tag == "TREE0")
+        if (Other.gameObject.tag == "TREE0" || Other.gameObject.tag == "TREE-1" || Other.gameObject.tag == "TREE" || Other.gameObject.tag == "TREE2" || Other.gameObject.tag == "HOUSE" ||
+            Other.gameObject.tag == "HouseRoof")
+        {
+            if (curCollidingNum == 1)
+            {
+                sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
+            }
+            else
+            {
+                if (sg.sortingOrder > Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1)
+                {
+                    sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
+                }
+            }
+        }
+        /*if (Other.gameObject.tag == "TREE0")
         {
             if (curCollidingNum == 1)
             {
@@ -634,7 +668,7 @@ public class Player : MonoBehaviour
                     sg.sortingOrder = -2;
                 }
             }
-        }
+        }*/
         if (Other.gameObject.tag == "NPC")
         {
             npcContact = true;
@@ -642,20 +676,20 @@ public class Player : MonoBehaviour
             {
                 if (transform.position.y > Other.transform.position.y)
                 {
-                    sg.sortingOrder = -1;
+                    sg.sortingOrder = Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1;
                 }
                 else
                 {
-                    sg.sortingOrder = 0;
+                    sg.sortingOrder = Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder;
                 }
             }
             else
             {
                 if (transform.position.y > Other.transform.position.y)
                 {
-                    if (sg.sortingOrder > -1)
+                    if (sg.sortingOrder > Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1)
                     {
-                        sg.sortingOrder = -1;
+                        sg.sortingOrder = Other.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1;
                     }
                 }
             }
