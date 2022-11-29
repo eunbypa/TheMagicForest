@@ -16,7 +16,7 @@ public class Portal : MonoBehaviour
     [SerializeField] private int destinationMapNum; // 도착지 맵 번호
 
     bool teleport = false; // 플레이어가 포탈과 접촉해 있어서 텔레포트가 가능한 상태인지 여부
-
+    bool teleportStart = false; // 텔레포트 동작 시작 여부
 
     void Start()
     {
@@ -27,13 +27,15 @@ public class Portal : MonoBehaviour
     {
         if (teleport) // 텔레포트 가능한 상태일 때
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow)) // 플레이어가 위쪽 방향키를 누른 경우 
+            if (Input.GetKeyDown(KeyCode.UpArrow) && !teleportStart) // 플레이어가 위쪽 방향키를 누른 경우 
             {
+                //GameManager.instance.TeleportStart = true;
+                teleportStart = true;
                 MonsterManager.instance.ResetMonstersOnMap(departureMapNum); // 텔레포트 하기 전 만약 그 맵에 몬스터들이 있으면 몬스터를 비활성화 함
                 GameManager.instance.WaitForTeleportReady(); // 텔레포트 완료까지 걸리는 시간만큼 대기하기 위해 gm의 WaitForTeleportReady 메서드 호출
             }
-            if (GameManager.instance.TeleportReady) TeleportEvent(); // 텔레포트 준비가 끝났으면 Teleport 시작
         }
+        if (teleportStart && GameManager.instance.TeleportReady) TeleportEvent(); // 텔레포트 준비가 끝났으면 Teleport 시작
     }
 
     /* Method : TeleportEvent
@@ -44,6 +46,7 @@ public class Portal : MonoBehaviour
     public void TeleportEvent()
     {
         GameManager.instance.TeleportMap(destinationMapNum);
+        teleportStart = false;
         BackGroundMusicManager.instance.StopBGM();
         BackGroundMusicManager.instance.PlayBGM(destinationMapNum);
         MonsterManager.instance.SetMonstersOnMap(destinationMapNum);
