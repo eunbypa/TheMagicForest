@@ -15,7 +15,6 @@ public class PrologSceneManager : MonoBehaviour
     [SerializeField] private GameObject loadingUI; // 게임 로딩창 GameObject
     [SerializeField] private Image loadingBar; // 로딩 그래프 바
     char[] LineSeperate = new char[] { '\n' }; // 줄바꿈
-    //char[] CSVSeperate = new char[] { ',' }; // csv는 쉼표를 기준으로 데이터를 나누기 때문에 데이터를 분리하기 위한 쉼표 
     List<string> prolog = new List<string>(); // 프롤로그 문장 리스트
     WaitForSeconds wfs; // 대기 시간
     WaitForSeconds wfs2; // 대기 시간

@@ -28,7 +28,6 @@ public class MonsterTypeB : Monster
         ani = mainBody.GetComponent<Animator>(); // 자식 GameObject 객체에서 Animator 컴포넌트를 가져옵니다.
         minPos = MapManager.instance.MonsterMaps[locatedMapNum].CellToWorld(MapManager.instance.MonsterMaps[locatedMapNum].cellBounds.min); // 몬스터가 위치한 맵의 min 좌표
         maxPos = MapManager.instance.MonsterMaps[locatedMapNum].CellToWorld(MapManager.instance.MonsterMaps[locatedMapNum].cellBounds.max); // 몬스터가 위치한 맵의 max 좌표
-        //Debug.Log(minPos + " " + maxPos);
         CurPos = transform.position; // 현재 좌표
         wfs = new WaitForSeconds(3f); // 대기 시간
         wfs2 = new WaitForSeconds(1f); // 대기 시간
@@ -237,11 +236,11 @@ public class MonsterTypeB : Monster
         }
         else
         {
-            StopCoroutine(hideSkill); // 즉시 비활성화
+            StopCoroutine(hideSkill); 
             for (int i = attackIdx; i < attackIdx + 4; i++)
             {
                 attackSkill[i].SetActive(false);
-                //Debug.Log(i + "비활성화");
+
             }
             DyingDone = false;
             MonsterManager.instance.DieEvent(gameObject, ExpValue, MonsterId);
@@ -278,14 +277,11 @@ public class MonsterTypeB : Monster
                 y = Random.Range(Vector3Int.FloorToInt(transform.position).y - 5, Vector3Int.FloorToInt(transform.position).y);
             else
                 y = Random.Range(Vector3Int.FloorToInt(transform.position).y + 1, Vector3Int.FloorToInt(transform.position).y + 5);
-            //Debug.Log(x);
             if ((minPos.x + 1) % 2 == 0) x = (x % 2 == 0) ? x : x + 1;
             else x = (x % 2 == 1) ? x : x + 1;
             if ((minPos.y + 1) % 2 == 0) y = (y % 2 == 0) ? y : y + 1;
             else y = (y % 2 == 1) ? y : y + 1;
-            //Debug.Log(x);
             randomPos = new Vector3(x, y, 0);
-            //Debug.Log("다음 위치 " + randomPos);
             loop++;
             if (loop > 10000)
             {
@@ -296,7 +292,6 @@ public class MonsterTypeB : Monster
         pathFinding.SetTiles();
         CurPos = transform.position;
         if (!MapManager.instance.MonsterMaps[locatedMapNum].HasTile(MapManager.instance.MonsterMaps[locatedMapNum].WorldToCell(CurPos))) yield break;
-        //Debug.Log(CurPos + " " + randomPos);
         shortestPath = pathFinding.FindPath(Vector3Int.FloorToInt(CurPos), Vector3Int.FloorToInt(randomPos), locatedMapNum);
         if (shortestPath == null)
         {
@@ -315,7 +310,6 @@ public class MonsterTypeB : Monster
         for (int i = aIdx; i < aIdx + 4; i++)
         {
             attackSkill[i].SetActive(false);
-            //Debug.Log(i + "비활성화");
         }
         yield break;
     }

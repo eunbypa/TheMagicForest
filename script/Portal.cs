@@ -29,7 +29,6 @@ public class Portal : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) && !teleportStart) // 플레이어가 위쪽 방향키를 누른 경우 
             {
-                //GameManager.instance.TeleportStart = true;
                 teleportStart = true;
                 MonsterManager.instance.ResetMonstersOnMap(departureMapNum); // 텔레포트 하기 전 만약 그 맵에 몬스터들이 있으면 몬스터를 비활성화 함
                 GameManager.instance.WaitForTeleportReady(); // 텔레포트 완료까지 걸리는 시간만큼 대기하기 위해 gm의 WaitForTeleportReady 메서드 호출

@@ -21,7 +21,6 @@ public class Merchant_Npc : Npc
     int[] sellingItemId = new int[2] { 1, 2 }; // 위치 index 기준 판매중인 아이템 id
     int[] sellingItemPrice = new int[2] { 100, 100 }; // 위치 index 기준 판매중인 아이템 가격
     string dialogue;
-    //string[] sellingItemType = new string[2] { "hpPotion", "mpPotion" }; // 위치 index 기준 판매중인 아이템 타입 
     bool getMoney = false; // 플레이어에게서 플레이어가 구매한 물품 가격만큼 돈을 받았는지 여부
 
     DialogueData d; // npc가 현재 말해야 할 대사 데이터 저장

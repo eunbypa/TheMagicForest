@@ -28,9 +28,7 @@ public class MonsterManager : MonoBehaviour
     int lastMap = -1; // 가장 최근에 있었던 맵
     Queue respawnList = new Queue(); // 죽고 나서 리스폰 되기를 기다리는 몬스터들
     IEnumerator waitForRespawn; // 리스폰하기까지 걸리는 시간동안 대기하는 WaitForRespawn 코루틴 변수
-    //IEnumerator waitForReset; // 몬스터 비활성화 전 1초 대기하는 WaitForReset 코루틴 변수
     WaitForSeconds wfs; // 대기 시간
-    //WaitForSeconds wfs2; // 대기 시간
 
     void Awake()
     {
@@ -39,9 +37,7 @@ public class MonsterManager : MonoBehaviour
     void Start()
     {
         waitForRespawn = WaitForRespawn(); // 코루틴 할당
-        //waitForReset = WaitForReset(); // 코루틴 할당
         wfs = new WaitForSeconds(15f); // 대기 시간
-        //wfs2 = new WaitForSeconds(1f); // 대기 시간
         SetMonstersOnMap(GameManager.instance.CurMapNum); // 현재 맵이 몬스터가 있는 맵이면 몬스터 활성화
     }
     /* Method : SetMonstersOnMap
@@ -75,9 +71,6 @@ public class MonsterManager : MonoBehaviour
         }
         StopCoroutine(waitForRespawn);
         respawnList.Clear();
-        /*lastMap = idx;
-        waitForReset = WaitForReset();
-        StartCoroutine(waitForReset);*/
     }
     /* Method : StartWaitingRespawn
      * Description : 리스폰 될 때까지 대기하도록 WaitForRespawn 코루틴을 호출하는 메서드입니다.
@@ -122,21 +115,4 @@ public class MonsterManager : MonoBehaviour
         RespawnEvent();
         yield break;
     }
-
-    /* Coroutine : WaitForReset
-     * Description : 1초 대기 동작을 수행하는 코루틴입니다.
-     
-    IEnumerator WaitForReset()
-    {
-        for (int i = 0; i < monstersList[lastMap].Monsters.Length; i++)
-        {
-            monstersList[lastMap].Monsters[i].GetComponent<Monster>().enabled = false;
-        }
-        yield return wfs2;
-        for (int i = 0; i < monstersList[lastMap].Monsters.Length; i++)
-        {
-            monstersList[lastMap].Monsters[i].SetActive(false);
-        }
-        yield break;
-    }*/
 }

@@ -12,7 +12,6 @@ public class Skill : MonoBehaviour
     [SerializeField] private float coolTime; // 스킬 쿨타임
     int goX = 0; // x축 이동 방향
     int goY = 0; // y축 이동 방향
-    //float coolTime = 2f; // 스킬 쿨타임
     bool attack = false; // 스킬 공격 가능 상태 여부
     bool finish = false; // 스킬 비활성화 여부
     bool attackSuccess = false; // 스킬 공격 성공 여부

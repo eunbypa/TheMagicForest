@@ -79,22 +79,6 @@ public class TitleSceneManager : MonoBehaviour
         enteringNameUI.SetActive(false);
         LoadGame();
     }
-    /* Method : ShowGameKeySettingInfo
-    * Description : 게임 방법에 대한 정보를 보여주는 메서드입니다.
-    * Return Value : void
-    */
-    public void ShowGameKeySettingInfo()
-    {
-       
-    }
-    /* Method : CloseGameKeySettingInfo
-    * Description : 게임 방법 정보창을 닫는 메서드입니다.
-    * Return Value : void
-    */
-    public void CloseGameKeySettingInfo()
-    {
-
-    }
     /* Method : LoadGame
     * Description : 기존 데이터를 불러온 다음 메인 씬으로 넘어가는 메서드입니다.
     * Return Value : void
@@ -112,7 +96,6 @@ public class TitleSceneManager : MonoBehaviour
         loadingStart = true;
         loadingNextScene = SceneManager.LoadSceneAsync("MainScene");
         loadingNextScene.allowSceneActivation = false;
-        //SceneManager.LoadScene("MainScene");
     }
     /* Method : LoadPrologScene
     * Description : 프롤로그 씬으로 전환하는 메서드입니다.

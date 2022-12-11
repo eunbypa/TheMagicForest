@@ -118,7 +118,6 @@ public class PathFinding
         }
         path.Reverse();
         path.RemoveAt(0);
-        //Debug.Log(path.Count);
         return path;
     }
 }

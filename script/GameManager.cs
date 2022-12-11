@@ -132,6 +132,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+        // 초기 데이터 세팅 작업
         if (DataManager.instance.Data.playerPos != null) this.playerPos = DataManager.instance.Data.playerPos;
         this.curMapNum = DataManager.instance.Data.curMapNum;
         if (DataManager.instance.Data.level > 0) this.curLevel = DataManager.instance.Data.level;
@@ -140,16 +141,16 @@ public class GameManager : MonoBehaviour
         this.name.text = this.playerName;
         if (DataManager.instance.Data.gold != -1) this.curGold = DataManager.instance.Data.gold;
         this.gold.text = Convert.ToString(this.curGold);
-        if (DataManager.instance.Data.maxHp != -1) this.curMaxHp = DataManager.instance.Data.maxHp; // 현재 플레이어의 체력 최댓값
-        if (DataManager.instance.Data.curHp != -1) HpDown(this.curMaxHp - DataManager.instance.Data.curHp); // 현재 체력에 맞게 체력그래프 설정
+        if (DataManager.instance.Data.maxHp != -1) this.curMaxHp = DataManager.instance.Data.maxHp; 
+        if (DataManager.instance.Data.curHp != -1) HpDown(this.curMaxHp - DataManager.instance.Data.curHp); 
         this.hp.text = Convert.ToString(this.curHp);
         this.maxHp.text = Convert.ToString(this.curMaxHp);
-        if (DataManager.instance.Data.maxMp != -1) this.curMaxMp = DataManager.instance.Data.maxMp; // 현재 플레이어의 마력 최댓값
-        if (DataManager.instance.Data.curMp != -1) MpDown(this.curMaxMp - DataManager.instance.Data.curMp); // 현재 마력에 맞게 마력그래프 설정
+        if (DataManager.instance.Data.maxMp != -1) this.curMaxMp = DataManager.instance.Data.maxMp; 
+        if (DataManager.instance.Data.curMp != -1) MpDown(this.curMaxMp - DataManager.instance.Data.curMp);
         this.mp.text = Convert.ToString(this.curMp);
         this.maxMp.text = Convert.ToString(this.curMaxMp);
-        if (DataManager.instance.Data.maxExp != -1) this.curMaxExp = DataManager.instance.Data.maxExp; // 현재 플레이어의 경험치 최댓값
-        if (DataManager.instance.Data.curExp != -1) ExpUp(DataManager.instance.Data.curExp); // 현재 경험치에 맞게 경험치그래프 설정
+        if (DataManager.instance.Data.maxExp != -1) this.curMaxExp = DataManager.instance.Data.maxExp; 
+        if (DataManager.instance.Data.curExp != -1) ExpUp(DataManager.instance.Data.curExp); 
         this.exp.text = Convert.ToString(this.curExp);
         this.maxExp.text = Convert.ToString(this.curMaxExp);
         if (DataManager.instance.Data.magicStone != null)
@@ -183,6 +184,7 @@ public class GameManager : MonoBehaviour
         this.wfs = new WaitForSeconds(0.05f); // 대기 시간
         this.wfs2 = new WaitForSeconds(0.5f); // 대기 시간
         this.wfs3 = new WaitForSeconds(5f); // 대기 시간
+        //초기 데이터 세팅 작업
         this.accept = DataManager.instance.Data.accept;
         this.success = DataManager.instance.Data.success;
         if (this.success)
@@ -1413,14 +1415,12 @@ public class GameManager : MonoBehaviour
     {
         GameObject gameObj = GameObject.FindWithTag("Player");
         gameObj.SetActive(false);
-        //BackGroundMusicManager.instance.gameObject.SetActive(false);
-        //EffectSoundManager.instance.gameObject.SetActive(false);
         blackOut.SetActive(true);
         gameOver.SetActive(true);
         StartCoroutine(BackToTitleScene());
     }
-    /* Coroutine : TalkAnime
-     * Description : 대사를 한글자씩 순서대로 시간차를 두면서 출력하는 동작을 수행하는 코루틴입니다.
+    /* Coroutine : BackToTitleScene
+     * Description : 지정한 시간이 지나면 타이틀 씬으로 돌아가는 코루틴입니다.
      */
     IEnumerator BackToTitleScene()
     {

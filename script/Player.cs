@@ -60,7 +60,6 @@ public class Player : MonoBehaviour
     void Start()
     {
         if (!GameManager.instance.PlayerPos.Equals(new Vector3(0, 0, 0))) this.transform.position = GameManager.instance.PlayerPos; // 저장 데이터가 존재하면 플레이어의 위치를 세팅함
-        //this.hurtPeriod = HurtEvent(); // 코루틴 할당
         this.wfs = new WaitForSeconds(notHurtTime); // 무적 시간 설정
         this.spResolver = GetComponent<SpriteResolver>(); // 현재 클래스가 할당된 GameObject 객체에서 SpriteResolver 컴포넌트를 가져옵니다.
         this.rb = GetComponent<Rigidbody2D>(); // 현재 클래스가 할당된 GameObject 객체에서 Rigidbody2D 컴포넌트를 가져옵니다.
@@ -431,8 +430,6 @@ public class Player : MonoBehaviour
             if (transform.position.x > Other.transform.position.x) attackedDirection = 1;
             else attackedDirection = -1;
             monsterContact = true;
-            //hurtPeriod = HurtEvent();
-            //StartCoroutine(hurtPeriod);
         }
         if (Other.gameObject.tag == "TREE0" || Other.gameObject.tag == "TREE-1" || Other.gameObject.tag == "TREE" || Other.gameObject.tag == "TREE2" || Other.gameObject.tag == "HOUSE" ||
             Other.gameObject.tag == "HouseRoof")
@@ -450,99 +447,6 @@ public class Player : MonoBehaviour
                 }
             }
         }
-        /*if (Other.gameObject.tag == "TREE0")
-        {
-            Debug.Log(Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder);
-            ++curCollidingNum;
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -2;
-            }
-            else
-            {
-                if (sg.sortingOrder > -2)
-                {
-                    sg.sortingOrder = -2;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "TREE-1")
-        {
-            ++curCollidingNum;
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -2;
-            }
-            else
-            {
-                if (sg.sortingOrder > -2)
-                {
-                    sg.sortingOrder = -2;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "TREE")
-        {
-            ++curCollidingNum;
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -4;
-            }
-            else
-            {
-                if (sg.sortingOrder > -4)
-                {
-                    sg.sortingOrder = -4;
-                }
-            }
-
-        }
-        if (Other.gameObject.tag == "TREE2")
-        {
-            ++curCollidingNum;
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -8;
-            }
-            else
-            {
-                if (sg.sortingOrder > -8)
-                {
-                    sg.sortingOrder = -8;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "HOUSE")
-        {
-            //Debug.Log(Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder);
-            ++curCollidingNum;
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
-            }
-            else
-            {
-                if (sg.sortingOrder > Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1)
-                {
-                    sg.sortingOrder = Other.gameObject.GetComponent<TilemapRenderer>().sortingOrder - 1;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "HouseRoof")
-        {
-            ++curCollidingNum;
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -2;
-            }
-            else
-            {
-                if (sg.sortingOrder > -2)
-                {
-                    sg.sortingOrder = -2;
-                }
-            }
-        }*/
         if (Other.gameObject.tag == "NPC")
         {
             ++curCollidingNum;
@@ -585,90 +489,7 @@ public class Player : MonoBehaviour
                 }
             }
         }
-        /*if (Other.gameObject.tag == "TREE0")
-        {
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -2;
-            }
-            else
-            {
-                if (sg.sortingOrder > -2)
-                {
-                    sg.sortingOrder = -2;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "TREE-1")
-        {
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -2;
-            }
-            else
-            {
-                if (sg.sortingOrder > -2)
-                {
-                    sg.sortingOrder = -2;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "TREE")
-        {
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -4;
-            }
-            else
-            {
-                if (sg.sortingOrder > -4)
-                {
-                    sg.sortingOrder = -4;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "TREE2")
-        {
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -8;
-            }
-            else
-            {
-                if (sg.sortingOrder > -8)
-                {
-                    sg.sortingOrder = -8;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "HOUSE")
-        {
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -6;
-            }
-            else
-            {
-                if (sg.sortingOrder > -6)
-                {
-                    sg.sortingOrder = -6;
-                }
-            }
-        }
-        if (Other.gameObject.tag == "HouseRoof")
-        {
-            if (curCollidingNum == 1)
-            {
-                sg.sortingOrder = -2;
-            }
-            else
-            {
-                if (sg.sortingOrder > -2)
-                {
-                    sg.sortingOrder = -2;
-                }
-            }
-        }*/
+        
         if (Other.gameObject.tag == "NPC")
         {
             npcContact = true;
